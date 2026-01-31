@@ -315,6 +315,7 @@ def build_html(data, excluded=None):
     const log = data.map(d => ({ x: d.X_log, y: d.Y_log, label: d.naam, type: d.type, gemeente: d.gemeente, size: d.size, brin: d.BRIN }));
 
     let selectedGemeenten = new Set();
+    var DEFAULT_GEMEENTEN = ["'S-GRAVENHAGE", 'AMSTERDAM', 'UTRECHT', 'ROTTERDAM'];
 
     function getPointsByTextFilter(points) {
       const parts = (document.getElementById('gemeenteFilter').value || '').split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
@@ -338,7 +339,11 @@ def build_html(data, excluded=None):
     }
     function renderGemeenteCheckboxes() {
       const list = getGemeentenInList();
-      if (list.length > 0 && selectedGemeenten.size === 0) selectedGemeenten = new Set(list);
+      if (list.length > 0 && selectedGemeenten.size === 0) {
+        var defaultSet = new Set(DEFAULT_GEMEENTEN);
+        selectedGemeenten = new Set(list.filter(function(g) { return defaultSet.has(g); }));
+        if (selectedGemeenten.size === 0) selectedGemeenten = new Set(list);
+      }
       const container = document.getElementById('gemeenteCheckboxes');
       container.innerHTML = '';
       list.forEach(g => {
