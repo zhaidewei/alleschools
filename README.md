@@ -1,0 +1,151 @@
+# Schools：荷兰中学 DUO 数据与坐标可视化
+
+本仓库从 **DUO Open Onderwijsdata** 抓取全部中学的考试人数数据，计算每所学校的「VWO 占比 × 理科占比」坐标，并提供本地可视化服务。
+
+---
+
+## 1. 数据流水线概览
+
+| 步骤 | 输入 | 脚本/操作 | 输出 |
+|------|------|-----------|------|
+| 抓取 | DUO CSV URL | `python3 fetch_duo_examen_all.py` | `duo_examen_raw_all.csv` |
+| 计算 | `duo_examen_raw_all.csv` | `python3 calc_xy_coords.py` | `schools_xy_coords.csv`、`excluded_schools.json` |
+| 服务 | `schools_xy_coords.csv` + `view_xy.html` | `python3 view_xy_server.py` | 浏览器打开 http://localhost:8082 |
+
+---
+
+## 2. 第一步：从 DUO 抓取全部中学数据
+
+- **数据源**：DUO Open Onderwijsdata → [Examens vmbo, havo en vwo](https://duo.nl/open_onderwijsdata/voortgezet-onderwijs/examens/examens-vmbo-havo-vwo.jsp) → **Examenkandidaten en geslaagden**（CSV 2019–2024）。
+- **抓取脚本**：`fetch_duo_examen_all.py` 下载完整 CSV，保存为 `duo_examen_raw_all.csv`。
+
+```bash
+python3 fetch_duo_examen_all.py
+```
+
+- **保留**：`duo_examen_raw_all.csv` 为全量中学考试人数原始数据，供下一步计算使用。
+
+---
+
+## 3. 第二步：从 duo_examen_raw_all 到 schools_xy_coords
+
+- **脚本**：`calc_xy_coords.py`
+- **输入**：`duo_examen_raw_all.csv`（若不存在则退化为 `duo_examen_raw.csv`）
+- **输出**：
+  - `schools_xy_coords.csv`：每所学校的 BRIN、校名、gemeente、类型（HAVO/VWO 或 VMBO）、X_linear、Y_linear、X_log、Y_log
+  - `excluded_schools.json`：因 HAVO/VWO 考生数过少（低于阈值）而排除的学校列表
+
+**坐标含义**：
+
+- **X（横轴）**：VWO 占比（0–100%），100% 表示纯 VWO（学术性强）。
+- **Y（纵轴）**：理科占比（0–100%）。HAVO/VWO 学校为 N&T、N&G、N&T/N&G 占比；VMBO 学校为 techniek 占比，且 X=0。
+- **权重**：近年权重大，逐年递减（2019–2020 到 2023–2024）。
+- **最小样本**：HAVO/VWO 总考生数（5 年合计）低于 20 的学校不写入 CSV，避免极端点（见下文「数据异常说明」）。
+
+```bash
+python3 calc_xy_coords.py
+```
+
+---
+
+## 4. Serving：本地可视化服务
+
+- **服务脚本**：`view_xy_server.py` 读取 `schools_xy_coords.csv` 和 `excluded_schools.json`，生成带散点图的 HTML，并启动 HTTP 服务（默认端口 8082）。
+- **前端**：`view_xy.html` 展示横轴 VWO 占比、纵轴理科占比，可切换线性/对数坐标，按 gemeente 筛选。
+- **排除名单**：`excluded_schools.json` 中学校在页面底部列出，不参与散点图。
+
+```bash
+python3 view_xy_server.py
+# 浏览器打开 http://localhost:8082
+```
+
+---
+
+## 5. 数据源与 BRIN 说明
+
+### 什么是 BRIN
+
+- **BRIN**：荷兰教育系统内唯一标识一所学校（或校区）的编号。**B**asis**R**egister **I**nstellingen（机构基础登记号）。
+- **组成**：4 位 instellingscode + 2 位 vestigingscode，共 6 位（如 `02QZ00`）。DUO、AlleCijfers 等均用 BRIN 指代学校/校区。
+
+### 哪里获取全部 BRIN / 中学列表
+
+- **Basisgegevens instellingen**（机构基础数据）：[说明页](https://duo.nl/open_onderwijsdata/onderwijs-algemeen/basisgegevens/basisgegevens-instellingen.jsp)，zip 内含 Organisaties 等，为 BRIN 全量来源。
+- **Alle vestigingen VO**（所有中学 vestigingen）：[说明页](https://duo.nl/open_onderwijsdata/voortgezet-onderwijs/adressen/vestigingen.jsp)，[CSV](https://duo.nl/open_onderwijsdata/images/02.-alle-vestigingen-vo.csv)，含全国中学 BRIN、校名、地址、GEMEENTENAAM 等。
+
+**DUO 开放数据首页**：https://duo.nl/open_onderwijsdata/
+
+---
+
+## 6. 数据来源思路（从需求到 DUO CSV）
+
+- **需求**：按学校、按 opleiding/profiel、按学年的考生数（examenkandidaten）。
+- **尝试**：从 AlleCijfers 抓取学校页 HTML → 发现「per gekozen profiel」数据由前端 JavaScript 加载，静态 HTML 无数字。
+- **结论**：改用 DUO 开放数据。在 DUO → Voortgezet onderwijs → Examens 下找到「Examenkandidaten en geslaagden」CSV，表头含 INSTELLINGSCODE、VESTIGINGSCODE（BRIN）、OPLEIDINGSNAAM（profiel）、各学年 EXAMENKANDIDATEN TOTAAL 等，满足「学校 + profiel + 学年考生数」需求。
+- **本仓库**：用该 CSV 全量下载为 `duo_examen_raw_all.csv`，再由 `calc_xy_coords.py` 按 BRIN 聚合 HAVO/VWO 与 VMBO，计算 X/Y 坐标。
+
+---
+
+## 7. 精英指数与坐标系建议
+
+### 精英指数（可选的三种方式）
+
+| 维度 | 含义 | 可用数据 |
+|------|------|----------|
+| 学历层次 | 偏 VWO 还是 HAVO | VWO 占比 = VWO/(HAVO+VWO) |
+| 学科取向 | 偏理科（N&T、N&G） | 理科占比，现有 CSV 可算 |
+| 毕业质量 | 通过率 | DUO 同一 CSV 有 GESLAAGDEN，可算 |
+
+- **方案 1**：精英指数 = VWO 占比 或 理科占比（单一维度）。
+- **方案 2（推荐）**：精英指数 = 0.6×VWO占比 + 0.4×理科占比。
+- **方案 3**：加入通过率，如 0.4×VWO + 0.3×理科 + 0.3×通过率（归一化）。
+
+本仓库的 **X = VWO 占比、Y = 理科占比** 即采用「学历层次 × 学科取向」二维，与方案 2 一致。
+
+### 坐标系说明（当前实现）
+
+- **X 轴**：VWO 占比（0–100%）。
+- **Y 轴**：理科占比（0–100%）。理科 = N&T + N&G + N&T/N&G（HAVO/VWO）；VMBO 为 techniek 占比。
+- 只算 HAVO/VWO 参与 X/Y；VMBO 学校 X=0，Y 为 VMBO 内 techniek 占比。
+- **组合 profiel**：N&T/N&G、E&M/C&M 等按 DUO OPLEIDINGSNAAM 归类；`<5` 按 2 计。
+
+---
+
+## 8. 按 gemeente 查中学
+
+- **网页**：`https://allecijfers.nl/middelbare-scholen-overzicht/{gemeente-slug}/`（如 amstelveen、amsterdam）。
+- **批量/程序**：下载 DUO「Alle vestigingen VO」CSV，按列 **GEMEENTENAAM** 筛选。示例（表头第 11 列为 GEMEENTENAAM）：
+
+```bash
+curl -sL "https://duo.nl/open_onderwijsdata/images/02.-alle-vestigingen-vo.csv" -o vestigingen_vo.csv
+awk -F';' 'NR==1 {print; next} toupper($11)==toupper("Amstelveen") {print}' vestigingen_vo.csv > amstelveen_vo.csv
+```
+
+---
+
+## 9. 数据异常与检查说明
+
+### IJburg College (100, 100)
+
+- **现象**：`schools_xy_coords.csv` 中 28DH01 IJburg College 曾出现 X_linear=100, Y_linear=100。
+- **原因**：在 `duo_examen_raw_all.csv` 中该校仅有一行「VWO - N&G」，且各年考生数多为 `<5`。计算得 VWO 占比=100%、理科占比=100%，并非算错，而是样本极少。
+- **处理**：在 `calc_xy_coords.py` 中设置 `MIN_HAVO_VWO_TOTAL = 20`，HAVO/VWO 总考生数（5 年合计）低于 20 的学校不写入 CSV，改为写入 `excluded_schools.json`。
+
+### X=100 的 HAVO/VWO 学校
+
+- **结论**：不是数据处理错误。X_linear=100 表示该校在 DUO 数据中**只有 VWO、没有 HAVO**（如 St. Ignatiusgymnasium、Het Amsterdams Lyceum、Stedelijk Gymnasium Haarlem 等），VWO 占比=100% 与原始数据一致。
+
+---
+
+## 10. 文件一览（清理后保留）
+
+| 文件 | 说明 |
+|------|------|
+| `fetch_duo_examen_all.py` | 从 DUO 下载全量考试人数 CSV → `duo_examen_raw_all.csv` |
+| `duo_examen_raw_all.csv` | DUO 原始数据（全量中学） |
+| `calc_xy_coords.py` | 从 duo_examen_raw_all 计算 X/Y → `schools_xy_coords.csv` |
+| `schools_xy_coords.csv` | 学校坐标（BRIN、校名、gemeente、type、X_linear、Y_linear、X_log、Y_log） |
+| `excluded_schools.json` | 样本过少被排除的学校列表（由 calc_xy_coords 生成） |
+| `view_xy_server.py` | 本地 HTTP 服务，提供散点图页面 |
+| `view_xy.html` | 散点图前端模板 |
+| `README.md` | 本文档（合并原有多份 Markdown） |
