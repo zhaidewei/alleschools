@@ -1,6 +1,6 @@
-# Schools：荷兰中学 DUO 数据与坐标可视化
+# AlleSchools（alleschools.nl）— 荷兰学校比较
 
-本仓库从 **DUO Open Onderwijsdata** 抓取全部中学的考试人数数据，计算每所学校的「VWO 通过人数占比 × 理科占比」坐标，并提供本地可视化服务。
+本仓库从 **DUO Open Onderwijsdata** 抓取全部中学的考试人数数据，计算每所学校的「VWO 通过人数占比 × 理科占比」坐标，并提供本地可视化服务。站点品牌：**AlleSchools**（[alleschools.nl](https://alleschools.nl)）。
 
 ---
 

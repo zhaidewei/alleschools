@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>School coordinates: VWO share × Science share</title>
+  <title>AlleSchools · School map: academic level × science focus</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
@@ -24,8 +24,8 @@
       </select>
     </div>
     <div id="chartWrap" class="mb-8">
-      <h1 id="titleMain" class="text-xl font-semibold text-slate-800 tracking-tight">School coordinates: VWO share (X) × Science share (Y)</h1>
-      <p id="subtitleMain" class="mt-1 text-sm text-slate-500">Data from DUO exam counts, recent years weighted higher. VMBO schools for reference (X=0). <strong id="schoolCount" class="font-medium text-slate-700">0</strong> schools shown.</p>
+      <h1 id="titleMain" class="text-xl font-semibold text-slate-800 tracking-tight"><a href="/" class="text-slate-800 hover:text-slate-600">AlleSchools</a> · School map: academic level × science focus</h1>
+      <p id="subtitleMain" class="mt-1 text-sm text-slate-500">Data from DUO. X = academic strength, Y = science share. Dot size = graduation count. <strong id="schoolCount" class="font-medium text-slate-700">0</strong> schools shown.</p>
       <div class="mt-4 bg-white rounded-xl border border-slate-200/80 shadow-sm p-4 sm:p-6">
         <div class="w-full aspect-[4/3] min-h-[420px]">
           <canvas id="chart" class="w-full h-full block"></canvas>
@@ -111,8 +111,8 @@
     const L = {
       en: {
         labelLanguage: 'Language',
-        titleMain: 'School coordinates: VWO share (X) × Science share (Y)',
-        subtitleBefore: 'Data from DUO exam counts, recent years weighted higher. VMBO schools for reference (X=0). ',
+        titleMain: 'AlleSchools · School map: academic level × science focus',
+        subtitleBefore: 'Data from DUO. X = academic strength, Y = science share. Dot size = graduation count. ',
         subtitleAfter: ' schools shown.',
         labelSchoolSearch: 'School search',
         schoolSearchPlaceholder: 'Search by name or BRIN, matches highlighted',
@@ -131,7 +131,7 @@
         axisYLog: 'Science share (log10(1+y/100))',
         tooltipCandidates: '5-yr candidates',
         algorithmTitle: 'How X and Y are calculated',
-        algorithmBody: '<p><strong>X (horizontal):</strong> VWO share = VWO passed / total exam candidates (all tracks: HAVO, VWO, VMBO) at the school, as a percentage (0–100%). Higher X means more academically oriented (more VWO).</p><p><strong>Y (vertical):</strong> Science share = science passed / total exam candidates. For HAVO/VWO schools, science = N&amp;T, N&amp;G, N&amp;T/N&amp;G profiles; for VMBO-only schools, Y = techniek share within VMBO, and X is set to 0.</p><p>Both X and Y are <strong>weighted averages</strong> over school years 2019–2020 to 2023–2024, with recent years weighted more. Dot size reflects total exam candidates (5-year sum) at the school.</p>',
+        algorithmBody: '<p><strong>X (horizontal):</strong> VWO share = VWO passed / total exam candidates (all tracks: HAVO, VWO, VMBO) at the school, as a percentage (0–100%). Higher X means more academically oriented (more VWO).</p><p><strong>Y (vertical):</strong> Science share = science passed / total exam candidates. For HAVO/VWO schools, science = the following profiles (bèta):</p><ul class="list-disc pl-5 my-1"><li><strong>N&amp;T</strong> — Natuur &amp; Techniek (Nature &amp; Technology): maths, physics, chemistry, technical subjects.</li><li><strong>N&amp;G</strong> — Natuur &amp; Gezondheid (Nature &amp; Health): biology, chemistry, health-related subjects.</li><li><strong>N&amp;T/N&amp;G</strong> — combination profile of N&amp;T and N&amp;G.</li></ul><p>For VMBO-only schools, Y = techniek share within VMBO, and X is set to 0.</p><p>Both X and Y are <strong>weighted averages</strong> over school years 2019–2020 to 2023–2024, with recent years weighted more. Dot size = graduation count (5-year sum) at the school.</p>',
         disclaimerTitle: 'Disclaimer',
         disclaimerBody: 'Data from DUO Open Onderwijsdata (exam candidates and pass counts). This tool is for reference only; no warranty of accuracy or fitness for any decision. Not affiliated with DUO or the Dutch government.',
         contactTitle: 'Contact',
@@ -140,8 +140,8 @@
       },
       zh: {
         labelLanguage: '语言',
-        titleMain: '学校坐标：VWO通过人数占比（横轴）× 理科占比（纵轴）',
-        subtitleBefore: '数据来自 DUO 考试人数，近年权重更高。VMBO 学校仅作参考（X=0）。共 ',
+        titleMain: 'AlleSchools · 中学定位图：学术度 × 理科度',
+        subtitleBefore: '数据来自DUO，X轴代表学术强度，Y轴代表理科占比，点的大小代表毕业人数。共 ',
         subtitleAfter: ' 所学校。',
         labelSchoolSearch: '学校搜索',
         schoolSearchPlaceholder: '按校名或 BRIN 搜索，匹配项高亮',
@@ -160,7 +160,7 @@
         axisYLog: '理科占比 (log10(1+y/100))',
         tooltipCandidates: '5年考生',
         algorithmTitle: 'X 与 Y 的计算方式',
-        algorithmBody: '<p><strong>X（横轴）：</strong>VWO 通过人数占比 = 该校 VWO 通过人数 / 该校全部考生总数（HAVO、VWO、VMBO 等），以百分比表示（0–100%）。X 越高表示越偏学术（VWO 越多）。</p><p><strong>Y（纵轴）：</strong>理科通过人数占比 = 理科通过人数 / 该校全部考生总数。HAVO/VWO 学校的理科含 N&T、N&G、N&T/N&G 等方向；仅 VMBO 的学校 Y 为 VMBO 内 techniek 占比，X 固定为 0。</p><p>X、Y 均为 2019–2020 至 2023–2024 学年的<strong>加权平均</strong>，近年权重更大。圆点大小表示该校 5 年考生总数。</p>',
+        algorithmBody: '<p><strong>X（横轴）：</strong>VWO 通过人数占比 = 该校 VWO 通过人数 / 该校全部考生总数（HAVO、VWO、VMBO 等），以百分比表示（0–100%）。X 越高表示越偏学术（VWO 越多）。</p><p><strong>Y（纵轴）：</strong>理科通过人数占比 = 理科通过人数 / 该校全部考生总数。HAVO/VWO 学校的理科指以下方向（bèta）：</p><ul class="list-disc pl-5 my-1"><li><strong>N&amp;T</strong> — Natuur &amp; Techniek（自然与技术）：数学、物理、化学、技术等。</li><li><strong>N&amp;G</strong> — Natuur &amp; Gezondheid（自然与健康）：生物、化学、健康相关等。</li><li><strong>N&amp;T/N&amp;G</strong> — N&amp;T 与 N&amp;G 的组合方向。</li></ul><p>仅 VMBO 的学校 Y 为 VMBO 内 techniek 占比，X 固定为 0。</p><p>X、Y 均为 2019–2020 至 2023–2024 学年的<strong>加权平均</strong>，近年权重更大。圆点大小表示该校 5 年毕业人数。</p>',
         disclaimerTitle: '免责声明',
         disclaimerBody: '数据来自 DUO Open Onderwijsdata（考试考生与通过人数）。本工具仅供参考，不保证准确或适用于任何决策；与 DUO 及荷兰政府无关联。',
         contactTitle: '联系作者',
@@ -169,8 +169,8 @@
       },
       nl: {
         labelLanguage: 'Taal',
-        titleMain: 'Schoolcoördinaten: VWO-aandeel (X) × bètandeel (Y)',
-        subtitleBefore: 'Data van DUO-examencijfers, recente jaren zwaarder. VMBO-scholen ter referentie (X=0). ',
+        titleMain: 'AlleSchools · Schoolkaart: academisch × bèta',
+        subtitleBefore: 'Data van DUO. X = academisch niveau, Y = bètandeel. Puntgrootte = aantal geslaagden. ',
         subtitleAfter: ' scholen getoond.',
         labelSchoolSearch: 'Zoek school',
         schoolSearchPlaceholder: 'Zoek op naam of BRIN, treffers gemarkeerd',
@@ -189,7 +189,7 @@
         axisYLog: 'Bètandeel (log10(1+y/100))',
         tooltipCandidates: '5-jaar kandidaten',
         algorithmTitle: 'Hoe X en Y worden berekend',
-        algorithmBody: '<p><strong>X (horizontaal):</strong> VWO-aandeel = VWO geslaagden / totaal examenkandidaten (alle richtingen: HAVO, VWO, VMBO) van de school, in procent (0–100%). Hogere X = meer academisch (meer VWO).</p><p><strong>Y (verticaal):</strong> Bètandeel = bètageslaagden / totaal examenkandidaten. Voor HAVO/VWO-scholen: bèta = N&amp;T, N&amp;G, N&amp;T/N&amp;G; voor alleen VMBO-scholen is Y het techniekaandeel binnen VMBO en X = 0.</p><p>X en Y zijn <strong>gewogen gemiddelden</strong> over schooljaren 2019–2020 t/m 2023–2024, met zwaardere weging voor recente jaren. Puntgrootte = totaal examenkandidaten (5-jaar som) van de school.</p>',
+        algorithmBody: '<p><strong>X (horizontaal):</strong> VWO-aandeel = VWO geslaagden / totaal examenkandidaten (alle richtingen: HAVO, VWO, VMBO) van de school, in procent (0–100%). Hogere X = meer academisch (meer VWO).</p><p><strong>Y (verticaal):</strong> Bètandeel = bètageslaagden / totaal examenkandidaten. Voor HAVO/VWO-scholen is bèta de volgende profielen:</p><ul class="list-disc pl-5 my-1"><li><strong>N&amp;T</strong> — Natuur &amp; Techniek: wiskunde, natuurkunde, scheikunde, technische vakken.</li><li><strong>N&amp;G</strong> — Natuur &amp; Gezondheid: biologie, scheikunde, gezondheidsgerelateerde vakken.</li><li><strong>N&amp;T/N&amp;G</strong> — combinatieprofiel van N&amp;T en N&amp;G.</li></ul><p>Voor alleen VMBO-scholen is Y het techniekaandeel binnen VMBO en X = 0.</p><p>X en Y zijn <strong>gewogen gemiddelden</strong> over schooljaren 2019–2020 t/m 2023–2024, met zwaardere weging voor recente jaren. Puntgrootte = aantal geslaagden (5-jaar som) van de school.</p>',
         disclaimerTitle: 'Disclaimer',
         disclaimerBody: 'Data van DUO Open Onderwijsdata (examenkandidaten en geslaagden). Dit hulpmiddel is alleen voor referentie; geen garantie op juistheid of geschiktheid voor beslissingen. Niet gelieerd aan DUO of de overheid.',
         contactTitle: 'Contact',
