@@ -126,6 +126,31 @@ def build_html(data, excluded=None):
       <div id="gemeenteCheckboxes" class="max-h-56 overflow-y-auto flex flex-wrap gap-x-4 gap-y-2"></div>
     </div>
     <div id="excludedSection" class="mt-8 pt-6 border-t border-slate-200 text-sm text-slate-500"></div>
+    <div id="algorithmSection" class="mt-8 pt-6 border-t border-slate-200 text-sm text-slate-600">
+      <h2 id="algorithmTitle" class="text-base font-semibold text-slate-700 mb-3"></h2>
+      <div id="algorithmBody" class="space-y-2 prose prose-slate max-w-none text-sm"></div>
+    </div>
+    <div id="disclaimerSection" class="mt-6 pt-4 border-t border-slate-200 text-sm text-slate-500">
+      <h2 id="disclaimerTitle" class="text-base font-semibold text-slate-700 mb-2"></h2>
+      <p id="disclaimerBody" class="text-slate-500"></p>
+    </div>
+    <div id="contactSection" class="mt-6 pt-4 border-t border-slate-200 text-sm text-slate-500 pb-4">
+      <h2 id="contactTitle" class="text-base font-semibold text-slate-700 mb-2"></h2>
+      <p class="text-slate-600">
+        <a href="mailto:dewei.zhai@gmail.com" class="text-slate-600 hover:text-slate-800 underline">dewei.zhai@gmail.com</a>
+        &nbsp;·&nbsp;
+        <a href="https://www.linkedin.com/in/zhaidewei/" target="_blank" rel="noopener noreferrer" class="text-slate-600 hover:text-slate-800 underline">LinkedIn</a>
+      </p>
+    </div>
+    <div id="supportSection" class="mt-4 pt-4 border-t border-slate-200 text-sm pb-4">
+      <p class="text-slate-600 mb-2">
+        <a id="supportLink" href="https://ko-fi.com/deweizhai" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-lg bg-amber-500/90 hover:bg-amber-500 px-4 py-2 text-sm font-medium text-white no-underline shadow-sm">Ko-fi</a>
+      </p>
+      <p id="supportHint" class="text-slate-500 text-xs"></p>
+    </div>
+    <footer id="copyrightSection" class="mt-4 pt-4 border-t border-slate-200 text-xs text-slate-400 pb-8">
+      <p id="copyrightText"></p>
+    </footer>
   </div>
   <script>
     (function() {
@@ -160,7 +185,14 @@ def build_html(data, excluded=None):
         axisXLog: 'VWO share (log10(1+x/100))',
         axisYLinear: 'Science share (%)',
         axisYLog: 'Science share (log10(1+y/100))',
-        tooltipCandidates: '5-yr candidates'
+        tooltipCandidates: '5-yr candidates',
+        algorithmTitle: 'How X and Y are calculated',
+        algorithmBody: '<p><strong>X (horizontal):</strong> VWO share = VWO passed / total exam candidates (all tracks: HAVO, VWO, VMBO) at the school, as a percentage (0–100%). Higher X means more academically oriented (more VWO).</p><p><strong>Y (vertical):</strong> Science share = science passed / total exam candidates. For HAVO/VWO schools, science = N&amp;T, N&amp;G, N&amp;T/N&amp;G profiles; for VMBO-only schools, Y = techniek share within VMBO, and X is set to 0.</p><p>Both X and Y are <strong>weighted averages</strong> over school years 2019–2020 to 2023–2024, with recent years weighted more. Dot size reflects total exam candidates (5-year sum) at the school.</p>',
+        disclaimerTitle: 'Disclaimer',
+        disclaimerBody: 'Data from DUO Open Onderwijsdata (exam candidates and pass counts). This tool is for reference only; no warranty of accuracy or fitness for any decision. Not affiliated with DUO or the Dutch government.',
+        contactTitle: 'Contact',
+        supportHint: 'Like this tool? Buy me a coffee on Ko-fi.',
+        copyrightText: '© 2025 Dewei Zhai. This project is licensed under the MIT License.'
       },
       zh: {
         labelLanguage: '语言',
@@ -182,7 +214,14 @@ def build_html(data, excluded=None):
         axisXLog: 'VWO 通过人数占比 (log10(1+x/100))',
         axisYLinear: '理科占比 (%)',
         axisYLog: '理科占比 (log10(1+y/100))',
-        tooltipCandidates: '5年考生'
+        tooltipCandidates: '5年考生',
+        algorithmTitle: 'X 与 Y 的计算方式',
+        algorithmBody: '<p><strong>X（横轴）：</strong>VWO 通过人数占比 = 该校 VWO 通过人数 / 该校全部考生总数（HAVO、VWO、VMBO 等），以百分比表示（0–100%）。X 越高表示越偏学术（VWO 越多）。</p><p><strong>Y（纵轴）：</strong>理科通过人数占比 = 理科通过人数 / 该校全部考生总数。HAVO/VWO 学校的理科含 N&T、N&G、N&T/N&G 等方向；仅 VMBO 的学校 Y 为 VMBO 内 techniek 占比，X 固定为 0。</p><p>X、Y 均为 2019–2020 至 2023–2024 学年的<strong>加权平均</strong>，近年权重更大。圆点大小表示该校 5 年考生总数。</p>',
+        disclaimerTitle: '免责声明',
+        disclaimerBody: '数据来自 DUO Open Onderwijsdata（考试考生与通过人数）。本工具仅供参考，不保证准确或适用于任何决策；与 DUO 及荷兰政府无关联。',
+        contactTitle: '联系作者',
+        supportHint: '觉得有用？请在 Ko-fi 请我喝杯咖啡。',
+        copyrightText: '© 2025 翟德炜。本项目采用 MIT 许可证。'
       },
       nl: {
         labelLanguage: 'Taal',
@@ -204,7 +243,14 @@ def build_html(data, excluded=None):
         axisXLog: 'VWO-aandeel (log10(1+x/100))',
         axisYLinear: 'Bètandeel (%)',
         axisYLog: 'Bètandeel (log10(1+y/100))',
-        tooltipCandidates: '5-jaar kandidaten'
+        tooltipCandidates: '5-jaar kandidaten',
+        algorithmTitle: 'Hoe X en Y worden berekend',
+        algorithmBody: '<p><strong>X (horizontaal):</strong> VWO-aandeel = VWO geslaagden / totaal examenkandidaten (alle richtingen: HAVO, VWO, VMBO) van de school, in procent (0–100%). Hogere X = meer academisch (meer VWO).</p><p><strong>Y (verticaal):</strong> Bètandeel = bètageslaagden / totaal examenkandidaten. Voor HAVO/VWO-scholen: bèta = N&amp;T, N&amp;G, N&amp;T/N&amp;G; voor alleen VMBO-scholen is Y het techniekaandeel binnen VMBO en X = 0.</p><p>X en Y zijn <strong>gewogen gemiddelden</strong> over schooljaren 2019–2020 t/m 2023–2024, met zwaardere weging voor recente jaren. Puntgrootte = totaal examenkandidaten (5-jaar som) van de school.</p>',
+        disclaimerTitle: 'Disclaimer',
+        disclaimerBody: 'Data van DUO Open Onderwijsdata (examenkandidaten en geslaagden). Dit hulpmiddel is alleen voor referentie; geen garantie op juistheid of geschiktheid voor beslissingen. Niet gelieerd aan DUO of de overheid.',
+        contactTitle: 'Contact',
+        supportHint: 'Waardevol? Trakteer me op een koffie via Ko-fi.',
+        copyrightText: '© 2025 Dewei Zhai. Dit project valt onder de MIT-licentie.'
       }
     };
     function t(key) { return (L[currentLang] || L.en)[key] || L.en[key] || key; }
@@ -244,6 +290,20 @@ def build_html(data, excluded=None):
       if (excludedTitle) excludedTitle.textContent = t('excludedTitle');
       var excludedDesc = document.getElementById('excludedDesc');
       if (excludedDesc) excludedDesc.textContent = t('excludedDesc');
+      var algorithmTitle = document.getElementById('algorithmTitle');
+      if (algorithmTitle) algorithmTitle.textContent = t('algorithmTitle');
+      var algorithmBody = document.getElementById('algorithmBody');
+      if (algorithmBody) algorithmBody.innerHTML = t('algorithmBody');
+      var disclaimerTitle = document.getElementById('disclaimerTitle');
+      if (disclaimerTitle) disclaimerTitle.textContent = t('disclaimerTitle');
+      var disclaimerBody = document.getElementById('disclaimerBody');
+      if (disclaimerBody) disclaimerBody.textContent = t('disclaimerBody');
+      var contactTitle = document.getElementById('contactTitle');
+      if (contactTitle) contactTitle.textContent = t('contactTitle');
+      var supportHint = document.getElementById('supportHint');
+      if (supportHint) supportHint.textContent = t('supportHint');
+      var copyrightText = document.getElementById('copyrightText');
+      if (copyrightText) copyrightText.textContent = t('copyrightText');
       if (typeof chart !== 'undefined') {
         var isLog = document.querySelector('input[name="coord"]:checked') && document.querySelector('input[name="coord"]:checked').value === 'log';
         chart.options.scales.x.title.text = isLog ? t('axisXLog') : t('axisXLinear');
@@ -393,8 +453,11 @@ def build_html(data, excluded=None):
             if (ctx.raw.matched) return bgColor;
             return 'rgba(180,180,180,0.28)';
           },
-          borderColor: 'transparent',
-          borderWidth: 0
+          borderColor: function(ctx) {
+            if (ctx.raw.matched) return bgColor;
+            return 'rgba(120,120,120,0.45)';
+          },
+          borderWidth: 1
         };
       });
     }
