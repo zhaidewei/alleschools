@@ -1,0 +1,87 @@
+{
+  "school": {
+    "naam": "Futuris",
+    "brin": "00WD00",
+    "vestigingsnaam": "VBO / MAVO Futuris",
+    "adres": "Pandora 1",
+    "postcode": "1183KK",
+    "plaats": "Amstelveen",
+    "type_onderwijs": "VBO / MAVO",
+    "denominatie": "Bijzonder",
+    "url_allecijfers": "https://allecijfers.nl/middelbare-school/futuris/",
+    "website": "https://www.futuris.nl/"
+  },
+  "bron": {
+    "pagina": "AlleCijfers.nl",
+    "sectie": "Aantal leerlingen per gekozen profiel",
+    "toelichting": "Aantal examenkandidaten per gekozen opleidingsprofiel/sector per examenjaar. Cijfers uit DUO Open Onderwijsdata (examenkandidaten en geslaagden). Op AlleCijfers.nl wordt hetzelfde type data getoond in het gestapeld staafdiagram."
+  },
+  "aantal_leerlingen_per_gekozen_profiel": {
+    "eenheid": "leerlingen (examenkandidaten)",
+    "bron_duo": "DUO Open Onderwijsdata - Examenkandidaten en geslaagden 2019-2024",
+    "examenjaren": [
+      "2019-2020",
+      "2020-2021",
+      "2021-2022",
+      "2022-2023",
+      "2023-2024"
+    ],
+    "profielen_per_examenjaar": {
+      "2019-2020": {
+        "VMBO B - techniek": 21,
+        "VMBO B - zorg en welzijn": 13,
+        "VMBO B - economie": 20,
+        "VMBO K - techniek": 8,
+        "VMBO K - zorg en welzijn": 11,
+        "VMBO K - economie": 62,
+        "VMBO T - techniek": 23,
+        "VMBO T - zorg en welzijn": 0,
+        "VMBO T - economie": 15
+      },
+      "2020-2021": {
+        "VMBO B - techniek": 9,
+        "VMBO B - zorg en welzijn": 0,
+        "VMBO B - economie": 38,
+        "VMBO K - techniek": 8,
+        "VMBO K - zorg en welzijn": 0,
+        "VMBO K - economie": 45,
+        "VMBO T - techniek": 11,
+        "VMBO T - zorg en welzijn": 0,
+        "VMBO T - economie": 19
+      },
+      "2021-2022": {
+        "VMBO B - techniek": 8,
+        "VMBO B - zorg en welzijn": 0,
+        "VMBO B - economie": 32,
+        "VMBO K - techniek": 10,
+        "VMBO K - zorg en welzijn": 0,
+        "VMBO K - economie": 38,
+        "VMBO T - techniek": 12,
+        "VMBO T - zorg en welzijn": "<5",
+        "VMBO T - economie": 9
+      },
+      "2022-2023": {
+        "VMBO B - techniek": "<5",
+        "VMBO B - zorg en welzijn": 0,
+        "VMBO B - economie": 24,
+        "VMBO K - techniek": 13,
+        "VMBO K - zorg en welzijn": 0,
+        "VMBO K - economie": 22,
+        "VMBO T - techniek": 17,
+        "VMBO T - zorg en welzijn": 0,
+        "VMBO T - economie": 12
+      },
+      "2023-2024": {
+        "VMBO B - techniek": "<5",
+        "VMBO B - zorg en welzijn": 0,
+        "VMBO B - economie": 26,
+        "VMBO K - techniek": 10,
+        "VMBO K - zorg en welzijn": 0,
+        "VMBO K - economie": 44,
+        "VMBO T - techniek": 8,
+        "VMBO T - zorg en welzijn": 8,
+        "VMBO T - economie": 12
+      }
+    }
+  }
+}

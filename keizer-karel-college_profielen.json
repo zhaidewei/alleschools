@@ -1,0 +1,102 @@
+{
+  "school": {
+    "naam": "Keizer Karel College",
+    "brin": "02QZ00",
+    "vestigingsnaam": "Keizer Karel College",
+    "adres": "Elegast 5",
+    "postcode": "1185AA",
+    "plaats": "Amstelveen",
+    "type_onderwijs": "HAVO / VWO",
+    "denominatie": "Bijzonder",
+    "url_allecijfers": "https://allecijfers.nl/middelbare-school/keizer-karel-college/",
+    "website": "https://www.keizerkarelcollege.nl/"
+  },
+  "bron": {
+    "pagina": "AlleCijfers.nl",
+    "sectie": "Aantal leerlingen per gekozen profiel",
+    "toelichting": "Aantal examenkandidaten per gekozen opleidingsprofiel per examenjaar. Cijfers uit DUO Open Onderwijsdata (examenkandidaten en geslaagden). Op AlleCijfers.nl wordt hetzelfde type data getoond in het gestapeld staafdiagram."
+  },
+  "aantal_leerlingen_per_gekozen_profiel": {
+    "eenheid": "leerlingen (examenkandidaten)",
+    "bron_duo": "DUO Open Onderwijsdata - Examenkandidaten en geslaagden 2019-2024",
+    "examenjaren": [
+      "2019-2020",
+      "2020-2021",
+      "2021-2022",
+      "2022-2023",
+      "2023-2024"
+    ],
+    "profielen_per_examenjaar": {
+      "2019-2020": {
+        "HAVO - N&T": "<5",
+        "HAVO - N&G": 18,
+        "HAVO - E&M": 50,
+        "HAVO - C&M": "<5",
+        "HAVO - N&T / N&G": 8,
+        "HAVO - E&M / C&M": 7,
+        "VWO - N&T": 24,
+        "VWO - N&G": 27,
+        "VWO - E&M": 62,
+        "VWO - C&M": 5,
+        "VWO - N&T / N&G": 44,
+        "VWO - E&M / C&M": 18
+      },
+      "2020-2021": {
+        "HAVO - N&T": "<5",
+        "HAVO - N&G": 25,
+        "HAVO - E&M": 42,
+        "HAVO - C&M": "<5",
+        "HAVO - N&T / N&G": 14,
+        "HAVO - E&M / C&M": "<5",
+        "VWO - N&T": 14,
+        "VWO - N&G": 25,
+        "VWO - E&M": 57,
+        "VWO - C&M": 8,
+        "VWO - N&T / N&G": 57,
+        "VWO - E&M / C&M": 19
+      },
+      "2021-2022": {
+        "HAVO - N&T": 5,
+        "HAVO - N&G": 16,
+        "HAVO - E&M": 52,
+        "HAVO - C&M": "<5",
+        "HAVO - N&T / N&G": 11,
+        "HAVO - E&M / C&M": "<5",
+        "VWO - N&T": 11,
+        "VWO - N&G": 15,
+        "VWO - E&M": 42,
+        "VWO - C&M": 6,
+        "VWO - N&T / N&G": 70,
+        "VWO - E&M / C&M": 24
+      },
+      "2022-2023": {
+        "HAVO - N&T": 6,
+        "HAVO - N&G": 12,
+        "HAVO - E&M": 47,
+        "HAVO - C&M": "<5",
+        "HAVO - N&T / N&G": 6,
+        "HAVO - E&M / C&M": 7,
+        "VWO - N&T": 31,
+        "VWO - N&G": 14,
+        "VWO - E&M": 74,
+        "VWO - C&M": 6,
+        "VWO - N&T / N&G": 48,
+        "VWO - E&M / C&M": 15
+      },
+      "2023-2024": {
+        "HAVO - N&T": "<5",
+        "HAVO - N&G": 11,
+        "HAVO - E&M": 48,
+        "HAVO - C&M": 5,
+        "HAVO - N&T / N&G": "<5",
+        "HAVO - E&M / C&M": 0,
+        "VWO - N&T": 27,
+        "VWO - N&G": 17,
+        "VWO - E&M": 46,
+        "VWO - C&M": 8,
+        "VWO - N&T / N&G": 46,
+        "VWO - E&M / C&M": 10
+      }
+    }
+  }
+}
