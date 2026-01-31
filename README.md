@@ -1,6 +1,6 @@
 # Schools：荷兰中学 DUO 数据与坐标可视化
 
-本仓库从 **DUO Open Onderwijsdata** 抓取全部中学的考试人数数据，计算每所学校的「VWO 占比 × 理科占比」坐标，并提供本地可视化服务。
+本仓库从 **DUO Open Onderwijsdata** 抓取全部中学的考试人数数据，计算每所学校的「VWO 通过人数占比 × 理科占比」坐标，并提供本地可视化服务。
 
 ---
 
@@ -37,8 +37,8 @@ python3 fetch_duo_examen_all.py
 
 **坐标含义**：
 
-- **X（横轴）**：VWO 占比（0–100%），100% 表示纯 VWO（学术性强）。
-- **Y（纵轴）**：理科占比（0–100%）。HAVO/VWO 学校为 N&T、N&G、N&T/N&G 占比；VMBO 学校为 techniek 占比，且 X=0。
+- **X（横轴）**：VWO 通过人数占比（0–100%）= VWO 通过人数 / 全校考生总数（HAVO+VWO+VMBO 等所有类型）。
+- **Y（纵轴）**：理科通过人数 / 全校考生总数（0–100%）。HAVO/VWO 学校为 N&T、N&G、N&T/N&G 通过人数占全校考生比；VMBO 学校为 techniek 占比，且 X=0。
 - **权重**：近年权重大，逐年递减（2019–2020 到 2023–2024）。
 - **最小样本**：HAVO/VWO 总考生数（5 年合计）低于 20 的学校不写入 CSV，避免极端点（见下文「数据异常说明」）。
 
@@ -51,7 +51,7 @@ python3 calc_xy_coords.py
 ## 4. Serving：本地可视化服务
 
 - **服务脚本**：`view_xy_server.py` 读取 `schools_xy_coords.csv` 和 `excluded_schools.json`，生成带散点图的 HTML，并启动 HTTP 服务（默认端口 8082）。
-- **前端**：`view_xy.html` 展示横轴 VWO 占比、纵轴理科占比，可切换线性/对数坐标，按 gemeente 筛选。
+- **前端**：`view_xy.html` 展示横轴 VWO 通过人数占比、纵轴理科占比，可切换线性/对数坐标，按 gemeente 筛选。
 - **排除名单**：`excluded_schools.json` 中学校在页面底部列出，不参与散点图。
 
 ```bash
@@ -100,12 +100,12 @@ python3 view_xy_server.py
 - **方案 2（推荐）**：精英指数 = 0.6×VWO占比 + 0.4×理科占比。
 - **方案 3**：加入通过率，如 0.4×VWO + 0.3×理科 + 0.3×通过率（归一化）。
 
-本仓库的 **X = VWO 占比、Y = 理科占比** 即采用「学历层次 × 学科取向」二维，与方案 2 一致。
+本仓库的 **X = VWO 通过人数占比、Y = 理科通过人数占比** 即采用「学历层次 × 学科取向」二维（用通过人数替代考生数，便于区分纯 VWO 校），与方案 2 一致。
 
 ### 坐标系说明（当前实现）
 
-- **X 轴**：VWO 占比（0–100%）。
-- **Y 轴**：理科占比（0–100%）。理科 = N&T + N&G + N&T/N&G（HAVO/VWO）；VMBO 为 techniek 占比。
+- **X 轴**：VWO 通过人数占比（0–100%）= VWO 通过人数 / 全校考生总数（所有类型）。
+- **Y 轴**：理科通过人数 / 全校考生总数（0–100%）。理科 = N&T + N&G + N&T/N&G（HAVO/VWO）；VMBO 为 techniek 占比。
 - 只算 HAVO/VWO 参与 X/Y；VMBO 学校 X=0，Y 为 VMBO 内 techniek 占比。
 - **组合 profiel**：N&T/N&G、E&M/C&M 等按 DUO OPLEIDINGSNAAM 归类；`<5` 按 2 计。
 
@@ -133,7 +133,15 @@ awk -F';' 'NR==1 {print; next} toupper($11)==toupper("Amstelveen") {print}' vest
 
 ### X=100 的 HAVO/VWO 学校
 
-- **结论**：不是数据处理错误。X_linear=100 表示该校在 DUO 数据中**只有 VWO、没有 HAVO**（如 St. Ignatiusgymnasium、Het Amsterdams Lyceum、Stedelijk Gymnasium Haarlem 等），VWO 占比=100% 与原始数据一致。
+- **结论**：不是数据处理错误。X_linear=100 表示该校在 DUO 数据中**只有 VWO 通过、没有 HAVO 通过**（如 St. Ignatiusgymnasium、Het Amsterdams Lyceum、Stedelijk Gymnasium Haarlem 等），VWO 通过人数占比=100% 与原始数据一致。
+
+### X=0、Y=100% 的点（多为 VMBO）
+
+- **现象**：散点图中有不少点落在 X=0、Y=100%（或接近 100%）位置。
+- **结论**：**不是数据错误**。这些点几乎都是 **VMBO 学校**：
+  - **X=0**：VMBO 学校横轴固定为 0（不参与 VWO 占比计算）。
+  - **Y=100%**：Y = VMBO 内 techniek 占比；100% 表示该校**只开 techniek（技术/职业）方向**，没有「zorg en welzijn」「economie」等。
+- **典型学校**：Maritieme Academie Harlingen（海事）、Mediacollege Amsterdam（传媒）、Grafisch Lyceum Rotterdam（平面）、STC（航运）、SiNTLUCAS（设计）等，均为单一技术/职业类 VMBO 校区，原始数据中仅有 VMBO B/K/G/T - techniek 行，故 techniek/总考生 = 100%。
 
 ---
 

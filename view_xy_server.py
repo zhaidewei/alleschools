@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 读取 schools_xy_coords.csv，生成带散点图的 HTML，并在本地启动 HTTP 服务。
-浏览器打开后显示：横轴 VWO 占比，纵轴 理科占比；可切换线性/对数坐标。
+浏览器打开后显示：横轴 VWO 通过人数占比，纵轴 理科占比；可切换线性/对数坐标。
 """
 import csv
 import json
@@ -51,7 +51,7 @@ def build_html(data, excluded=None):
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <title>学校坐标：VWO占比 × 理科占比</title>
+  <title>学校坐标：VWO通过人数占比 × 理科占比</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body { font-family: system-ui, sans-serif; margin: 24px; background: #f8f9fa; }
@@ -74,7 +74,7 @@ def build_html(data, excluded=None):
 <body>
   <div id="wrap">
     <div id="chartWrap">
-      <h1>学校坐标：VWO占比（横轴）× 理科占比（纵轴）</h1>
+      <h1>学校坐标：VWO通过人数占比（横轴）× 理科占比（纵轴）</h1>
       <p style="color:#666; font-size:0.9rem;">数据来自 DUO 考试人数，近年权重更高。VMBO 学校仅作参考（X=0）。共 <strong id="schoolCount">0</strong> 所学校。</p>
       <canvas id="chart" width="700" height="420"></canvas>
     </div>
@@ -82,6 +82,7 @@ def build_html(data, excluded=None):
       <label>Gemeente 过滤: <input type="text" id="gemeenteFilter" placeholder="不输入显示全部，多个用逗号分隔" style="margin-right:12px;"></label>
       <label><input type="radio" name="coord" value="linear" checked> 线性坐标</label>
       <label><input type="radio" name="coord" value="log"> 对数坐标</label>
+      <label style="margin-left:12px;"><input type="checkbox" id="showVMBO"> 显示纯 VMBO 学校</label>
     </div>
     <div id="gemeenteList">
       <div class="gemeente-list-header">
@@ -115,8 +116,12 @@ def build_html(data, excluded=None):
     }
     function getFilteredPoints(points) {
       const byText = getPointsByTextFilter(points);
-      if (selectedGemeenten.size === 0) return [];
-      return byText.filter(p => p.gemeente && selectedGemeenten.has(p.gemeente));
+      let result = selectedGemeenten.size === 0
+        ? byText
+        : byText.filter(p => p.gemeente && selectedGemeenten.has(p.gemeente));
+      var showVMBOEl = document.getElementById('showVMBO');
+      if (showVMBOEl && !showVMBOEl.checked) result = result.filter(function(p) { return p.type !== 'VMBO'; });
+      return result;
     }
     function getGemeentenInList() {
       const coord = document.querySelector('input[name="coord"]:checked').value;
@@ -210,9 +215,7 @@ def build_html(data, excluded=None):
 
     const chart = new Chart(document.getElementById('chart'), {
       type: 'scatter',
-      data: {
-        datasets: makeDatasets(getFilteredPoints(linear))
-      },
+      data: { datasets: [] },
       options: {
         responsive: true,
         maintainAspectRatio: true,
@@ -232,18 +235,20 @@ def build_html(data, excluded=None):
         },
         scales: {
           x: {
-            title: { display: true, text: 'VWO 占比 (%) — 100% 学术性最强' },
-            min: 0,
+            title: { display: true, text: 'VWO 通过人数占比 (%) — 100% 学术性最强' },
+            min: -5,
             max: 105,
             grace: '0%',
-            ticks: { min: 0, max: 105, stepSize: 21 }
+            afterBuildTicks: function(axis) { axis.ticks = [0,10,20,30,40,50,60,70,80,90,100].map(function(v){ return { value: v }; }); },
+            ticks: { stepSize: 10 }
           },
           y: {
             title: { display: true, text: '理科占比 (%)' },
-            min: 0,
+            min: -5,
             max: 105,
             grace: '0%',
-            ticks: { min: 0, max: 105, stepSize: 21 }
+            afterBuildTicks: function(axis) { axis.ticks = [0,10,20,30,40,50,60,70,80,90,100].map(function(v){ return { value: v }; }); },
+            ticks: { stepSize: 10 }
           }
         }
       },
@@ -287,25 +292,32 @@ def build_html(data, excluded=None):
       refreshChart();
     });
 
+    var showVMBOEl = document.getElementById('showVMBO');
+    if (showVMBOEl) showVMBOEl.addEventListener('change', refreshChart);
+
     document.querySelectorAll('input[name="coord"]').forEach(radio => {
       radio.addEventListener('change', () => {
         const isLog = radio.value === 'log';
-        chart.options.scales.x.title.text = isLog ? 'VWO 占比 (log10(1+x/100))' : 'VWO 占比 (%) — 100% 学术性最强';
+        chart.options.scales.x.title.text = isLog ? 'VWO 通过人数占比 (log10(1+x/100))' : 'VWO 通过人数占比 (%) — 100% 学术性最强';
         chart.options.scales.y.title.text = isLog ? '理科占比 (log10(1+y/100))' : '理科占比 (%)';
         if (isLog) {
-          chart.options.scales.x.min = 0;
+          chart.options.scales.x.min = -0.02;
           chart.options.scales.x.max = 0.35;
-          chart.options.scales.x.ticks = { min: 0, max: 0.35, stepSize: 0.05 };
-          chart.options.scales.y.min = 0;
+          chart.options.scales.x.afterBuildTicks = undefined;
+          chart.options.scales.x.ticks = { stepSize: 0.05 };
+          chart.options.scales.y.min = -0.02;
           chart.options.scales.y.max = 0.35;
-          chart.options.scales.y.ticks = { min: 0, max: 0.35, stepSize: 0.05 };
+          chart.options.scales.y.afterBuildTicks = undefined;
+          chart.options.scales.y.ticks = { stepSize: 0.05 };
         } else {
-          chart.options.scales.x.min = 0;
+          chart.options.scales.x.min = -5;
           chart.options.scales.x.max = 105;
-          chart.options.scales.x.ticks = { min: 0, max: 105, stepSize: 21 };
-          chart.options.scales.y.min = 0;
+          chart.options.scales.x.afterBuildTicks = function(axis) { axis.ticks = [0,10,20,30,40,50,60,70,80,90,100].map(function(v){ return { value: v }; }); };
+          chart.options.scales.x.ticks = { stepSize: 10 };
+          chart.options.scales.y.min = -5;
           chart.options.scales.y.max = 105;
-          chart.options.scales.y.ticks = { min: 0, max: 105, stepSize: 21 };
+          chart.options.scales.y.afterBuildTicks = function(axis) { axis.ticks = [0,10,20,30,40,50,60,70,80,90,100].map(function(v){ return { value: v }; }); };
+          chart.options.scales.y.ticks = { stepSize: 10 };
         }
         refreshChart();
       });

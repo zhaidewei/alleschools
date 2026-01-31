@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-从 duo_examen_raw.csv 计算每所学校的 X（VWO占比）和 Y（理科占比）。
-- 横坐标 X：VWO 占比（0–100%），100% 代表学术性强。
-- 纵坐标 Y：理科占比（0–100%）。
+从 duo_examen_raw.csv 计算每所学校的 X（VWO 通过人数占比）和 Y（理科占比）。
+- 横坐标 X：VWO 通过人数 / 全校考生总数（HAVO+VWO+VMBO 等所有类型），0–100%。
+- 纵坐标 Y：理科通过人数 / 全校考生总数（0–100%）。
 - 仅 HAVO+VWO 参与 X/Y 计算；VMBO 学校作为参考保留，X=0，Y=VMBO 内 techniek 占比。
 - 历史年份加权平均：最近年份权重大，逐年递减。
 - 输出线性坐标与对数坐标（log10(1+x)），并写入新 CSV。
@@ -20,13 +20,13 @@ COL_GEMEENTE = 3
 COL_ONDERWIJSTYPE = 4
 COL_OPLEIDINGSNAAM = 6
 # 每年 9 列：MAN kand, MAN geslaagd, MAN %, VROUW kand, VROUW geslaagd, VROUW %, TOTAAL kand, TOTAAL geslaagd, TOTAAL %
-# 每年 TOTAAL examenkandidaten 所在列
+# (TOTAAL examenkandidaten 列, TOTAAL geslaagden 列, 学年名)。X 轴用 geslaagden 算 VWO 占比，便于区分纯 VWO 校；阈值仍用 kand 总数。
 YEAR_COLS = [
-    (13, "2019-2020"),
-    (22, "2020-2021"),
-    (31, "2021-2022"),
-    (40, "2022-2023"),
-    (49, "2023-2024"),
+    (13, 14, "2019-2020"),
+    (22, 23, "2020-2021"),
+    (31, 32, "2021-2022"),
+    (40, 41, "2022-2023"),
+    (49, 50, "2023-2024"),
 ]
 # 权重：最近年份高，历史递减
 WEIGHTS = [0.2, 0.4, 0.6, 0.8, 1.0]
@@ -101,25 +101,28 @@ def main():
                 schools[brin] = {
                     "naam": naam,
                     "gemeente": gemeente,
-                    "havo_vwo": {y: {"vwo": 0, "havo": 0, "science": 0, "total": 0} for _, y in YEAR_COLS},
-                    "vmbo": {y: {"techniek": 0, "total": 0} for _, y in YEAR_COLS},
+                    "havo_vwo": {y: {"vwo": 0, "havo": 0, "science": 0, "total": 0} for (_, _, y) in YEAR_COLS},
+                    "vmbo": {y: {"techniek": 0, "total": 0} for (_, _, y) in YEAR_COLS},
+                    "all_kand": {y: 0 for (_, _, y) in YEAR_COLS},  # 全校考生总数（所有类型）
                 }
 
-            for i, (col, year) in enumerate(YEAR_COLS):
-                n = parse_int(row[col])
+            for i, (col_kand, col_geslaagd, year) in enumerate(YEAR_COLS):
+                n_kand = parse_int(row[col_kand])
+                n_geslaagd = parse_int(row[col_geslaagd])
+                schools[brin]["all_kand"][year] += n_kand  # 全校考生数（每行都累加）
 
                 if is_havo_vwo(otype):
-                    schools[brin]["havo_vwo"][year]["total"] += n
+                    schools[brin]["havo_vwo"][year]["total"] += n_kand  # 阈值用考生总数
                     if otype.strip().strip('"').upper() == "VWO":
-                        schools[brin]["havo_vwo"][year]["vwo"] += n
+                        schools[brin]["havo_vwo"][year]["vwo"] += n_geslaagd  # X 分子：VWO 通过人数
                     else:
-                        schools[brin]["havo_vwo"][year]["havo"] += n
+                        schools[brin]["havo_vwo"][year]["havo"] += n_geslaagd
                     if is_science_havo_vwo(opleiding):
-                        schools[brin]["havo_vwo"][year]["science"] += n
+                        schools[brin]["havo_vwo"][year]["science"] += n_geslaagd
                 elif is_vmbo(otype):
-                    schools[brin]["vmbo"][year]["total"] += n
+                    schools[brin]["vmbo"][year]["total"] += n_kand
                     if is_science_vmbo(opleiding):
-                        schools[brin]["vmbo"][year]["techniek"] += n
+                        schools[brin]["vmbo"][year]["techniek"] += n_kand
 
     # 计算每校加权平均 X, Y（线性），再算对数坐标
     rows_out = []
@@ -128,40 +131,33 @@ def main():
         hw = data["havo_vwo"]
         vmbo = data["vmbo"]
 
-        # 加权平均：仅用有 HAVO+VWO 数据的年份
-        sum_w = 0
-        sum_w_x = 0.0
-        sum_w_y = 0.0
-        for i, (_, year) in enumerate(YEAR_COLS):
-            w = WEIGHTS[i]
-            t = hw[year]["total"]
-            if t <= 0:
-                continue
-            vwo = hw[year]["vwo"]
-            sci = hw[year]["science"]
-            x_year = 100.0 * vwo / t if t else 0
-            y_year = 100.0 * sci / t if t else 0
-            sum_w += w
-            sum_w_x += w * x_year
-            sum_w_y += w * y_year
+        total_havo_vwo = sum(hw[y]["total"] for (_, _, y) in YEAR_COLS)  # 阈值：HAVO/VWO 考生总数
 
-        total_havo_vwo = sum(hw[y]["total"] for _, y in YEAR_COLS)
-        if sum_w > 0:
-            x_linear = sum_w_x / sum_w
-            y_linear = sum_w_y / sum_w
+        if total_havo_vwo >= MIN_HAVO_VWO_TOTAL:
+            # HAVO/VWO 学校：X = VWO 通过人数 / 全校考生总数；Y = 理科通过人数 / 全校考生总数
+            sum_w = 0
+            sum_w_x = 0.0
+            sum_w_y = 0.0
+            all_kand = data["all_kand"]
+            for i, (_, _, year) in enumerate(YEAR_COLS):
+                w = WEIGHTS[i]
+                vwo_g = hw[year]["vwo"]
+                t_all = all_kand[year]  # 全校考生总数（HAVO+VWO+VMBO 等）
+                if t_all <= 0:
+                    continue
+                x_year = 100.0 * vwo_g / t_all  # X = VWO 通过人数 / 全校考生数
+                y_year = 100.0 * hw[year]["science"] / t_all  # Y = 理科通过人数 / 全校考生数
+                sum_w += w
+                sum_w_x += w * x_year
+                sum_w_y += w * y_year
+            x_linear = sum_w_x / sum_w if sum_w > 0 else 0.0
+            y_linear = sum_w_y / sum_w if sum_w > 0 else 0.0
             type_label = "HAVO/VWO"
-            if total_havo_vwo < MIN_HAVO_VWO_TOTAL:
-                excluded_low_sample.append({
-                    "BRIN": brin,
-                    "naam": data["naam"],
-                    "gemeente": data["gemeente"],
-                })
-                continue  # 样本过少，跳过，避免 100/100 等异常
-        else:
+        elif sum(vmbo[y]["total"] for (_, _, y) in YEAR_COLS) > 0:
             # 仅 VMBO：X=0，Y=VMBO 内 techniek 占比（加权）
             sum_w = 0
             sum_w_y = 0.0
-            for i, (_, year) in enumerate(YEAR_COLS):
+            for i, (_, _, year) in enumerate(YEAR_COLS):
                 w = WEIGHTS[i]
                 t = vmbo[year]["total"]
                 if t <= 0:
@@ -173,6 +169,13 @@ def main():
             x_linear = 0.0
             y_linear = (sum_w_y / sum_w) if sum_w > 0 else 0.0
             type_label = "VMBO"
+        else:
+            excluded_low_sample.append({
+                "BRIN": brin,
+                "naam": data["naam"],
+                "gemeente": data["gemeente"],
+            })
+            continue
 
         # 对数坐标：log10(1 + x)，避免 log(0)。这里 x 已是 0–100，用 log10(1 + x/100) 使结果约在 0–2
         x_log = math.log10(1.0 + x_linear / 100.0)
