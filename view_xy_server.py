@@ -73,7 +73,7 @@ def build_html(data, excluded=None):
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <script>document.documentElement.classList.toggle('dark', localStorage.getItem('theme')==='dark');</script>
-  <style>.chartjs-tooltip { max-width: min(320px, 90vw); overflow-wrap: break-word; word-break: break-word; }</style>
+  <style>.chartjs-tooltip { max-width: min(320px, 90vw); overflow-wrap: break-word; word-break: break-word; transform-origin: bottom center; }</style>
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-200 font-sans antialiased">
   <div id="wrap" class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
@@ -498,6 +498,18 @@ def build_html(data, excluded=None):
       });
     }
 
+    function updateTooltipScale() {
+      var scale = (window.visualViewport && typeof window.visualViewport.scale === 'number') ? window.visualViewport.scale : 1;
+      var s = scale > 0 ? 1 / scale : 1;
+      document.querySelectorAll('.chartjs-tooltip').forEach(function(el) {
+        el.style.transform = 'scale(' + s + ')';
+      });
+    }
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', updateTooltipScale);
+      window.visualViewport.addEventListener('scroll', updateTooltipScale);
+    }
+
     const chart = new Chart(document.getElementById('chart'), {
       type: 'scatter',
       data: { datasets: [] },
@@ -516,7 +528,8 @@ def build_html(data, excluded=None):
                 const line1 = (gemeente ? gemeente + ' · ' : '') + name;
                 const line2 = '(' + p.x.toFixed(2) + ', ' + p.y.toFixed(2) + ') ' + t('tooltipCandidates') + ': ' + (p.size != null && p.size > 0 ? p.size : '—');
                 return [line1, line2];
-              }
+              },
+              afterBody: function() { setTimeout(updateTooltipScale, 0); }
             }
           }
         },
