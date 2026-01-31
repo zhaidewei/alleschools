@@ -73,7 +73,7 @@ def build_html(data, excluded=None):
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <script>document.documentElement.classList.toggle('dark', localStorage.getItem('theme')==='dark');</script>
-  <style>.chartjs-tooltip { max-width: min(320px, 90vw); overflow-wrap: break-word; word-break: break-word; transform-origin: bottom center; }</style>
+  <style>.chartjs-tooltip { max-width: min(320px, 90vw); overflow-wrap: break-word; word-break: break-word; transform-origin: bottom center; } #shareWrap.open #shareDropdown { opacity: 1; visibility: visible; }</style>
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-200 font-sans antialiased">
   <div id="wrap" class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
@@ -90,6 +90,13 @@ def build_html(data, excluded=None):
           <option value="zh">中文</option>
           <option value="nl">Nederlands</option>
         </select>
+      </div>
+      <div class="relative inline-block group" id="shareWrap">
+        <button type="button" id="shareBtn" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg border border-slate-300 dark:border-slate-500 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600">Share</button>
+        <div id="shareDropdown" class="absolute right-0 top-full mt-1 py-1 min-w-[10rem] bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-600 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20">
+          <a href="#" id="shareXLink" target="_blank" rel="noopener noreferrer" class="block px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 no-underline rounded-t-lg">Share to X</a>
+          <a href="#" id="shareFbLink" target="_blank" rel="noopener noreferrer" class="block px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 no-underline rounded-b-lg">Share to Facebook</a>
+        </div>
       </div>
     </div>
     <div id="chartWrap" class="mb-8">
@@ -181,6 +188,9 @@ def build_html(data, excluded=None):
       en: {
         labelLanguage: 'Language',
         labelTheme: 'Theme',
+        share: 'Share',
+        shareToX: 'Share to X',
+        shareToFacebook: 'Share to Facebook',
         labelLight: 'Light',
         labelDark: 'Dark',
         titleMain: '🏫 Dutch secondary school map: academic level × science focus',
@@ -213,6 +223,9 @@ def build_html(data, excluded=None):
       zh: {
         labelLanguage: '语言',
         labelTheme: '主题',
+        share: '分享',
+        shareToX: '分享到 X',
+        shareToFacebook: '分享到 Facebook',
         labelLight: '浅色',
         labelDark: '深色',
         titleMain: '🏫 荷兰中学定位图：学术度 × 理科度',
@@ -245,6 +258,9 @@ def build_html(data, excluded=None):
       nl: {
         labelLanguage: 'Taal',
         labelTheme: 'Thema',
+        share: 'Delen',
+        shareToX: 'Delen op X',
+        shareToFacebook: 'Delen op Facebook',
         labelLight: 'Licht',
         labelDark: 'Donker',
         titleMain: '🏫 Nederlandse schoolkaart voortgezet onderwijs: academisch × bèta',
@@ -314,6 +330,18 @@ def build_html(data, excluded=None):
       if (themeLightBtn) themeLightBtn.textContent = t('labelLight');
       var themeDarkBtn = document.getElementById('themeDark');
       if (themeDarkBtn) themeDarkBtn.textContent = t('labelDark');
+      var shareBtn = document.getElementById('shareBtn');
+      if (shareBtn) shareBtn.textContent = t('share');
+      var shareXLink = document.getElementById('shareXLink');
+      if (shareXLink) {
+        shareXLink.textContent = t('shareToX');
+        shareXLink.href = 'https://twitter.com/intent/tweet?url=' + encodeURIComponent(window.location.href) + '&text=' + encodeURIComponent(t('titleMain'));
+      }
+      var shareFbLink = document.getElementById('shareFbLink');
+      if (shareFbLink) {
+        shareFbLink.textContent = t('shareToFacebook');
+        shareFbLink.href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(window.location.href);
+      }
       var excludedTitle = document.getElementById('excludedTitle');
       if (excludedTitle) excludedTitle.textContent = t('excludedTitle');
       var excludedDesc = document.getElementById('excludedDesc');
@@ -634,6 +662,13 @@ def build_html(data, excluded=None):
     document.getElementById('themeLight').addEventListener('click', function() { applyTheme(false); });
     document.getElementById('themeDark').addEventListener('click', function() { applyTheme(true); });
     applyTheme(isDarkTheme());
+
+    document.getElementById('shareBtn').addEventListener('click', function(e) {
+      e.stopPropagation();
+      document.getElementById('shareWrap').classList.toggle('open');
+    });
+    document.addEventListener('click', function() { document.getElementById('shareWrap').classList.remove('open'); });
+    document.getElementById('shareWrap').addEventListener('click', function(e) { e.stopPropagation(); });
 
     document.querySelectorAll('input[name="coord"]').forEach(radio => {
       radio.addEventListener('change', () => {
