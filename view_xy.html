@@ -7,92 +7,100 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } }
+    tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } }
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>document.documentElement.classList.toggle('dark', localStorage.getItem('theme')==='dark');</script>
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-800 font-sans antialiased">
+<body class="min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-200 font-sans antialiased">
   <div id="wrap" class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-    <div class="flex justify-end items-center gap-2 mb-2">
-      <label id="labelLanguage" class="text-sm font-medium text-slate-600">Language</label>
-      <select id="langSelect" class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-800 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400 align-middle">
-        <option value="en">English</option>
-        <option value="zh">中文</option>
-        <option value="nl">Nederlands</option>
-      </select>
+    <div class="flex justify-end items-center gap-4 mb-2">
+      <div class="flex items-center gap-2">
+        <span id="labelTheme" class="text-sm font-medium text-slate-600 dark:text-slate-400">Theme</span>
+        <button type="button" id="themeLight" class="px-2.5 py-1 text-sm rounded-md border border-slate-300 dark:border-slate-500 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-1 focus:ring-slate-400">Light</button>
+        <button type="button" id="themeDark" class="px-2.5 py-1 text-sm rounded-md border border-slate-300 dark:border-slate-500 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-1 focus:ring-slate-400">Dark</button>
+      </div>
+      <div class="flex items-center gap-2">
+        <label id="labelLanguage" class="text-sm font-medium text-slate-600 dark:text-slate-400">Language</label>
+        <select id="langSelect" class="rounded-lg border border-slate-300 dark:border-slate-500 px-3 py-1.5 text-sm text-slate-800 dark:text-slate-200 dark:bg-slate-700 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400 align-middle">
+          <option value="en">English</option>
+          <option value="zh">中文</option>
+          <option value="nl">Nederlands</option>
+        </select>
+      </div>
     </div>
     <div id="chartWrap" class="mb-8">
-      <h1 id="titleMain" class="text-xl font-semibold text-slate-800 tracking-tight"><a href="/" class="text-slate-800 hover:text-slate-600">AlleSchools</a> · School map: academic level × science focus</h1>
-      <p id="subtitleMain" class="mt-1 text-sm text-slate-500">Data from DUO. X = academic strength, Y = science share. Dot size = graduation count. <strong id="schoolCount" class="font-medium text-slate-700">0</strong> schools shown.</p>
-      <div class="mt-4 bg-white rounded-xl border border-slate-200/80 shadow-sm p-4 sm:p-6">
+      <h1 id="titleMain" class="text-xl font-semibold text-slate-800 dark:text-slate-100 tracking-tight"><a href="/" class="text-slate-800 dark:text-slate-100 hover:text-slate-600 dark:hover:text-slate-300">AlleSchools</a> · School map: academic level × science focus</h1>
+      <p id="subtitleMain" class="mt-1 text-sm text-slate-500 dark:text-slate-400">Data from DUO. X = academic strength, Y = science share. Dot size = graduation count. <strong id="schoolCount" class="font-medium text-slate-700 dark:text-slate-300">0</strong> schools shown.</p>
+      <div class="mt-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-600 shadow-sm p-4 sm:p-6">
         <div class="w-full aspect-[4/3] min-h-[420px]">
           <canvas id="chart" class="w-full h-full block"></canvas>
         </div>
       </div>
     </div>
-    <div class="controls flex flex-wrap items-center gap-4 sm:gap-6 py-4 px-4 bg-white rounded-xl border border-slate-200/80 shadow-sm">
+    <div class="controls flex flex-wrap items-center gap-4 sm:gap-6 py-4 px-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-600 shadow-sm">
       <div class="flex items-center gap-2">
-        <label id="labelSchoolSearch" class="text-sm font-medium text-slate-600 whitespace-nowrap">School search</label>
-        <input type="text" id="schoolSearch" placeholder="Search by name or BRIN, matches highlighted" class="flex-1 min-w-[200px] rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400">
+        <label id="labelSchoolSearch" class="text-sm font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">School search</label>
+        <input type="text" id="schoolSearch" placeholder="Search by name or BRIN, matches highlighted" class="flex-1 min-w-[200px] rounded-lg border border-slate-300 dark:border-slate-500 px-3 py-2 text-sm text-slate-800 dark:text-slate-200 dark:bg-slate-700 placeholder-slate-400 dark:placeholder-slate-500 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400">
       </div>
       <div class="flex items-center gap-2">
-        <label id="labelGemeente" class="text-sm font-medium text-slate-600 whitespace-nowrap">Gemeente filter</label>
-        <input type="text" id="gemeenteFilter" placeholder="Leave empty for all, comma for multiple" class="flex-1 min-w-[180px] rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400">
+        <label id="labelGemeente" class="text-sm font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">Gemeente filter</label>
+        <input type="text" id="gemeenteFilter" placeholder="Leave empty for all, comma for multiple" class="flex-1 min-w-[180px] rounded-lg border border-slate-300 dark:border-slate-500 px-3 py-2 text-sm text-slate-800 dark:text-slate-200 dark:bg-slate-700 placeholder-slate-400 dark:placeholder-slate-500 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400">
       </div>
       <div class="flex flex-wrap items-center gap-4">
-        <label class="inline-flex items-center gap-2 cursor-pointer text-sm text-slate-600">
+        <label class="inline-flex items-center gap-2 cursor-pointer text-sm text-slate-600 dark:text-slate-400">
           <input type="radio" name="coord" value="linear" checked class="rounded-full border-slate-300 text-slate-600 focus:ring-slate-400">
           <span id="labelLinear">Linear scale</span>
         </label>
-        <label class="inline-flex items-center gap-2 cursor-pointer text-sm text-slate-600">
+        <label class="inline-flex items-center gap-2 cursor-pointer text-sm text-slate-600 dark:text-slate-400">
           <input type="radio" name="coord" value="log" class="rounded-full border-slate-300 text-slate-600 focus:ring-slate-400">
           <span id="labelLog">Log scale</span>
         </label>
-        <label class="inline-flex items-center gap-2 cursor-pointer text-sm text-slate-600">
+        <label class="inline-flex items-center gap-2 cursor-pointer text-sm text-slate-600 dark:text-slate-400">
           <input type="checkbox" id="showVMBO" class="rounded border-slate-300 text-slate-600 focus:ring-slate-400">
           <span id="labelShowVMBO">Show VMBO-only schools</span>
         </label>
       </div>
     </div>
-    <div id="gemeenteList" class="mt-8 pt-6 border-t border-slate-200">
+    <div id="gemeenteList" class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-600">
       <div class="gemeente-list-header flex flex-wrap items-center gap-4 mb-3">
-        <label class="inline-flex items-center gap-2 cursor-pointer text-sm font-medium text-slate-600">
+        <label class="inline-flex items-center gap-2 cursor-pointer text-sm font-medium text-slate-600 dark:text-slate-400">
           <input type="checkbox" id="selectAll" class="rounded border-slate-300 text-slate-600 focus:ring-slate-400">
           <span id="labelSelectAll">Select all</span>
         </label>
-        <label class="inline-flex items-center gap-2 cursor-pointer text-sm font-medium text-slate-600">
+        <label class="inline-flex items-center gap-2 cursor-pointer text-sm font-medium text-slate-600 dark:text-slate-400">
           <input type="checkbox" id="deselectAll" class="rounded border-slate-300 text-slate-600 focus:ring-slate-400">
           <span id="labelDeselectAll">Deselect all</span>
         </label>
       </div>
       <div id="gemeenteCheckboxes" class="max-h-56 overflow-y-auto flex flex-wrap gap-x-4 gap-y-2"></div>
     </div>
-    <div id="excludedSection" class="mt-8 pt-6 border-t border-slate-200 text-sm text-slate-500"></div>
-    <div id="algorithmSection" class="mt-8 pt-6 border-t border-slate-200 text-sm text-slate-600">
-      <h2 id="algorithmTitle" class="text-base font-semibold text-slate-700 mb-3"></h2>
+    <div id="excludedSection" class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-600 text-sm text-slate-500 dark:text-slate-400"></div>
+    <div id="algorithmSection" class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-600 text-sm text-slate-600 dark:text-slate-400">
+      <h2 id="algorithmTitle" class="text-base font-semibold text-slate-700 dark:text-slate-300 mb-3"></h2>
       <div id="algorithmBody" class="space-y-2 prose prose-slate max-w-none text-sm"></div>
     </div>
-    <div id="disclaimerSection" class="mt-6 pt-4 border-t border-slate-200 text-sm text-slate-500">
-      <h2 id="disclaimerTitle" class="text-base font-semibold text-slate-700 mb-2"></h2>
-      <p id="disclaimerBody" class="text-slate-500"></p>
+    <div id="disclaimerSection" class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-600 text-sm text-slate-500 dark:text-slate-400">
+      <h2 id="disclaimerTitle" class="text-base font-semibold text-slate-700 dark:text-slate-300 mb-2"></h2>
+      <p id="disclaimerBody" class="text-slate-500 dark:text-slate-400"></p>
     </div>
-    <div id="contactSection" class="mt-6 pt-4 border-t border-slate-200 text-sm text-slate-500 pb-4">
-      <h2 id="contactTitle" class="text-base font-semibold text-slate-700 mb-2"></h2>
-      <p class="text-slate-600">
-        <a href="mailto:dewei.zhai@gmail.com" class="text-slate-600 hover:text-slate-800 underline">dewei.zhai@gmail.com</a>
+    <div id="contactSection" class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-600 text-sm text-slate-500 dark:text-slate-400 pb-4">
+      <h2 id="contactTitle" class="text-base font-semibold text-slate-700 dark:text-slate-300 mb-2"></h2>
+      <p class="text-slate-600 dark:text-slate-400">
+        <a href="mailto:dewei.zhai@gmail.com" class="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 underline">dewei.zhai@gmail.com</a>
         &nbsp;·&nbsp;
-        <a href="https://www.linkedin.com/in/zhaidewei/" target="_blank" rel="noopener noreferrer" class="text-slate-600 hover:text-slate-800 underline">LinkedIn</a>
+        <a href="https://www.linkedin.com/in/zhaidewei/" target="_blank" rel="noopener noreferrer" class="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 underline">LinkedIn</a>
       </p>
     </div>
-    <div id="supportSection" class="mt-4 pt-4 border-t border-slate-200 text-sm pb-4">
-      <p class="text-slate-600 mb-2">
+    <div id="supportSection" class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-600 text-sm pb-4">
+      <p class="text-slate-600 dark:text-slate-400 mb-2">
         <a id="supportLink" href="https://ko-fi.com/deweizhai" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-lg bg-amber-500/90 hover:bg-amber-500 px-4 py-2 text-sm font-medium text-white no-underline shadow-sm">Ko-fi</a>
       </p>
-      <p id="supportHint" class="text-slate-500 text-xs"></p>
+      <p id="supportHint" class="text-slate-500 dark:text-slate-400 text-xs"></p>
     </div>
-    <footer id="copyrightSection" class="mt-4 pt-4 border-t border-slate-200 text-xs text-slate-400 pb-8">
+    <footer id="copyrightSection" class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-600 text-xs text-slate-400 dark:text-slate-500 pb-8">
       <p id="copyrightText"></p>
     </footer>
   </div>
@@ -101,7 +109,7 @@
       const excluded = [{"BRIN": "17VF08", "naam": "Xplore Agora Amsterdam", "gemeente": "AMSTERDAM"}, {"BRIN": "20MH01", "naam": "Jac P Thijsse College", "gemeente": "CASTRICUM"}, {"BRIN": "28DH01", "naam": "IJburg College", "gemeente": "AMSTERDAM"}, {"BRIN": "31KZ00", "naam": "Pvo Hoorn", "gemeente": "HOORN"}, {"BRIN": "31LB00", "naam": "Pvo Deventer", "gemeente": "DEVENTER"}];
       const el = document.getElementById('excludedSection');
       if (excluded.length === 0) { el.innerHTML = ''; return; }
-      el.innerHTML = '<h2 id="excludedTitle" class="text-base font-semibold text-slate-700 mb-2"></h2><p id="excludedDesc" class="mb-3 text-slate-500"></p><ul class="list-disc pl-5 max-h-44 overflow-y-auto space-y-1 text-slate-600">' +
+      el.innerHTML = '<h2 id="excludedTitle" class="text-base font-semibold text-slate-700 dark:text-slate-300 mb-2"></h2><p id="excludedDesc" class="mb-3 text-slate-500 dark:text-slate-400"></p><ul class="list-disc pl-5 max-h-44 overflow-y-auto space-y-1 text-slate-600 dark:text-slate-400">' +
         excluded.map(function(s) { return '<li>' + (s.BRIN || '') + ' ' + (s.naam || '') + ' (' + (s.gemeente || '') + ')</li>'; }).join('') + '</ul>';
     })();
   </script>
@@ -111,6 +119,9 @@
     const L = {
       en: {
         labelLanguage: 'Language',
+        labelTheme: 'Theme',
+        labelLight: 'Light',
+        labelDark: 'Dark',
         titleMain: 'AlleSchools · School map: academic level × science focus',
         subtitleBefore: 'Data from DUO. X = academic strength, Y = science share. Dot size = graduation count. ',
         subtitleAfter: ' schools shown.',
@@ -140,6 +151,9 @@
       },
       zh: {
         labelLanguage: '语言',
+        labelTheme: '主题',
+        labelLight: '浅色',
+        labelDark: '深色',
         titleMain: 'AlleSchools · 中学定位图：学术度 × 理科度',
         subtitleBefore: '数据来自DUO，X轴代表学术强度，Y轴代表理科占比，点的大小代表毕业人数。共 ',
         subtitleAfter: ' 所学校。',
@@ -169,6 +183,9 @@
       },
       nl: {
         labelLanguage: 'Taal',
+        labelTheme: 'Thema',
+        labelLight: 'Licht',
+        labelDark: 'Donker',
         titleMain: 'AlleSchools · Schoolkaart: academisch × bèta',
         subtitleBefore: 'Data van DUO. X = academisch niveau, Y = bètandeel. Puntgrootte = aantal geslaagden. ',
         subtitleAfter: ' scholen getoond.',
@@ -230,6 +247,12 @@
       if (labelSelectAll) labelSelectAll.textContent = t('labelSelectAll');
       var labelDeselectAll = document.getElementById('labelDeselectAll');
       if (labelDeselectAll) labelDeselectAll.textContent = t('labelDeselectAll');
+      var labelThemeEl = document.getElementById('labelTheme');
+      if (labelThemeEl) labelThemeEl.textContent = t('labelTheme');
+      var themeLightBtn = document.getElementById('themeLight');
+      if (themeLightBtn) themeLightBtn.textContent = t('labelLight');
+      var themeDarkBtn = document.getElementById('themeDark');
+      if (themeDarkBtn) themeDarkBtn.textContent = t('labelDark');
       var excludedTitle = document.getElementById('excludedTitle');
       if (excludedTitle) excludedTitle.textContent = t('excludedTitle');
       var excludedDesc = document.getElementById('excludedDesc');
@@ -505,6 +528,35 @@
     });
     document.getElementById('langSelect').value = currentLang;
     applyLanguage();
+
+    function isDarkTheme() { return document.documentElement.classList.contains('dark'); }
+    function updateChartTheme(dark) {
+      var grid = dark ? '#475569' : '#e2e8f0';
+      var text = dark ? '#e2e8f0' : '#334155';
+      var tick = dark ? '#94a3b8' : '#64748b';
+      if (chart && chart.options && chart.options.scales) {
+        chart.options.scales.x.grid.color = grid;
+        chart.options.scales.x.ticks.color = tick;
+        chart.options.scales.x.title.color = text;
+        chart.options.scales.y.grid.color = grid;
+        chart.options.scales.y.ticks.color = tick;
+        chart.options.scales.y.title.color = text;
+        if (chart.options.plugins && chart.options.plugins.legend && chart.options.plugins.legend.labels) chart.options.plugins.legend.labels.color = text;
+        chart.update();
+      }
+    }
+    function applyTheme(dark) {
+      document.documentElement.classList.toggle('dark', dark);
+      localStorage.setItem('theme', dark ? 'dark' : 'light');
+      updateChartTheme(dark);
+      var lightBtn = document.getElementById('themeLight');
+      var darkBtn = document.getElementById('themeDark');
+      if (lightBtn) { lightBtn.classList.toggle('bg-slate-200', !dark); lightBtn.classList.toggle('dark:bg-slate-600', dark); }
+      if (darkBtn) { darkBtn.classList.toggle('bg-slate-200', dark); darkBtn.classList.toggle('dark:bg-slate-600', !dark); }
+    }
+    document.getElementById('themeLight').addEventListener('click', function() { applyTheme(false); });
+    document.getElementById('themeDark').addEventListener('click', function() { applyTheme(true); });
+    applyTheme(isDarkTheme());
 
     document.querySelectorAll('input[name="coord"]').forEach(radio => {
       radio.addEventListener('change', () => {
