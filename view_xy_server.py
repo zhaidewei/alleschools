@@ -30,6 +30,12 @@ def load_data():
     rows = []
     with open(CSV_PATH, "r", encoding="utf-8") as f:
         for r in csv.DictReader(f):
+            # 人数：优先用 candidates_total（5 年考生总数），兼容旧 CSV 的 HAVO_geslaagd_total
+            size_raw = r.get("candidates_total") or r.get("HAVO_geslaagd_total") or 0
+            try:
+                size = int(size_raw)
+            except (ValueError, TypeError):
+                size = 0
             rows.append({
                 "BRIN": r["BRIN"],
                 "naam": r["vestigingsnaam"],
@@ -39,6 +45,7 @@ def load_data():
                 "Y_linear": float(r["Y_linear"]),
                 "X_log": float(r["X_log"]),
                 "Y_log": float(r["Y_log"]),
+                "size": size,
             })
     return rows
 
@@ -63,12 +70,14 @@ def build_html(data, excluded=None):
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-800 font-sans antialiased">
-  <div id="wrap" class="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+  <div id="wrap" class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
     <div id="chartWrap" class="mb-8">
       <h1 class="text-xl font-semibold text-slate-800 tracking-tight">学校坐标：VWO通过人数占比（横轴）× 理科占比（纵轴）</h1>
       <p class="mt-1 text-sm text-slate-500">数据来自 DUO 考试人数，近年权重更高。VMBO 学校仅作参考（X=0）。共 <strong id="schoolCount" class="font-medium text-slate-700">0</strong> 所学校。</p>
-      <div class="mt-4 bg-white rounded-xl border border-slate-200/80 shadow-sm p-4 sm:p-5">
-        <canvas id="chart" width="700" height="420" class="w-full"></canvas>
+      <div class="mt-4 bg-white rounded-xl border border-slate-200/80 shadow-sm p-4 sm:p-6">
+        <div class="w-full aspect-[4/3] min-h-[420px]">
+          <canvas id="chart" class="w-full h-full block"></canvas>
+        </div>
       </div>
     </div>
     <div class="controls flex flex-wrap items-center gap-4 sm:gap-6 py-4 px-4 bg-white rounded-xl border border-slate-200/80 shadow-sm">
@@ -117,8 +126,8 @@ def build_html(data, excluded=None):
   </script>
   <script>
     const data = """ + data_js + """;
-    const linear = data.map(d => ({ x: d.X_linear, y: d.Y_linear, label: d.naam, type: d.type, gemeente: d.gemeente }));
-    const log = data.map(d => ({ x: d.X_log, y: d.Y_log, label: d.naam, type: d.type, gemeente: d.gemeente }));
+    const linear = data.map(d => ({ x: d.X_linear, y: d.Y_linear, label: d.naam, type: d.type, gemeente: d.gemeente, size: d.size }));
+    const log = data.map(d => ({ x: d.X_log, y: d.Y_log, label: d.naam, type: d.type, gemeente: d.gemeente, size: d.size }));
 
     let selectedGemeenten = new Set();
 
@@ -129,9 +138,8 @@ def build_html(data, excluded=None):
     }
     function getFilteredPoints(points) {
       const byText = getPointsByTextFilter(points);
-      let result = selectedGemeenten.size === 0
-        ? byText
-        : byText.filter(p => p.gemeente && selectedGemeenten.has(p.gemeente));
+      /* 只显示勾选的 gemeenten：未勾选任何时显示为空，图例仅包含当前勾选项 */
+      let result = byText.filter(p => p.gemeente && selectedGemeenten.has(p.gemeente));
       var showVMBOEl = document.getElementById('showVMBO');
       if (showVMBOEl && !showVMBOEl.checked) result = result.filter(function(p) { return p.type !== 'VMBO'; });
       return result;
@@ -209,18 +217,35 @@ def build_html(data, excluded=None):
       return `hsl(${hue}, ${sat}%, ${light}%)`;
     }
 
+    /** 根据当前可见点的 size 将人数映射为圆点半径（约 4–20px） */
+    function sizeToRadius(points) {
+      const sizes = points.map(p => (p.size != null && p.size > 0) ? p.size : 0).filter(Boolean);
+      if (sizes.length === 0) return () => 8;
+      const minS = Math.min(...sizes);
+      const maxS = Math.max(...sizes);
+      const range = maxS - minS || 1;
+      return function(size) {
+        if (size == null || size <= 0) return 8;
+        return Math.round(4 + 14 * (size - minS) / range);
+      };
+    }
     function makeDatasets(points) {
+      const radiusFn = sizeToRadius(points);
       const byGemeente = {};
       points.forEach(p => {
         const g = p.gemeente || '(未知)';
         if (!byGemeente[g]) byGemeente[g] = [];
-        byGemeente[g].push({ x: p.x, y: p.y, naam: p.label, type: p.type });
+        byGemeente[g].push({
+          x: p.x, y: p.y, naam: p.label, type: p.type,
+          r: radiusFn(p.size),
+          size: p.size
+        });
       });
       const gemeenten = Object.keys(byGemeente).sort();
       return gemeenten.map(g => ({
         label: g,
         data: byGemeente[g],
-        pointRadius: 8,
+        pointRadius: function(ctx) { return ctx.raw.r != null ? ctx.raw.r : 8; },
         backgroundColor: gemeenteToColor(g),
         borderColor: gemeenteToBorderColor(g),
         borderWidth: 1
@@ -233,16 +258,18 @@ def build_html(data, excluded=None):
       options: {
         responsive: true,
         maintainAspectRatio: true,
-        aspectRatio: 700/420,
+        aspectRatio: 4/3,
         plugins: {
-          legend: { position: 'top' },
+          legend: { position: 'bottom' },
           tooltip: {
             callbacks: {
               label: function(ctx) {
                 const p = ctx.raw;
                 const gemeente = ctx.dataset.label || '';
                 const name = p.naam || '';
-                return (gemeente ? gemeente + ' · ' : '') + name + ' — X: ' + p.x.toFixed(2) + ', Y: ' + p.y.toFixed(2);
+                let line = (gemeente ? gemeente + ' · ' : '') + name + ' — X: ' + p.x.toFixed(2) + ', Y: ' + p.y.toFixed(2);
+                if (p.size != null && p.size > 0) line += ' · 5年考生: ' + p.size;
+                return line;
               }
             }
           }

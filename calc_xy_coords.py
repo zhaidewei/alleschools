@@ -181,6 +181,9 @@ def main():
         x_log = math.log10(1.0 + x_linear / 100.0)
         y_log = math.log10(1.0 + y_linear / 100.0)
 
+        # 5 年考生总数（毕业年级人数），用于图表中点的大小
+        candidates_total = sum(data["all_kand"][year] for (_, _, year) in YEAR_COLS)
+
         rows_out.append({
             "BRIN": brin,
             "vestigingsnaam": data["naam"],
@@ -190,10 +193,11 @@ def main():
             "Y_linear": round(y_linear, 2),
             "X_log": round(x_log, 4),
             "Y_log": round(y_log, 4),
+            "candidates_total": candidates_total,
         })
 
     with open(out, "w", encoding="utf-8", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=["BRIN", "vestigingsnaam", "gemeente", "type", "X_linear", "Y_linear", "X_log", "Y_log"])
+        writer = csv.DictWriter(f, fieldnames=["BRIN", "vestigingsnaam", "gemeente", "type", "X_linear", "Y_linear", "X_log", "Y_log", "candidates_total"])
         writer.writeheader()
         writer.writerows(rows_out)
 
