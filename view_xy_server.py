@@ -82,6 +82,10 @@ def build_html(data, excluded=None):
     </div>
     <div class="controls flex flex-wrap items-center gap-4 sm:gap-6 py-4 px-4 bg-white rounded-xl border border-slate-200/80 shadow-sm">
       <div class="flex items-center gap-2">
+        <label class="text-sm font-medium text-slate-600 whitespace-nowrap">学校搜索</label>
+        <input type="text" id="schoolSearch" placeholder="按校名或 BRIN 搜索，匹配项高亮" class="flex-1 min-w-[200px] rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400">
+      </div>
+      <div class="flex items-center gap-2">
         <label class="text-sm font-medium text-slate-600 whitespace-nowrap">Gemeente 过滤</label>
         <input type="text" id="gemeenteFilter" placeholder="不输入显示全部，多个用逗号分隔" class="flex-1 min-w-[180px] rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400">
       </div>
@@ -126,8 +130,8 @@ def build_html(data, excluded=None):
   </script>
   <script>
     const data = """ + data_js + """;
-    const linear = data.map(d => ({ x: d.X_linear, y: d.Y_linear, label: d.naam, type: d.type, gemeente: d.gemeente, size: d.size }));
-    const log = data.map(d => ({ x: d.X_log, y: d.Y_log, label: d.naam, type: d.type, gemeente: d.gemeente, size: d.size }));
+    const linear = data.map(d => ({ x: d.X_linear, y: d.Y_linear, label: d.naam, type: d.type, gemeente: d.gemeente, size: d.size, brin: d.BRIN }));
+    const log = data.map(d => ({ x: d.X_log, y: d.Y_log, label: d.naam, type: d.type, gemeente: d.gemeente, size: d.size, brin: d.BRIN }));
 
     let selectedGemeenten = new Set();
 
@@ -229,27 +233,53 @@ def build_html(data, excluded=None):
         return Math.round(4 + 14 * (size - minS) / range);
       };
     }
+    function getSchoolSearchTerm() {
+      return (document.getElementById('schoolSearch') && document.getElementById('schoolSearch').value || '').trim().toUpperCase();
+    }
+    function pointMatchesSearch(p, searchTerm) {
+      if (!searchTerm) return true;
+      const naam = (p.label || '').toUpperCase();
+      const brin = (p.brin || '').toUpperCase();
+      const gemeente = (p.gemeente || '').toUpperCase();
+      return naam.includes(searchTerm) || brin.includes(searchTerm) || gemeente.includes(searchTerm);
+    }
     function makeDatasets(points) {
       const radiusFn = sizeToRadius(points);
+      const searchTerm = getSchoolSearchTerm();
       const byGemeente = {};
       points.forEach(p => {
         const g = p.gemeente || '(未知)';
         if (!byGemeente[g]) byGemeente[g] = [];
+        const matched = pointMatchesSearch(p, searchTerm);
         byGemeente[g].push({
           x: p.x, y: p.y, naam: p.label, type: p.type,
           r: radiusFn(p.size),
-          size: p.size
+          size: p.size,
+          matched: matched
         });
       });
       const gemeenten = Object.keys(byGemeente).sort();
-      return gemeenten.map(g => ({
-        label: g,
-        data: byGemeente[g],
-        pointRadius: function(ctx) { return ctx.raw.r != null ? ctx.raw.r : 8; },
-        backgroundColor: gemeenteToColor(g),
-        borderColor: gemeenteToBorderColor(g),
-        borderWidth: 1
-      }));
+      return gemeenten.map(g => {
+        const bgColor = gemeenteToColor(g);
+        const borderColorVal = gemeenteToBorderColor(g);
+        return {
+          label: g,
+          data: byGemeente[g],
+          pointRadius: function(ctx) {
+            const r = ctx.raw.r != null ? ctx.raw.r : 8;
+            return ctx.raw.matched ? Math.max(r, r * 1.4 + 2) : r;
+          },
+          backgroundColor: function(ctx) {
+            if (ctx.raw.matched) return bgColor;
+            return 'rgba(180,180,180,0.28)';
+          },
+          borderColor: function(ctx) {
+            if (ctx.raw.matched) return borderColorVal;
+            return 'rgba(160,160,160,0.4)';
+          },
+          borderWidth: function(ctx) { return ctx.raw.matched ? 2.5 : 1; }
+        };
+      });
     }
 
     const chart = new Chart(document.getElementById('chart'), {
@@ -323,6 +353,9 @@ def build_html(data, excluded=None):
       syncSelectAllDeselectAll();
       refreshChart();
     });
+
+    document.getElementById('schoolSearch').addEventListener('input', refreshChart);
+    document.getElementById('schoolSearch').addEventListener('change', refreshChart);
 
     document.getElementById('gemeenteFilter').addEventListener('input', function() {
       renderGemeenteCheckboxes();
