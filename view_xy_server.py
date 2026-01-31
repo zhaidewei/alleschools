@@ -3,9 +3,11 @@
 读取 schools_xy_coords.csv，生成带散点图的 HTML，并在本地启动 HTTP 服务。
 浏览器打开后显示：横轴 VWO 通过人数占比，纵轴 理科占比；可切换线性/对数坐标。
 """
+import argparse
 import csv
 import json
 import os
+import sys
 import webbrowser
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 
@@ -13,6 +15,7 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 CSV_PATH = os.path.join(BASE, "schools_xy_coords.csv")
 EXCLUDED_PATH = os.path.join(BASE, "excluded_schools.json")
 HTML_PATH = os.path.join(BASE, "view_xy.html")
+PUBLIC_INDEX = os.path.join(BASE, "public", "index.html")
 PORT = 8082
 
 
@@ -650,12 +653,25 @@ def build_html(data, excluded=None):
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Generate school map HTML and optionally serve locally.")
+    parser.add_argument("--static", action="store_true", help="Build only: write to public/index.html and exit (for Vercel static deploy).")
+    args = parser.parse_args()
+
     if not os.path.exists(CSV_PATH):
-        print(f"找不到 {CSV_PATH}，请先运行 calc_xy_coords.py")
+        print(f"找不到 {CSV_PATH}，请先运行 calc_xy_coords.py", file=sys.stderr)
         return 1
     data = load_data()
     excluded = load_excluded()
     html = build_html(data, excluded)
+
+    if args.static:
+        out_dir = os.path.dirname(PUBLIC_INDEX)
+        os.makedirs(out_dir, exist_ok=True)
+        with open(PUBLIC_INDEX, "w", encoding="utf-8") as f:
+            f.write(html)
+        print(f"已生成: {PUBLIC_INDEX}")
+        return 0
+
     with open(HTML_PATH, "w", encoding="utf-8") as f:
         f.write(html)
     print(f"已生成: {HTML_PATH}")
@@ -667,6 +683,7 @@ def main():
     print(f"本地服务: {url}")
     webbrowser.open(url)
     server.serve_forever()
+    return 0
 
 
 if __name__ == "__main__":

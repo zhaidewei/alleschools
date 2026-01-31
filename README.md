@@ -59,6 +59,33 @@ python3 view_xy_server.py
 # 浏览器打开 http://localhost:8082
 ```
 
+**仅生成静态 HTML（不启动服务，用于 Vercel 等静态托管）：**
+
+```bash
+python3 view_xy_server.py --static
+# 输出到 public/index.html
+```
+
+---
+
+## 4.1 部署到 Vercel（静态托管）
+
+本项目已配置为用 **Vercel 静态托管** 部署：
+
+1. 将仓库推送到 GitHub/GitLab/Bitbucket，或在 Vercel 导入该仓库。
+2. Vercel 会读取根目录的 `vercel.json`：
+   - **Build Command**：`python3 view_xy_server.py --static`（生成 `public/index.html`）
+   - **Output Directory**：`public`
+3. 部署前请确保仓库内已有 `schools_xy_coords.csv` 和 `excluded_schools.json`（先本地运行 `calc_xy_coords.py` 并提交，或使用 CI 生成）。
+
+**本地预览静态构建：**
+
+```bash
+python3 view_xy_server.py --static
+# 用任意静态服务器打开 public/，例如：
+# python3 -m http.server 8082 --directory public
+```
+
 ---
 
 ## 5. 数据源与 BRIN 说明
@@ -154,6 +181,7 @@ awk -F';' 'NR==1 {print; next} toupper($11)==toupper("Amstelveen") {print}' vest
 | `calc_xy_coords.py` | 从 duo_examen_raw_all 计算 X/Y → `schools_xy_coords.csv` |
 | `schools_xy_coords.csv` | 学校坐标（BRIN、校名、gemeente、type、X_linear、Y_linear、X_log、Y_log） |
 | `excluded_schools.json` | 样本过少被排除的学校列表（由 calc_xy_coords 生成） |
-| `view_xy_server.py` | 本地 HTTP 服务，提供散点图页面 |
-| `view_xy.html` | 散点图前端模板 |
+| `view_xy_server.py` | 本地 HTTP 服务 / 静态构建（`--static` → `public/index.html`） |
+| `view_xy.html` | 散点图前端模板（本地开发时生成） |
+| `vercel.json` | Vercel 静态托管配置（buildCommand + outputDirectory） |
 | `README.md` | 本文档（合并原有多份 Markdown） |
