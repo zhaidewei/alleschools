@@ -51,54 +51,67 @@ def build_html(data, excluded=None):
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>学校坐标：VWO通过人数占比 × 理科占比</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body { font-family: system-ui, sans-serif; margin: 24px; background: #f8f9fa; }
-    h1 { font-size: 1.25rem; }
-    #wrap { max-width: 720px; }
-    #chartWrap { margin-bottom: 20px; }
-    canvas { background: #fff; border-radius: 8px; display: block; }
-    .controls { margin: 16px 0; }
-    .controls label { margin-right: 12px; }
-    #gemeenteList { margin-top: 16px; border-top: 1px solid #ddd; padding-top: 12px; }
-    .gemeente-list-header { margin-bottom: 8px; font-weight: 600; }
-    .gemeente-list-header label { margin-right: 16px; cursor: pointer; font-weight: normal; }
-    #gemeenteCheckboxes { max-height: 240px; overflow-y: auto; display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 8px; }
-    #gemeenteCheckboxes label { cursor: pointer; font-weight: normal; display: inline-flex; align-items: center; gap: 4px; }
-    #excludedSection { margin-top: 24px; padding-top: 16px; border-top: 1px solid #ddd; color: #555; font-size: 0.9rem; }
-    #excludedSection h2 { font-size: 1rem; margin-bottom: 8px; }
-    #excludedSection ul { margin: 0; padding-left: 20px; max-height: 180px; overflow-y: auto; }
-  </style>
+  <script>
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
-<body>
-  <div id="wrap">
-    <div id="chartWrap">
-      <h1>学校坐标：VWO通过人数占比（横轴）× 理科占比（纵轴）</h1>
-      <p style="color:#666; font-size:0.9rem;">数据来自 DUO 考试人数，近年权重更高。VMBO 学校仅作参考（X=0）。共 <strong id="schoolCount">0</strong> 所学校。</p>
-      <canvas id="chart" width="700" height="420"></canvas>
-    </div>
-    <div class="controls">
-      <label>Gemeente 过滤: <input type="text" id="gemeenteFilter" placeholder="不输入显示全部，多个用逗号分隔" style="margin-right:12px;"></label>
-      <label><input type="radio" name="coord" value="linear" checked> 线性坐标</label>
-      <label><input type="radio" name="coord" value="log"> 对数坐标</label>
-      <label style="margin-left:12px;"><input type="checkbox" id="showVMBO"> 显示纯 VMBO 学校</label>
-    </div>
-    <div id="gemeenteList">
-      <div class="gemeente-list-header">
-        <label><input type="checkbox" id="selectAll"> 全选</label>
-        <label><input type="checkbox" id="deselectAll"> 全部取消</label>
+<body class="min-h-screen bg-slate-50 text-slate-800 font-sans antialiased">
+  <div id="wrap" class="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+    <div id="chartWrap" class="mb-8">
+      <h1 class="text-xl font-semibold text-slate-800 tracking-tight">学校坐标：VWO通过人数占比（横轴）× 理科占比（纵轴）</h1>
+      <p class="mt-1 text-sm text-slate-500">数据来自 DUO 考试人数，近年权重更高。VMBO 学校仅作参考（X=0）。共 <strong id="schoolCount" class="font-medium text-slate-700">0</strong> 所学校。</p>
+      <div class="mt-4 bg-white rounded-xl border border-slate-200/80 shadow-sm p-4 sm:p-5">
+        <canvas id="chart" width="700" height="420" class="w-full"></canvas>
       </div>
-      <div id="gemeenteCheckboxes"></div>
     </div>
-    <div id="excludedSection"></div>
+    <div class="controls flex flex-wrap items-center gap-4 sm:gap-6 py-4 px-4 bg-white rounded-xl border border-slate-200/80 shadow-sm">
+      <div class="flex items-center gap-2">
+        <label class="text-sm font-medium text-slate-600 whitespace-nowrap">Gemeente 过滤</label>
+        <input type="text" id="gemeenteFilter" placeholder="不输入显示全部，多个用逗号分隔" class="flex-1 min-w-[180px] rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400">
+      </div>
+      <div class="flex flex-wrap items-center gap-4">
+        <label class="inline-flex items-center gap-2 cursor-pointer text-sm text-slate-600">
+          <input type="radio" name="coord" value="linear" checked class="rounded-full border-slate-300 text-slate-600 focus:ring-slate-400">
+          <span>线性坐标</span>
+        </label>
+        <label class="inline-flex items-center gap-2 cursor-pointer text-sm text-slate-600">
+          <input type="radio" name="coord" value="log" class="rounded-full border-slate-300 text-slate-600 focus:ring-slate-400">
+          <span>对数坐标</span>
+        </label>
+        <label class="inline-flex items-center gap-2 cursor-pointer text-sm text-slate-600">
+          <input type="checkbox" id="showVMBO" class="rounded border-slate-300 text-slate-600 focus:ring-slate-400">
+          <span>显示纯 VMBO 学校</span>
+        </label>
+      </div>
+    </div>
+    <div id="gemeenteList" class="mt-8 pt-6 border-t border-slate-200">
+      <div class="gemeente-list-header flex flex-wrap items-center gap-4 mb-3">
+        <label class="inline-flex items-center gap-2 cursor-pointer text-sm font-medium text-slate-600">
+          <input type="checkbox" id="selectAll" class="rounded border-slate-300 text-slate-600 focus:ring-slate-400">
+          <span>全选</span>
+        </label>
+        <label class="inline-flex items-center gap-2 cursor-pointer text-sm font-medium text-slate-600">
+          <input type="checkbox" id="deselectAll" class="rounded border-slate-300 text-slate-600 focus:ring-slate-400">
+          <span>全部取消</span>
+        </label>
+      </div>
+      <div id="gemeenteCheckboxes" class="max-h-56 overflow-y-auto flex flex-wrap gap-x-4 gap-y-2"></div>
+    </div>
+    <div id="excludedSection" class="mt-8 pt-6 border-t border-slate-200 text-sm text-slate-500"></div>
   </div>
   <script>
     (function() {
       const excluded = """ + excluded_js + """;
       const el = document.getElementById('excludedSection');
       if (excluded.length === 0) { el.innerHTML = ''; return; }
-      el.innerHTML = '<h2>因数据点过少未纳入图表的学校</h2><p style="margin-bottom:8px;">以下学校因 HAVO/VWO 考生数过少（5 年合计 &lt; 20）未参与坐标计算，故未出现在上图中。</p><ul>' +
+      el.innerHTML = '<h2 class="text-base font-semibold text-slate-700 mb-2">因数据点过少未纳入图表的学校</h2><p class="mb-3 text-slate-500">以下学校因 HAVO/VWO 考生数过少（5 年合计 &lt; 20）未参与坐标计算，故未出现在上图中。</p><ul class="list-disc pl-5 max-h-44 overflow-y-auto space-y-1 text-slate-600">' +
         excluded.map(function(s) { return '<li>' + (s.BRIN || '') + ' ' + (s.naam || '') + ' (' + (s.gemeente || '') + ')</li>'; }).join('') + '</ul>';
     })();
   </script>
@@ -137,9 +150,10 @@ def build_html(data, excluded=None):
       container.innerHTML = '';
       list.forEach(g => {
         const label = document.createElement('label');
+        label.className = 'inline-flex items-center gap-2 cursor-pointer text-sm text-slate-600 hover:text-slate-800';
         const cb = document.createElement('input');
         cb.type = 'checkbox';
-        cb.className = 'gemeente-cb';
+        cb.className = 'gemeente-cb rounded border-slate-300 text-slate-600 focus:ring-slate-400';
         cb.dataset.gemeente = g;
         cb.checked = selectedGemeenten.has(g);
         cb.addEventListener('change', () => {
