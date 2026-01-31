@@ -59,7 +59,7 @@ def build_html(data, excluded=None):
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>学校坐标：VWO通过人数占比 × 理科占比</title>
+  <title>School coordinates: VWO share × Science share</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
@@ -71,9 +71,17 @@ def build_html(data, excluded=None):
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-800 font-sans antialiased">
   <div id="wrap" class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+    <div class="flex justify-end mb-2">
+      <label id="labelLanguage" class="text-sm font-medium text-slate-600 mr-2">Language</label>
+      <select id="langSelect" class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-800 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400">
+        <option value="en">English</option>
+        <option value="zh">中文</option>
+        <option value="nl">Nederlands</option>
+      </select>
+    </div>
     <div id="chartWrap" class="mb-8">
-      <h1 class="text-xl font-semibold text-slate-800 tracking-tight">学校坐标：VWO通过人数占比（横轴）× 理科占比（纵轴）</h1>
-      <p class="mt-1 text-sm text-slate-500">数据来自 DUO 考试人数，近年权重更高。VMBO 学校仅作参考（X=0）。共 <strong id="schoolCount" class="font-medium text-slate-700">0</strong> 所学校。</p>
+      <h1 id="titleMain" class="text-xl font-semibold text-slate-800 tracking-tight">School coordinates: VWO share (X) × Science share (Y)</h1>
+      <p id="subtitleMain" class="mt-1 text-sm text-slate-500">Data from DUO exam counts, recent years weighted higher. VMBO schools for reference (X=0). <strong id="schoolCount" class="font-medium text-slate-700">0</strong> schools shown.</p>
       <div class="mt-4 bg-white rounded-xl border border-slate-200/80 shadow-sm p-4 sm:p-6">
         <div class="w-full aspect-[4/3] min-h-[420px]">
           <canvas id="chart" class="w-full h-full block"></canvas>
@@ -82,25 +90,25 @@ def build_html(data, excluded=None):
     </div>
     <div class="controls flex flex-wrap items-center gap-4 sm:gap-6 py-4 px-4 bg-white rounded-xl border border-slate-200/80 shadow-sm">
       <div class="flex items-center gap-2">
-        <label class="text-sm font-medium text-slate-600 whitespace-nowrap">学校搜索</label>
-        <input type="text" id="schoolSearch" placeholder="按校名或 BRIN 搜索，匹配项高亮" class="flex-1 min-w-[200px] rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400">
+        <label id="labelSchoolSearch" class="text-sm font-medium text-slate-600 whitespace-nowrap">School search</label>
+        <input type="text" id="schoolSearch" placeholder="Search by name or BRIN, matches highlighted" class="flex-1 min-w-[200px] rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400">
       </div>
       <div class="flex items-center gap-2">
-        <label class="text-sm font-medium text-slate-600 whitespace-nowrap">Gemeente 过滤</label>
-        <input type="text" id="gemeenteFilter" placeholder="不输入显示全部，多个用逗号分隔" class="flex-1 min-w-[180px] rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400">
+        <label id="labelGemeente" class="text-sm font-medium text-slate-600 whitespace-nowrap">Gemeente filter</label>
+        <input type="text" id="gemeenteFilter" placeholder="Leave empty for all, comma for multiple" class="flex-1 min-w-[180px] rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400">
       </div>
       <div class="flex flex-wrap items-center gap-4">
         <label class="inline-flex items-center gap-2 cursor-pointer text-sm text-slate-600">
           <input type="radio" name="coord" value="linear" checked class="rounded-full border-slate-300 text-slate-600 focus:ring-slate-400">
-          <span>线性坐标</span>
+          <span id="labelLinear">Linear scale</span>
         </label>
         <label class="inline-flex items-center gap-2 cursor-pointer text-sm text-slate-600">
           <input type="radio" name="coord" value="log" class="rounded-full border-slate-300 text-slate-600 focus:ring-slate-400">
-          <span>对数坐标</span>
+          <span id="labelLog">Log scale</span>
         </label>
         <label class="inline-flex items-center gap-2 cursor-pointer text-sm text-slate-600">
           <input type="checkbox" id="showVMBO" class="rounded border-slate-300 text-slate-600 focus:ring-slate-400">
-          <span>显示纯 VMBO 学校</span>
+          <span id="labelShowVMBO">Show VMBO-only schools</span>
         </label>
       </div>
     </div>
@@ -108,11 +116,11 @@ def build_html(data, excluded=None):
       <div class="gemeente-list-header flex flex-wrap items-center gap-4 mb-3">
         <label class="inline-flex items-center gap-2 cursor-pointer text-sm font-medium text-slate-600">
           <input type="checkbox" id="selectAll" class="rounded border-slate-300 text-slate-600 focus:ring-slate-400">
-          <span>全选</span>
+          <span id="labelSelectAll">Select all</span>
         </label>
         <label class="inline-flex items-center gap-2 cursor-pointer text-sm font-medium text-slate-600">
           <input type="checkbox" id="deselectAll" class="rounded border-slate-300 text-slate-600 focus:ring-slate-400">
-          <span>全部取消</span>
+          <span id="labelDeselectAll">Deselect all</span>
         </label>
       </div>
       <div id="gemeenteCheckboxes" class="max-h-56 overflow-y-auto flex flex-wrap gap-x-4 gap-y-2"></div>
@@ -124,12 +132,125 @@ def build_html(data, excluded=None):
       const excluded = """ + excluded_js + """;
       const el = document.getElementById('excludedSection');
       if (excluded.length === 0) { el.innerHTML = ''; return; }
-      el.innerHTML = '<h2 class="text-base font-semibold text-slate-700 mb-2">因数据点过少未纳入图表的学校</h2><p class="mb-3 text-slate-500">以下学校因 HAVO/VWO 考生数过少（5 年合计 &lt; 20）未参与坐标计算，故未出现在上图中。</p><ul class="list-disc pl-5 max-h-44 overflow-y-auto space-y-1 text-slate-600">' +
+      el.innerHTML = '<h2 id="excludedTitle" class="text-base font-semibold text-slate-700 mb-2"></h2><p id="excludedDesc" class="mb-3 text-slate-500"></p><ul class="list-disc pl-5 max-h-44 overflow-y-auto space-y-1 text-slate-600">' +
         excluded.map(function(s) { return '<li>' + (s.BRIN || '') + ' ' + (s.naam || '') + ' (' + (s.gemeente || '') + ')</li>'; }).join('') + '</ul>';
     })();
   </script>
   <script>
     const data = """ + data_js + """;
+    let currentLang = localStorage.getItem('schools-lang') || 'en';
+    const L = {
+      en: {
+        labelLanguage: 'Language',
+        titleMain: 'School coordinates: VWO share (X) × Science share (Y)',
+        subtitleBefore: 'Data from DUO exam counts, recent years weighted higher. VMBO schools for reference (X=0). ',
+        subtitleAfter: ' schools shown.',
+        labelSchoolSearch: 'School search',
+        schoolSearchPlaceholder: 'Search by name or BRIN, matches highlighted',
+        labelGemeente: 'Gemeente filter',
+        gemeentePlaceholder: 'Leave empty for all, comma for multiple',
+        labelLinear: 'Linear scale',
+        labelLog: 'Log scale',
+        labelShowVMBO: 'Show VMBO-only schools',
+        labelSelectAll: 'Select all',
+        labelDeselectAll: 'Deselect all',
+        excludedTitle: 'Schools excluded (too few data points)',
+        excludedDesc: 'The following schools were not included in the chart because HAVO/VWO exam candidates (5-year total) are below 20.',
+        axisXLinear: 'VWO share (%) — 100% most academic',
+        axisXLog: 'VWO share (log10(1+x/100))',
+        axisYLinear: 'Science share (%)',
+        axisYLog: 'Science share (log10(1+y/100))',
+        tooltipCandidates: '5-yr candidates'
+      },
+      zh: {
+        labelLanguage: '语言',
+        titleMain: '学校坐标：VWO通过人数占比（横轴）× 理科占比（纵轴）',
+        subtitleBefore: '数据来自 DUO 考试人数，近年权重更高。VMBO 学校仅作参考（X=0）。共 ',
+        subtitleAfter: ' 所学校。',
+        labelSchoolSearch: '学校搜索',
+        schoolSearchPlaceholder: '按校名或 BRIN 搜索，匹配项高亮',
+        labelGemeente: 'Gemeente 过滤',
+        gemeentePlaceholder: '不输入显示全部，多个用逗号分隔',
+        labelLinear: '线性坐标',
+        labelLog: '对数坐标',
+        labelShowVMBO: '显示纯 VMBO 学校',
+        labelSelectAll: '全选',
+        labelDeselectAll: '全部取消',
+        excludedTitle: '因数据点过少未纳入图表的学校',
+        excludedDesc: '以下学校因 HAVO/VWO 考生数过少（5 年合计 < 20）未参与坐标计算，故未出现在上图中。',
+        axisXLinear: 'VWO 通过人数占比 (%) — 100% 学术性最强',
+        axisXLog: 'VWO 通过人数占比 (log10(1+x/100))',
+        axisYLinear: '理科占比 (%)',
+        axisYLog: '理科占比 (log10(1+y/100))',
+        tooltipCandidates: '5年考生'
+      },
+      nl: {
+        labelLanguage: 'Taal',
+        titleMain: 'Schoolcoördinaten: VWO-aandeel (X) × bètandeel (Y)',
+        subtitleBefore: 'Data van DUO-examencijfers, recente jaren zwaarder. VMBO-scholen ter referentie (X=0). ',
+        subtitleAfter: ' scholen getoond.',
+        labelSchoolSearch: 'Zoek school',
+        schoolSearchPlaceholder: 'Zoek op naam of BRIN, treffers gemarkeerd',
+        labelGemeente: 'Gemeentefilter',
+        gemeentePlaceholder: 'Leeg = alle, komma voor meerdere',
+        labelLinear: 'Lineaire schaal',
+        labelLog: 'Logschaal',
+        labelShowVMBO: 'Toon alleen VMBO-scholen',
+        labelSelectAll: 'Alles selecteren',
+        labelDeselectAll: 'Alles deselecteren',
+        excludedTitle: 'Scholen uitgesloten (te weinig datapunten)',
+        excludedDesc: 'De volgende scholen zijn niet in de grafiek opgenomen omdat HAVO/VWO-examenkandidaten (5-jaar totaal) onder 20 liggen.',
+        axisXLinear: 'VWO-aandeel (%) — 100% meest academisch',
+        axisXLog: 'VWO-aandeel (log10(1+x/100))',
+        axisYLinear: 'Bètandeel (%)',
+        axisYLog: 'Bètandeel (log10(1+y/100))',
+        tooltipCandidates: '5-jaar kandidaten'
+      }
+    };
+    function t(key) { return (L[currentLang] || L.en)[key] || L.en[key] || key; }
+    function applyLanguage() {
+      var langSel = document.getElementById('langSelect');
+      currentLang = (langSel && langSel.value) || 'en';
+      if (langSel) langSel.value = currentLang;
+      localStorage.setItem('schools-lang', currentLang);
+      var labelLanguage = document.getElementById('labelLanguage');
+      if (labelLanguage) labelLanguage.textContent = t('labelLanguage');
+      var countEl = document.getElementById('schoolCount');
+      var count = countEl ? countEl.textContent : '0';
+      document.title = t('titleMain');
+      var titleMain = document.getElementById('titleMain');
+      if (titleMain) titleMain.textContent = t('titleMain');
+      var subtitleMain = document.getElementById('subtitleMain');
+      if (subtitleMain) subtitleMain.innerHTML = t('subtitleBefore') + '<strong id="schoolCount">' + count + '</strong>' + t('subtitleAfter');
+      var labelSchoolSearch = document.getElementById('labelSchoolSearch');
+      if (labelSchoolSearch) labelSchoolSearch.textContent = t('labelSchoolSearch');
+      var schoolSearch = document.getElementById('schoolSearch');
+      if (schoolSearch) schoolSearch.placeholder = t('schoolSearchPlaceholder');
+      var labelGemeente = document.getElementById('labelGemeente');
+      if (labelGemeente) labelGemeente.textContent = t('labelGemeente');
+      var gemeenteFilter = document.getElementById('gemeenteFilter');
+      if (gemeenteFilter) gemeenteFilter.placeholder = t('gemeentePlaceholder');
+      var labelLinear = document.getElementById('labelLinear');
+      if (labelLinear) labelLinear.textContent = t('labelLinear');
+      var labelLog = document.getElementById('labelLog');
+      if (labelLog) labelLog.textContent = t('labelLog');
+      var labelShowVMBO = document.getElementById('labelShowVMBO');
+      if (labelShowVMBO) labelShowVMBO.textContent = t('labelShowVMBO');
+      var labelSelectAll = document.getElementById('labelSelectAll');
+      if (labelSelectAll) labelSelectAll.textContent = t('labelSelectAll');
+      var labelDeselectAll = document.getElementById('labelDeselectAll');
+      if (labelDeselectAll) labelDeselectAll.textContent = t('labelDeselectAll');
+      var excludedTitle = document.getElementById('excludedTitle');
+      if (excludedTitle) excludedTitle.textContent = t('excludedTitle');
+      var excludedDesc = document.getElementById('excludedDesc');
+      if (excludedDesc) excludedDesc.textContent = t('excludedDesc');
+      if (typeof chart !== 'undefined') {
+        var isLog = document.querySelector('input[name="coord"]:checked') && document.querySelector('input[name="coord"]:checked').value === 'log';
+        chart.options.scales.x.title.text = isLog ? t('axisXLog') : t('axisXLinear');
+        chart.options.scales.y.title.text = isLog ? t('axisYLog') : t('axisYLinear');
+        chart.update();
+      }
+    }
     const linear = data.map(d => ({ x: d.X_linear, y: d.Y_linear, label: d.naam, type: d.type, gemeente: d.gemeente, size: d.size, brin: d.BRIN }));
     const log = data.map(d => ({ x: d.X_log, y: d.Y_log, label: d.naam, type: d.type, gemeente: d.gemeente, size: d.size, brin: d.BRIN }));
 
@@ -294,7 +415,7 @@ def build_html(data, excluded=None):
                 const gemeente = ctx.dataset.label || '';
                 const name = p.naam || '';
                 let line = (gemeente ? gemeente + ' · ' : '') + name + ' — X: ' + p.x.toFixed(2) + ', Y: ' + p.y.toFixed(2);
-                if (p.size != null && p.size > 0) line += ' · 5年考生: ' + p.size;
+                if (p.size != null && p.size > 0) line += ' · ' + t('tooltipCandidates') + ': ' + p.size;
                 return line;
               }
             }
@@ -302,7 +423,7 @@ def build_html(data, excluded=None):
         },
         scales: {
           x: {
-            title: { display: true, text: 'VWO 通过人数占比 (%) — 100% 学术性最强' },
+            title: { display: true, text: 'VWO share (%)' },
             min: -5,
             max: 105,
             grace: '0%',
@@ -310,7 +431,7 @@ def build_html(data, excluded=None):
             ticks: { stepSize: 10 }
           },
           y: {
-            title: { display: true, text: '理科占比 (%)' },
+            title: { display: true, text: 'Science share (%)' },
             min: -5,
             max: 105,
             grace: '0%',
@@ -365,11 +486,19 @@ def build_html(data, excluded=None):
     var showVMBOEl = document.getElementById('showVMBO');
     if (showVMBOEl) showVMBOEl.addEventListener('change', refreshChart);
 
+    document.getElementById('langSelect').addEventListener('change', function() {
+      currentLang = this.value;
+      localStorage.setItem('schools-lang', currentLang);
+      applyLanguage();
+    });
+    document.getElementById('langSelect').value = currentLang;
+    applyLanguage();
+
     document.querySelectorAll('input[name="coord"]').forEach(radio => {
       radio.addEventListener('change', () => {
         const isLog = radio.value === 'log';
-        chart.options.scales.x.title.text = isLog ? 'VWO 通过人数占比 (log10(1+x/100))' : 'VWO 通过人数占比 (%) — 100% 学术性最强';
-        chart.options.scales.y.title.text = isLog ? '理科占比 (log10(1+y/100))' : '理科占比 (%)';
+        chart.options.scales.x.title.text = isLog ? t('axisXLog') : t('axisXLinear');
+        chart.options.scales.y.title.text = isLog ? t('axisYLog') : t('axisYLinear');
         if (isLog) {
           chart.options.scales.x.min = -0.02;
           chart.options.scales.x.max = 0.35;
