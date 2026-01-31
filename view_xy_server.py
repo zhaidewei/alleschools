@@ -62,7 +62,7 @@ def build_html(data, excluded=None):
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AlleSchools · School map: academic level × science focus</title>
+  <title>Dutch secondary school map (excluding international schools): academic level × science focus</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
@@ -91,7 +91,7 @@ def build_html(data, excluded=None):
       </div>
     </div>
     <div id="chartWrap" class="mb-8">
-      <h1 id="titleMain" class="text-xl font-semibold text-slate-800 dark:text-slate-100 tracking-tight"><a href="/" class="text-slate-800 dark:text-slate-100 hover:text-slate-600 dark:hover:text-slate-300">AlleSchools</a> · School map: academic level × science focus</h1>
+      <h1 id="titleMain" class="text-xl font-semibold text-slate-800 dark:text-slate-100 tracking-tight"><a href="/" class="text-slate-800 dark:text-slate-100 hover:text-slate-600 dark:hover:text-slate-300">Dutch secondary school map (excluding international schools)</a>: academic level × science focus</h1>
       <p id="subtitleMain" class="mt-1 text-sm text-slate-500 dark:text-slate-400">Data from DUO. X = academic strength, Y = science share. Dot size = graduation count. <strong id="schoolCount" class="font-medium text-slate-700 dark:text-slate-300">0</strong> schools shown.</p>
       <div class="mt-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-600 shadow-sm p-4 sm:p-6">
         <div class="w-full aspect-[4/3] min-h-[420px]">
@@ -105,7 +105,7 @@ def build_html(data, excluded=None):
         <input type="text" id="schoolSearch" placeholder="Search by name or BRIN, matches highlighted" class="flex-1 min-w-[200px] rounded-lg border border-slate-300 dark:border-slate-500 px-3 py-2 text-sm text-slate-800 dark:text-slate-200 dark:bg-slate-700 placeholder-slate-400 dark:placeholder-slate-500 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400">
       </div>
       <div class="flex items-center gap-2">
-        <label id="labelGemeente" class="text-sm font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">Gemeente filter</label>
+        <label id="labelGemeente" class="text-sm font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">City hall filter</label>
         <input type="text" id="gemeenteFilter" placeholder="Leave empty for all, comma for multiple" class="flex-1 min-w-[180px] rounded-lg border border-slate-300 dark:border-slate-500 px-3 py-2 text-sm text-slate-800 dark:text-slate-200 dark:bg-slate-700 placeholder-slate-400 dark:placeholder-slate-500 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400">
       </div>
       <div class="flex flex-wrap items-center gap-4">
@@ -181,12 +181,12 @@ def build_html(data, excluded=None):
         labelTheme: 'Theme',
         labelLight: 'Light',
         labelDark: 'Dark',
-        titleMain: 'AlleSchools · School map: academic level × science focus',
+        titleMain: 'Dutch secondary school map (excluding international schools): academic level × science focus',
         subtitleBefore: 'Data from DUO. X = academic strength, Y = science share. Dot size = graduation count. ',
         subtitleAfter: ' schools shown.',
         labelSchoolSearch: 'School search',
         schoolSearchPlaceholder: 'Search by name or BRIN, matches highlighted',
-        labelGemeente: 'Gemeente filter',
+        labelGemeente: 'City hall filter',
         gemeentePlaceholder: 'Leave empty for all, comma for multiple',
         labelLinear: 'Linear scale',
         labelLog: 'Log scale',
@@ -213,12 +213,12 @@ def build_html(data, excluded=None):
         labelTheme: '主题',
         labelLight: '浅色',
         labelDark: '深色',
-        titleMain: 'AlleSchools · 中学定位图：学术度 × 理科度',
+        titleMain: '荷兰中学定位图(不含国际学校)：学术度 × 理科度',
         subtitleBefore: '数据来自DUO，X轴代表学术强度，Y轴代表理科占比，点的大小代表毕业人数。共 ',
         subtitleAfter: ' 所学校。',
         labelSchoolSearch: '学校搜索',
         schoolSearchPlaceholder: '按校名或 BRIN 搜索，匹配项高亮',
-        labelGemeente: 'Gemeente 过滤',
+        labelGemeente: '市政厅 过滤',
         gemeentePlaceholder: '不输入显示全部，多个用逗号分隔',
         labelLinear: '线性坐标',
         labelLog: '对数坐标',
@@ -245,7 +245,7 @@ def build_html(data, excluded=None):
         labelTheme: 'Thema',
         labelLight: 'Licht',
         labelDark: 'Donker',
-        titleMain: 'AlleSchools · Schoolkaart: academisch × bèta',
+        titleMain: 'Nederlandse schoolkaart voortgezet onderwijs (zonder internationale scholen): academisch × bèta',
         subtitleBefore: 'Data van DUO. X = academisch niveau, Y = bètandeel. Puntgrootte = aantal geslaagden. ',
         subtitleAfter: ' scholen getoond.',
         labelSchoolSearch: 'Zoek school',
