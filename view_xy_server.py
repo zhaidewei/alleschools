@@ -261,7 +261,6 @@ def build_html(data, excluded=None):
       const gemeenten = Object.keys(byGemeente).sort();
       return gemeenten.map(g => {
         const bgColor = gemeenteToColor(g);
-        const borderColorVal = gemeenteToBorderColor(g);
         return {
           label: g,
           data: byGemeente[g],
@@ -273,11 +272,8 @@ def build_html(data, excluded=None):
             if (ctx.raw.matched) return bgColor;
             return 'rgba(180,180,180,0.28)';
           },
-          borderColor: function(ctx) {
-            if (ctx.raw.matched) return borderColorVal;
-            return 'rgba(160,160,160,0.4)';
-          },
-          borderWidth: function(ctx) { return ctx.raw.matched ? 2.5 : 1; }
+          borderColor: 'transparent',
+          borderWidth: 0
         };
       });
     }
