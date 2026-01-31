@@ -62,7 +62,8 @@ def build_html(data, excluded=None):
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dutch secondary school map (excluding international schools): academic level × science focus</title>
+  <title>🏫 Dutch secondary school map: academic level × science focus</title>
+  <link rel="icon" href="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ctext%20y%3D%22.9em%22%20font-size%3D%2290%22%3E%F0%9F%8E%AB%3C%2Ftext%3E%3C%2Fsvg%3E">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
@@ -72,6 +73,7 @@ def build_html(data, excluded=None):
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <script>document.documentElement.classList.toggle('dark', localStorage.getItem('theme')==='dark');</script>
+  <style>.chartjs-tooltip { max-width: min(320px, 90vw); overflow-wrap: break-word; word-break: break-word; }</style>
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-200 font-sans antialiased">
   <div id="wrap" class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
@@ -91,8 +93,8 @@ def build_html(data, excluded=None):
       </div>
     </div>
     <div id="chartWrap" class="mb-8">
-      <h1 id="titleMain" class="text-xl font-semibold text-slate-800 dark:text-slate-100 tracking-tight"><a href="/" class="text-slate-800 dark:text-slate-100 hover:text-slate-600 dark:hover:text-slate-300">Dutch secondary school map (excluding international schools)</a>: academic level × science focus</h1>
-      <p id="subtitleMain" class="mt-1 text-sm text-slate-500 dark:text-slate-400">Data from DUO. X = academic strength, Y = science share. Dot size = graduation count. <strong id="schoolCount" class="font-medium text-slate-700 dark:text-slate-300">0</strong> schools shown.</p>
+      <h1 id="titleMain" class="text-xl font-semibold text-slate-800 dark:text-slate-100 tracking-tight"><a href="/" class="text-slate-800 dark:text-slate-100 hover:text-slate-600 dark:hover:text-slate-300">🏫 Dutch secondary school map</a>: academic level × science focus</h1>
+      <p id="subtitleMain" class="mt-1 text-sm text-slate-500 dark:text-slate-400">Data from DUO (excluding international schools). X = academic strength, Y = science share. Dot size = graduation count. <strong id="schoolCount" class="font-medium text-slate-700 dark:text-slate-300">0</strong> schools shown.</p>
       <div class="mt-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-600 shadow-sm p-4 sm:p-6">
         <div class="w-full aspect-[4/3] min-h-[420px]">
           <canvas id="chart" class="w-full h-full block"></canvas>
@@ -119,7 +121,7 @@ def build_html(data, excluded=None):
         </label>
         <label class="inline-flex items-center gap-2 cursor-pointer text-sm text-slate-600 dark:text-slate-400">
           <input type="checkbox" id="showVMBO" class="rounded border-slate-300 text-slate-600 focus:ring-slate-400">
-          <span id="labelShowVMBO">Show VMBO-only schools</span>
+          <span id="labelShowVMBO">Include VMBO-only schools</span>
         </label>
       </div>
     </div>
@@ -181,8 +183,8 @@ def build_html(data, excluded=None):
         labelTheme: 'Theme',
         labelLight: 'Light',
         labelDark: 'Dark',
-        titleMain: 'Dutch secondary school map (excluding international schools): academic level × science focus',
-        subtitleBefore: 'Data from DUO. X = academic strength, Y = science share. Dot size = graduation count. ',
+        titleMain: '🏫 Dutch secondary school map: academic level × science focus',
+        subtitleBefore: 'Data from DUO (excluding international schools). X = academic strength, Y = science share. Dot size = graduation count. ',
         subtitleAfter: ' schools shown.',
         labelSchoolSearch: 'School search',
         schoolSearchPlaceholder: 'Search by name or BRIN, matches highlighted',
@@ -190,7 +192,7 @@ def build_html(data, excluded=None):
         gemeentePlaceholder: 'Leave empty for all, comma for multiple',
         labelLinear: 'Linear scale',
         labelLog: 'Log scale',
-        labelShowVMBO: 'Show VMBO-only schools',
+        labelShowVMBO: 'Include VMBO-only schools',
         labelSelectAll: 'Select all',
         labelDeselectAll: 'Deselect all',
         excludedTitle: 'Schools excluded (too few data points)',
@@ -213,8 +215,8 @@ def build_html(data, excluded=None):
         labelTheme: '主题',
         labelLight: '浅色',
         labelDark: '深色',
-        titleMain: '荷兰中学定位图(不含国际学校)：学术度 × 理科度',
-        subtitleBefore: '数据来自DUO，X轴代表学术强度，Y轴代表理科占比，点的大小代表毕业人数。共 ',
+        titleMain: '🏫荷兰中学定位图：学术度 × 理科度',
+        subtitleBefore: '数据来自DUO（不含国际学校），X轴代表学术强度，Y轴代表理科占比，点的大小代表毕业人数。共 ',
         subtitleAfter: ' 所学校。',
         labelSchoolSearch: '学校搜索',
         schoolSearchPlaceholder: '按校名或 BRIN 搜索，匹配项高亮',
@@ -222,7 +224,7 @@ def build_html(data, excluded=None):
         gemeentePlaceholder: '不输入显示全部，多个用逗号分隔',
         labelLinear: '线性坐标',
         labelLog: '对数坐标',
-        labelShowVMBO: '显示纯 VMBO 学校',
+        labelShowVMBO: '包括纯 VMBO 学校',
         labelSelectAll: '全选',
         labelDeselectAll: '全部取消',
         excludedTitle: '因数据点过少未纳入图表的学校',
@@ -245,8 +247,8 @@ def build_html(data, excluded=None):
         labelTheme: 'Thema',
         labelLight: 'Licht',
         labelDark: 'Donker',
-        titleMain: 'Nederlandse schoolkaart voortgezet onderwijs (zonder internationale scholen): academisch × bèta',
-        subtitleBefore: 'Data van DUO. X = academisch niveau, Y = bètandeel. Puntgrootte = aantal geslaagden. ',
+        titleMain: '🏫 Nederlandse schoolkaart voortgezet onderwijs: academisch × bèta',
+        subtitleBefore: 'Data van DUO (zonder internationale scholen). X = academisch niveau, Y = bètandeel. Puntgrootte = aantal geslaagden. ',
         subtitleAfter: ' scholen getoond.',
         labelSchoolSearch: 'Zoek school',
         schoolSearchPlaceholder: 'Zoek op naam of BRIN, treffers gemarkeerd',
@@ -254,7 +256,7 @@ def build_html(data, excluded=None):
         gemeentePlaceholder: 'Leeg = alle, komma voor meerdere',
         labelLinear: 'Lineaire schaal',
         labelLog: 'Logschaal',
-        labelShowVMBO: 'Toon alleen VMBO-scholen',
+        labelShowVMBO: 'Inclusief alleen VMBO-scholen',
         labelSelectAll: 'Alles selecteren',
         labelDeselectAll: 'Alles deselecteren',
         excludedTitle: 'Scholen uitgesloten (te weinig datapunten)',
@@ -478,7 +480,10 @@ def build_html(data, excluded=None):
           data: byGemeente[g],
           pointRadius: function(ctx) {
             const r = ctx.raw.r != null ? ctx.raw.r : 8;
-            return ctx.raw.matched ? Math.max(r, r * 1.4 + 2) : r;
+            const chartW = (ctx.chart && ctx.chart.width) || 800;
+            const scale = Math.min(1, chartW / 800);
+            const baseR = Math.max(1, Math.round(r * scale));
+            return ctx.raw.matched ? Math.max(baseR, baseR * 1.4 + 2) : baseR;
           },
           backgroundColor: function(ctx) {
             if (ctx.raw.matched) return bgColor;
@@ -508,9 +513,9 @@ def build_html(data, excluded=None):
                 const p = ctx.raw;
                 const gemeente = ctx.dataset.label || '';
                 const name = p.naam || '';
-                let line = (gemeente ? gemeente + ' · ' : '') + name + ' — X: ' + p.x.toFixed(2) + ', Y: ' + p.y.toFixed(2);
-                if (p.size != null && p.size > 0) line += ' · ' + t('tooltipCandidates') + ': ' + p.size;
-                return line;
+                const line1 = (gemeente ? gemeente + ' · ' : '') + name;
+                const line2 = '(' + p.x.toFixed(2) + ', ' + p.y.toFixed(2) + ') ' + t('tooltipCandidates') + ': ' + (p.size != null && p.size > 0 ? p.size : '—');
+                return [line1, line2];
               }
             }
           }
