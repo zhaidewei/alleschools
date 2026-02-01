@@ -211,10 +211,12 @@ def main() -> int:
         if type_label not in ("Bo", "Sbo"):
             type_label = "Bo"
 
+        postcode = (data.get("postcode") or "").strip()
         rows_out.append({
             "BRIN": brin,
             "vestigingsnaam": data["naam"],
             "gemeente": data["gemeente"],
+            "postcode": postcode,
             "type": type_label,
             "X_linear": round(x_linear, 2),
             "Y_linear": round(y_linear, 2),
@@ -224,7 +226,7 @@ def main() -> int:
         })
 
     out_path = os.path.join(base, "schools_xy_coords_po.csv")
-    fieldnames = ["BRIN", "vestigingsnaam", "gemeente", "type", "X_linear", "Y_linear", "X_log", "Y_log", "pupils_total"]
+    fieldnames = ["BRIN", "vestigingsnaam", "gemeente", "postcode", "type", "X_linear", "Y_linear", "X_log", "Y_log", "pupils_total"]
     with open(out_path, "w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()

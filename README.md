@@ -32,8 +32,10 @@ python3 fetch_duo_examen_all.py
 - **脚本**：`calc_xy_coords.py`
 - **输入**：`duo_examen_raw_all.csv`（若不存在则退化为 `duo_examen_raw.csv`）
 - **输出**：
-  - `schools_xy_coords.csv`：每所学校的 BRIN、校名、gemeente、类型（HAVO/VWO 或 VMBO）、X_linear、Y_linear、X_log、Y_log
+  - `schools_xy_coords.csv`：每所学校的 BRIN、校名、gemeente、**postcode（邮编）**、类型（HAVO/VWO 或 VMBO）、X_linear、Y_linear、X_log、Y_log
   - `excluded_schools.json`：因 HAVO/VWO 考生数过少（低于阈值）而排除的学校列表
+
+**中学邮编来源**：考试数据 `duo_examen_raw_all.csv` 本身不含邮编。`calc_xy_coords.py` 会读取 DUO 的 **Alle vestigingen VO**（[CSV](https://duo.nl/open_onderwijsdata/images/02.-alle-vestigingen-vo.csv)），按 **VESTIGINGSCODE** 与考试数据中的校址代码匹配，将 **POSTCODE** 写入 `schools_xy_coords.csv`。若未放置 `duo_vestigingen_vo.csv`，可先运行 `download_duo_vestigingen_vo.py` 下载。
 
 **坐标含义**：
 
@@ -51,7 +53,7 @@ python3 calc_xy_coords.py
 ## 4. Serving：本地可视化服务
 
 - **服务脚本**：`view_xy_server.py` 读取 `schools_xy_coords.csv` 和 `excluded_schools.json`，生成带散点图的 HTML，并启动 HTTP 服务（默认端口 8082）。
-- **前端**：`view_xy.html` 展示横轴 VWO 通过人数占比、纵轴理科占比，可切换线性/对数坐标，按 gemeente 筛选。
+- **前端**：`view_xy.html` 展示横轴 VWO 通过人数占比、纵轴理科占比，可切换线性/对数坐标，按 gemeente 筛选；悬停圆点显示校名、邮编等，搜索框支持按校名、BRIN、邮编搜索。
 - **排除名单**：`excluded_schools.json` 中学校在页面底部列出，不参与散点图。
 
 ```bash
@@ -179,7 +181,7 @@ awk -F';' 'NR==1 {print; next} toupper($11)==toupper("Amstelveen") {print}' vest
 | `fetch_duo_examen_all.py` | 从 DUO 下载全量考试人数 CSV → `duo_examen_raw_all.csv` |
 | `duo_examen_raw_all.csv` | DUO 原始数据（全量中学） |
 | `calc_xy_coords.py` | 从 duo_examen_raw_all 计算 X/Y → `schools_xy_coords.csv` |
-| `schools_xy_coords.csv` | 学校坐标（BRIN、校名、gemeente、type、X_linear、Y_linear、X_log、Y_log） |
+| `schools_xy_coords.csv` | 学校坐标（BRIN、校名、gemeente、postcode、type、X_linear、Y_linear、X_log、Y_log） |
 | `excluded_schools.json` | 样本过少被排除的学校列表（由 calc_xy_coords 生成） |
 | `view_xy_server.py` | 本地 HTTP 服务 / 静态构建（`--static` → `public/index.html`） |
 | `view_xy.html` | 散点图前端模板（本地开发时生成） |

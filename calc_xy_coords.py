@@ -63,6 +63,27 @@ def is_science_vmbo(opleiding):
     return "techniek" in (opleiding or "").lower()
 
 
+def load_vestigingen_postcode(base):
+    """从 duo_vestigingen_vo.csv 加载 VESTIGINGSCODE -> POSTCODE。返回 dict，无则空串。"""
+    path = os.path.join(base, "duo_vestigingen_vo.csv")
+    out = {}
+    if not os.path.exists(path):
+        return out
+    for enc in ("utf-8", "latin-1", "cp1252"):
+        try:
+            with open(path, "r", encoding=enc) as f:
+                reader = csv.DictReader(f, delimiter=";", quotechar='"')
+                for row in reader:
+                    vest = (row.get("VESTIGINGSCODE") or "").strip().strip('"')
+                    pc = (row.get("POSTCODE") or "").strip().strip('"')
+                    if vest:
+                        out[vest] = pc
+            break
+        except UnicodeDecodeError:
+            continue
+    return out
+
+
 def main():
     base = os.path.dirname(os.path.abspath(__file__))
     # 优先用全量数据，否则用 Amstelveen 四校
@@ -74,6 +95,12 @@ def main():
     if not os.path.exists(inp):
         print(f"找不到输入文件。请放置 duo_examen_raw_all.csv 或 duo_examen_raw.csv")
         return 1
+
+    brin_to_postcode = load_vestigingen_postcode(base)
+    if brin_to_postcode:
+        print(f"已加载邮编表: duo_vestigingen_vo.csv（{len(brin_to_postcode)} 条）")
+    else:
+        print("未找到 duo_vestigingen_vo.csv，邮编列将为空")
 
     print(f"输入: {os.path.basename(inp)}")
 
@@ -183,11 +210,13 @@ def main():
 
         # 5 年考生总数（毕业年级人数），用于图表中点的大小
         candidates_total = sum(data["all_kand"][year] for (_, _, year) in YEAR_COLS)
+        postcode = brin_to_postcode.get(brin, "")
 
         rows_out.append({
             "BRIN": brin,
             "vestigingsnaam": data["naam"],
             "gemeente": data["gemeente"],
+            "postcode": postcode,
             "type": type_label,
             "X_linear": round(x_linear, 2),
             "Y_linear": round(y_linear, 2),
@@ -197,7 +226,7 @@ def main():
         })
 
     with open(out, "w", encoding="utf-8", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=["BRIN", "vestigingsnaam", "gemeente", "type", "X_linear", "Y_linear", "X_log", "Y_log", "candidates_total"])
+        writer = csv.DictWriter(f, fieldnames=["BRIN", "vestigingsnaam", "gemeente", "postcode", "type", "X_linear", "Y_linear", "X_log", "Y_log", "candidates_total"])
         writer.writeheader()
         writer.writerows(rows_out)
 

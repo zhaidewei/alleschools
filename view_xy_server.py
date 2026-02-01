@@ -44,6 +44,7 @@ def load_data_vo():
                 "BRIN": r["BRIN"],
                 "naam": r["vestigingsnaam"],
                 "gemeente": r["gemeente"],
+                "postcode": (r.get("postcode") or "").strip(),
                 "type": r["type"],
                 "X_linear": float(r["X_linear"]),
                 "Y_linear": float(r["Y_linear"]),
@@ -69,6 +70,7 @@ def load_data_po():
                 "BRIN": r["BRIN"],
                 "naam": r["vestigingsnaam"],
                 "gemeente": r["gemeente"],
+                "postcode": (r.get("postcode") or "").strip(),
                 "type": r["type"],
                 "X_linear": float(r["X_linear"]),
                 "Y_linear": float(r["Y_linear"]),
@@ -245,7 +247,7 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
         subtitleBefore: 'Data from DUO (excluding international schools). X = academic strength, Y = science share. Dot size = graduation count. ',
         subtitleAfter: ' schools shown.',
         labelSchoolSearch: 'School search',
-        schoolSearchPlaceholder: 'Search by name or BRIN, matches highlighted',
+        schoolSearchPlaceholder: 'Search by name, BRIN or postcode, matches highlighted',
         labelGemeente: 'City hall filter',
         gemeentePlaceholder: 'Leave empty for all, comma for multiple',
         labelLinear: 'Linear scale',
@@ -260,6 +262,7 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
         axisYLinear: 'Science share (%)',
         axisYLog: 'Science share (log10(1+y/100))',
         tooltipCandidates: '5-yr candidates',
+        tooltipPostcode: 'Postcode',
         algorithmTitle: 'How X and Y are calculated',
         algorithmBody: '<p><strong>X (horizontal):</strong> VWO share = VWO passed / total exam candidates (all tracks: HAVO, VWO, VMBO) at the school, as a percentage (0–100%). Higher X means more academically oriented (more VWO).</p><p><strong>Y (vertical):</strong> Science share = science passed / total exam candidates. For HAVO/VWO schools, science = the following profiles (bèta):</p><ul class="list-disc pl-5 my-1"><li><strong>N&amp;T</strong> — Natuur &amp; Techniek (Nature &amp; Technology): maths, physics, chemistry, technical subjects.</li><li><strong>N&amp;G</strong> — Natuur &amp; Gezondheid (Nature &amp; Health): biology, chemistry, health-related subjects.</li><li><strong>N&amp;T/N&amp;G</strong> — combination profile of N&amp;T and N&amp;G.</li></ul><p>For VMBO-only schools, Y = techniek share within VMBO, and X is set to 0.</p><p>Both X and Y are <strong>weighted averages</strong> over school years 2019–2020 to 2023–2024, with recent years weighted more. Dot size = graduation count (5-year sum) at the school.</p>',
         disclaimerTitle: 'Disclaimer',
@@ -294,7 +297,7 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
         subtitleBefore: '数据来自DUO（不含国际学校），X轴代表学术强度，Y轴代表理科占比，点的大小代表毕业人数。共 ',
         subtitleAfter: ' 所学校。',
         labelSchoolSearch: '学校搜索',
-        schoolSearchPlaceholder: '按校名或 BRIN 搜索，匹配项高亮',
+        schoolSearchPlaceholder: '按校名、BRIN 或邮编搜索，匹配项高亮',
         labelGemeente: '市政厅 过滤',
         gemeentePlaceholder: '不输入显示全部，多个用逗号分隔',
         labelLinear: '线性坐标',
@@ -309,6 +312,7 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
         axisYLinear: '理科占比 (%)',
         axisYLog: '理科占比 (log10(1+y/100))',
         tooltipCandidates: '5年考生',
+        tooltipPostcode: '邮编',
         algorithmTitle: 'X 与 Y 的计算方式',
         algorithmBody: '<p><strong>X（横轴）：</strong>VWO 通过人数占比 = 该校 VWO 通过人数 / 该校全部考生总数（HAVO、VWO、VMBO 等），以百分比表示（0–100%）。X 越高表示越偏学术（VWO 越多）。</p><p><strong>Y（纵轴）：</strong>理科通过人数占比 = 理科通过人数 / 该校全部考生总数。HAVO/VWO 学校的理科指以下方向（bèta）：</p><ul class="list-disc pl-5 my-1"><li><strong>N&amp;T</strong> — Natuur &amp; Techniek（自然与技术）：数学、物理、化学、技术等。</li><li><strong>N&amp;G</strong> — Natuur &amp; Gezondheid（自然与健康）：生物、化学、健康相关等。</li><li><strong>N&amp;T/N&amp;G</strong> — N&amp;T 与 N&amp;G 的组合方向。</li></ul><p>仅 VMBO 的学校 Y 为 VMBO 内 techniek 占比，X 固定为 0。</p><p>X、Y 均为 2019–2020 至 2023–2024 学年的<strong>加权平均</strong>，近年权重更大。圆点大小表示该校 5 年毕业人数。</p>',
         disclaimerTitle: '免责声明',
@@ -343,7 +347,7 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
         subtitleBefore: 'Data van DUO (zonder internationale scholen). X = academisch niveau, Y = bètandeel. Puntgrootte = aantal geslaagden. ',
         subtitleAfter: ' scholen getoond.',
         labelSchoolSearch: 'Zoek school',
-        schoolSearchPlaceholder: 'Zoek op naam of BRIN, treffers gemarkeerd',
+        schoolSearchPlaceholder: 'Zoek op naam, BRIN of postcode, treffers gemarkeerd',
         labelGemeente: 'Gemeentefilter',
         gemeentePlaceholder: 'Leeg = alle, komma voor meerdere',
         labelLinear: 'Lineaire schaal',
@@ -358,6 +362,7 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
         axisYLinear: 'Bètandeel (%)',
         axisYLog: 'Bètandeel (log10(1+y/100))',
         tooltipCandidates: '5-jaar kandidaten',
+        tooltipPostcode: 'Postcode',
         algorithmTitle: 'Hoe X en Y worden berekend',
         algorithmBody: '<p><strong>X (horizontaal):</strong> VWO-aandeel = VWO geslaagden / totaal examenkandidaten (alle richtingen: HAVO, VWO, VMBO) van de school, in procent (0–100%). Hogere X = meer academisch (meer VWO).</p><p><strong>Y (verticaal):</strong> Bètandeel = bètageslaagden / totaal examenkandidaten. Voor HAVO/VWO-scholen is bèta de volgende profielen:</p><ul class="list-disc pl-5 my-1"><li><strong>N&amp;T</strong> — Natuur &amp; Techniek: wiskunde, natuurkunde, scheikunde, technische vakken.</li><li><strong>N&amp;G</strong> — Natuur &amp; Gezondheid: biologie, scheikunde, gezondheidsgerelateerde vakken.</li><li><strong>N&amp;T/N&amp;G</strong> — combinatieprofiel van N&amp;T en N&amp;G.</li></ul><p>Voor alleen VMBO-scholen is Y het techniekaandeel binnen VMBO en X = 0.</p><p>X en Y zijn <strong>gewogen gemiddelden</strong> over schooljaren 2019–2020 t/m 2023–2024, met zwaardere weging voor recente jaren. Puntgrootte = aantal geslaagden (5-jaar som) van de school.</p>',
         disclaimerTitle: 'Disclaimer',
@@ -463,8 +468,8 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
         chart.update();
       }
     }
-    let linear = data.map(d => ({ x: d.X_linear, y: d.Y_linear, label: d.naam, type: d.type, gemeente: d.gemeente, size: d.size, brin: d.BRIN }));
-    let log = data.map(d => ({ x: d.X_log, y: d.Y_log, label: d.naam, type: d.type, gemeente: d.gemeente, size: d.size, brin: d.BRIN }));
+    let linear = data.map(d => ({ x: d.X_linear, y: d.Y_linear, label: d.naam, type: d.type, gemeente: d.gemeente, postcode: d.postcode || '', size: d.size, brin: d.BRIN }));
+    let log = data.map(d => ({ x: d.X_log, y: d.Y_log, label: d.naam, type: d.type, gemeente: d.gemeente, postcode: d.postcode || '', size: d.size, brin: d.BRIN }));
 
     let selectedGemeenten = new Set();
     var DEFAULT_GEMEENTEN = ["'S-GRAVENHAGE", 'AMSTERDAM', 'UTRECHT', 'ROTTERDAM'];
@@ -595,8 +600,8 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
       currentMode = mode;
       localStorage.setItem('schools-mode', mode);
       data = mode === 'vo' ? dataVO : dataPO;
-      linear = data.map(d => ({ x: d.X_linear, y: d.Y_linear, label: d.naam, type: d.type, gemeente: d.gemeente, size: d.size, brin: d.BRIN }));
-      log = data.map(d => ({ x: d.X_log, y: d.Y_log, label: d.naam, type: d.type, gemeente: d.gemeente, size: d.size, brin: d.BRIN }));
+      linear = data.map(d => ({ x: d.X_linear, y: d.Y_linear, label: d.naam, type: d.type, gemeente: d.gemeente, postcode: d.postcode || '', size: d.size, brin: d.BRIN }));
+      log = data.map(d => ({ x: d.X_log, y: d.Y_log, label: d.naam, type: d.type, gemeente: d.gemeente, postcode: d.postcode || '', size: d.size, brin: d.BRIN }));
       updateExcludedSection();
       applyLanguage();
       setChartScaleForMode();
@@ -653,7 +658,9 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
       const naam = (p.label || '').toUpperCase();
       const brin = (p.brin || '').toUpperCase();
       const gemeente = (p.gemeente || '').toUpperCase();
-      return naam.includes(searchTerm) || brin.includes(searchTerm) || gemeente.includes(searchTerm);
+      const postcode = (p.postcode || '').toUpperCase().replace(/\\s/g, '');
+      const termNorm = searchTerm.replace(/\\s/g, '');
+      return naam.includes(searchTerm) || brin.includes(searchTerm) || gemeente.includes(searchTerm) || postcode.includes(termNorm);
     }
     function makeDatasets(points) {
       const radiusFn = sizeToRadius(points);
@@ -664,7 +671,7 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
         if (!byGemeente[g]) byGemeente[g] = [];
         const matched = pointMatchesSearch(p, searchTerm);
         byGemeente[g].push({
-          x: p.x, y: p.y, naam: p.label, type: p.type,
+          x: p.x, y: p.y, naam: p.label, type: p.type, postcode: p.postcode || '',
           r: radiusFn(p.size),
           size: p.size,
           matched: matched
@@ -724,8 +731,10 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
                 const gemeente = ctx.dataset.label || '';
                 const name = p.naam || '';
                 const line1 = (gemeente ? gemeente + ' · ' : '') + name;
-                const line2 = '(' + p.x.toFixed(2) + ', ' + p.y.toFixed(2) + ') ' + t('tooltipCandidates') + ': ' + (p.size != null && p.size > 0 ? p.size : '—');
-                return [line1, line2];
+                const lines = [line1];
+                if (p.postcode) lines.push((t('tooltipPostcode') || 'Postcode') + ': ' + p.postcode);
+                lines.push('(' + p.x.toFixed(2) + ', ' + p.y.toFixed(2) + ') ' + t('tooltipCandidates') + ': ' + (p.size != null && p.size > 0 ? p.size : '—'));
+                return lines;
               },
               afterBody: function() { setTimeout(updateTooltipScale, 0); }
             }
