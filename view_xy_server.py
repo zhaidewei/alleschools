@@ -14,26 +14,27 @@ from http.server import HTTPServer, SimpleHTTPRequestHandler
 BASE = os.path.dirname(os.path.abspath(__file__))
 CSV_PATH = os.path.join(BASE, "schools_xy_coords.csv")
 EXCLUDED_PATH = os.path.join(BASE, "excluded_schools.json")
+CSV_PATH_PO = os.path.join(BASE, "schools_xy_coords_po.csv")
+EXCLUDED_PATH_PO = os.path.join(BASE, "excluded_schools_po.json")
 HTML_PATH = os.path.join(BASE, "view_xy.html")
 PUBLIC_INDEX = os.path.join(BASE, "public", "index.html")
 PORT = 8082
 
 
-def load_excluded():
-    if not os.path.exists(EXCLUDED_PATH):
+def load_excluded(path=EXCLUDED_PATH):
+    if not os.path.exists(path):
         return []
     try:
-        with open(EXCLUDED_PATH, "r", encoding="utf-8") as f:
+        with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
     except Exception:
         return []
 
 
-def load_data():
+def load_data_vo():
     rows = []
     with open(CSV_PATH, "r", encoding="utf-8") as f:
         for r in csv.DictReader(f):
-            # 人数：优先用 candidates_total（5 年考生总数），兼容旧 CSV 的 HAVO_geslaagd_total
             size_raw = r.get("candidates_total") or r.get("HAVO_geslaagd_total") or 0
             try:
                 size = int(size_raw)
@@ -53,10 +54,38 @@ def load_data():
     return rows
 
 
-def build_html(data, excluded=None):
-    excluded = excluded if excluded is not None else []
-    data_js = json.dumps(data, ensure_ascii=False)
-    excluded_js = json.dumps(excluded, ensure_ascii=False)
+def load_data_po():
+    if not os.path.exists(CSV_PATH_PO):
+        return []
+    rows = []
+    with open(CSV_PATH_PO, "r", encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            size_raw = r.get("pupils_total") or 0
+            try:
+                size = int(size_raw)
+            except (ValueError, TypeError):
+                size = 0
+            rows.append({
+                "BRIN": r["BRIN"],
+                "naam": r["vestigingsnaam"],
+                "gemeente": r["gemeente"],
+                "type": r["type"],
+                "X_linear": float(r["X_linear"]),
+                "Y_linear": float(r["Y_linear"]),
+                "X_log": float(r["X_log"]),
+                "Y_log": float(r["Y_log"]),
+                "size": size,
+            })
+    return rows
+
+
+def build_html(data_vo, excluded_vo, data_po, excluded_po):
+    excluded_vo = excluded_vo if excluded_vo is not None else []
+    excluded_po = excluded_po if excluded_po is not None else []
+    data_vo_js = json.dumps(data_vo, ensure_ascii=False)
+    data_po_js = json.dumps(data_po, ensure_ascii=False)
+    excluded_vo_js = json.dumps(excluded_vo, ensure_ascii=False)
+    excluded_po_js = json.dumps(excluded_po, ensure_ascii=False)
     return """<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -77,7 +106,12 @@ def build_html(data, excluded=None):
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-200 font-sans antialiased">
   <div id="wrap" class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-    <div class="flex justify-end items-center gap-4 mb-2">
+    <div class="flex flex-wrap justify-between items-center gap-4 mb-2">
+      <div class="flex items-center gap-1 rounded-lg border border-slate-300 dark:border-slate-500 p-0.5">
+        <button type="button" id="navVO" class="navSchoolType px-3 py-1.5 text-sm font-medium rounded-md border-0 bg-slate-200 dark:bg-slate-600 text-slate-800 dark:text-slate-100" data-mode="vo">中学</button>
+        <button type="button" id="navPO" class="navSchoolType px-3 py-1.5 text-sm font-medium rounded-md border-0 bg-transparent text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700" data-mode="po">小学</button>
+      </div>
+      <div class="flex items-center gap-4">
       <div class="flex items-center gap-2">
         <span id="labelTheme" class="text-sm font-medium text-slate-600 dark:text-slate-400">Theme</span>
         <button type="button" id="themeLight" class="px-2.5 py-1 text-sm rounded-md border border-slate-300 dark:border-slate-500 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-1 focus:ring-slate-400">Light</button>
@@ -97,6 +131,7 @@ def build_html(data, excluded=None):
           <a href="#" id="shareXLink" target="_blank" rel="noopener noreferrer" class="block px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 no-underline rounded-t-lg">Share to X</a>
           <a href="#" id="shareFbLink" target="_blank" rel="noopener noreferrer" class="block px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 no-underline rounded-b-lg">Share to Facebook</a>
         </div>
+      </div>
       </div>
     </div>
     <div id="chartWrap" class="mb-8">
@@ -173,19 +208,32 @@ def build_html(data, excluded=None):
     </footer>
   </div>
   <script>
-    (function() {
-      const excluded = """ + excluded_js + """;
+    const dataVO = """ + data_vo_js + """;
+    const dataPO = """ + data_po_js + """;
+    const excludedVO = """ + excluded_vo_js + """;
+    const excludedPO = """ + excluded_po_js + """;
+    let currentMode = localStorage.getItem('schools-mode') || 'vo';
+    let data = currentMode === 'vo' ? dataVO : dataPO;
+    let excluded = currentMode === 'vo' ? excludedVO : excludedPO;
+    function updateExcludedSection() {
+      excluded = currentMode === 'vo' ? excludedVO : excludedPO;
       const el = document.getElementById('excludedSection');
+      if (!el) return;
       if (excluded.length === 0) { el.innerHTML = ''; return; }
       el.innerHTML = '<h2 id="excludedTitle" class="text-base font-semibold text-slate-700 dark:text-slate-300 mb-2"></h2><p id="excludedDesc" class="mb-3 text-slate-500 dark:text-slate-400"></p><ul class="list-disc pl-5 max-h-44 overflow-y-auto space-y-1 text-slate-600 dark:text-slate-400">' +
         excluded.map(function(s) { return '<li>' + (s.BRIN || '') + ' ' + (s.naam || '') + ' (' + (s.gemeente || '') + ')</li>'; }).join('') + '</ul>';
-    })();
+      var excludedTitle = document.getElementById('excludedTitle');
+      if (excludedTitle) excludedTitle.textContent = t('excludedTitle');
+      var excludedDesc = document.getElementById('excludedDesc');
+      if (excludedDesc) excludedDesc.textContent = t('excludedDesc');
+    }
   </script>
   <script>
-    const data = """ + data_js + """;
     let currentLang = localStorage.getItem('schools-lang') || 'en';
     const L = {
       en: {
+        navVO: 'Secondary',
+        navPO: 'Primary',
         labelLanguage: 'Language',
         labelTheme: 'Theme',
         share: 'Share',
@@ -218,9 +266,23 @@ def build_html(data, excluded=None):
         disclaimerBody: 'Data from DUO Open Onderwijsdata (exam candidates and pass counts). This tool is for reference only; no warranty of accuracy or fitness for any decision. Not affiliated with DUO or the Dutch government.',
         contactTitle: 'Contact',
         supportHint: 'Like this tool? Buy me a coffee on Ko-fi.',
-        copyrightText: '© 2025 Dewei Zhai. This project is licensed under the MIT License.'
+        copyrightText: '© 2025 Dewei Zhai. This project is licensed under the MIT License.',
+        titleMain_po: '🏫 Dutch primary school map: VWO-advice share × WOZ (postcode)',
+        subtitleBefore_po: 'Data from DUO schooladviezen + CBS WOZ. X = VWO-advice share (%), Y = mean WOZ (×1000 €). Dot size = pupils. ',
+        axisXLinear_po: 'VWO-advice share (%)',
+        axisYLinear_po: 'Mean WOZ (×1000 €)',
+        axisXLog_po: 'VWO-advice share (log)',
+        axisYLog_po: 'WOZ (log)',
+        labelShowSbo: 'Include Sbo-only schools',
+        excludedTitle_po: 'Primary schools excluded (too few pupils)',
+        excludedDesc_po: 'The following schools were not included because total advised pupils (across years) are below the threshold.',
+        algorithmTitle_po: 'How X and Y are calculated (primary)',
+        algorithmBody_po: '<p><strong>X (horizontal):</strong> VWO-advice share = (VWO + 0.5×HAVO_VWO + 0.5×HAVO) / total advised pupils, as a percentage. Higher X = more pupils advised to academic tracks.</p><p><strong>Y (vertical):</strong> Mean WOZ = average WOZ value of dwellings (×1000 €) for the school postcode (PC4), from CBS, weighted by year. Dot size = total advised pupils.</p>',
+        tooltipCandidates_po: 'pupils (advised)'
       },
       zh: {
+        navVO: '中学',
+        navPO: '小学',
         labelLanguage: '语言',
         labelTheme: '主题',
         share: '分享',
@@ -253,9 +315,23 @@ def build_html(data, excluded=None):
         disclaimerBody: '数据来自 DUO Open Onderwijsdata（考试考生与通过人数）。本工具仅供参考，不保证准确或适用于任何决策；与 DUO 及荷兰政府无关联。',
         contactTitle: '联系作者',
         supportHint: '觉得有用？请在 Ko-fi 请我喝杯咖啡。',
-        copyrightText: '© 2025 翟德炜。本项目采用 MIT 许可证。'
+        copyrightText: '© 2025 翟德炜。本项目采用 MIT 许可证。',
+        titleMain_po: '🏫 荷兰小学定位图：VWO 升学率 × 邮编 WOZ',
+        subtitleBefore_po: '数据来自 DUO 毕业建议 + CBS WOZ。X = VWO 升学率(%)，Y = 邮编 WOZ 均值(千欧)，点大小 = 人数。共 ',
+        axisXLinear_po: 'VWO 升学率 (%)',
+        axisYLinear_po: 'WOZ 均值 (千欧)',
+        axisXLog_po: 'VWO 升学率 (对数)',
+        axisYLog_po: 'WOZ (对数)',
+        labelShowSbo: '包括纯 Sbo 学校',
+        excludedTitle_po: '因人数过少未纳入的小学',
+        excludedDesc_po: '以下学校因建议人数合计低于阈值未参与图表。',
+        algorithmTitle_po: 'X 与 Y 的计算方式（小学）',
+        algorithmBody_po: '<p><strong>X（横轴）：</strong>VWO 升学率 = (VWO + 0.5×HAVO_VWO + 0.5×HAVO) / 总建议人数，百分比。X 越高表示升学术向越多。</p><p><strong>Y（纵轴）：</strong>学校邮编(PC4)对应的 CBS WOZ 均值（千欧），按年加权。点大小 = 建议人数合计。</p>',
+        tooltipCandidates_po: '人数(建议)'
       },
       nl: {
+        navVO: 'Voortgezet',
+        navPO: 'Primair',
         labelLanguage: 'Taal',
         labelTheme: 'Thema',
         share: 'Delen',
@@ -288,15 +364,35 @@ def build_html(data, excluded=None):
         disclaimerBody: 'Data van DUO Open Onderwijsdata (examenkandidaten en geslaagden). Dit hulpmiddel is alleen voor referentie; geen garantie op juistheid of geschiktheid voor beslissingen. Niet gelieerd aan DUO of de overheid.',
         contactTitle: 'Contact',
         supportHint: 'Waardevol? Trakteer me op een koffie via Ko-fi.',
-        copyrightText: '© 2025 Dewei Zhai. Dit project valt onder de MIT-licentie.'
+        copyrightText: '© 2025 Dewei Zhai. Dit project valt onder de MIT-licentie.',
+        titleMain_po: '🏫 Nederlandse basisschoolkaart: VWO-adviesaandeel × WOZ (postcode)',
+        subtitleBefore_po: 'Data van DUO schooladviezen + CBS WOZ. X = VWO-adviesaandeel (%), Y = gem. WOZ (×1000 €). Puntgrootte = leerlingen. ',
+        axisXLinear_po: 'VWO-adviesaandeel (%)',
+        axisYLinear_po: 'Gem. WOZ (×1000 €)',
+        axisXLog_po: 'VWO-adviesaandeel (log)',
+        axisYLog_po: 'WOZ (log)',
+        labelShowSbo: 'Inclusief alleen Sbo-scholen',
+        excludedTitle_po: 'Basisscholen uitgesloten (te weinig leerlingen)',
+        excludedDesc_po: 'De volgende scholen zijn niet opgenomen omdat het totaal geadviseerde leerlingen onder de drempel ligt.',
+        algorithmTitle_po: 'Hoe X en Y worden berekend (primair)',
+        algorithmBody_po: '<p><strong>X (horizontaal):</strong> VWO-adviesaandeel = (VWO + 0,5×HAVO_VWO + 0,5×HAVO) / totaal geadviseerde leerlingen, in procent. Hogere X = meer advies naar academische richting.</p><p><strong>Y (verticaal):</strong> Gemiddelde WOZ-waarde woningen (×1000 €) voor de postcode (PC4) van de school, CBS, gewogen naar jaar. Puntgrootte = totaal geadviseerde leerlingen.</p>',
+        tooltipCandidates_po: 'leerlingen (advies)'
       }
     };
-    function t(key) { return (L[currentLang] || L.en)[key] || L.en[key] || key; }
+    function t(key) {
+      const lang = L[currentLang] || L.en;
+      const modeKey = key + '_' + currentMode;
+      return (lang[modeKey] !== undefined ? lang[modeKey] : lang[key]) || L.en[modeKey] || L.en[key] || key;
+    }
     function applyLanguage() {
       var langSel = document.getElementById('langSelect');
       currentLang = (langSel && langSel.value) || 'en';
       if (langSel) langSel.value = currentLang;
       localStorage.setItem('schools-lang', currentLang);
+      var navVO = document.getElementById('navVO');
+      if (navVO) navVO.textContent = t('navVO');
+      var navPO = document.getElementById('navPO');
+      if (navPO) navPO.textContent = t('navPO');
       var labelLanguage = document.getElementById('labelLanguage');
       if (labelLanguage) labelLanguage.textContent = t('labelLanguage');
       var countEl = document.getElementById('schoolCount');
@@ -319,7 +415,7 @@ def build_html(data, excluded=None):
       var labelLog = document.getElementById('labelLog');
       if (labelLog) labelLog.textContent = t('labelLog');
       var labelShowVMBO = document.getElementById('labelShowVMBO');
-      if (labelShowVMBO) labelShowVMBO.textContent = t('labelShowVMBO');
+      if (labelShowVMBO) labelShowVMBO.textContent = currentMode === 'vo' ? t('labelShowVMBO') : t('labelShowSbo');
       var labelSelectAll = document.getElementById('labelSelectAll');
       if (labelSelectAll) labelSelectAll.textContent = t('labelSelectAll');
       var labelDeselectAll = document.getElementById('labelDeselectAll');
@@ -367,8 +463,8 @@ def build_html(data, excluded=None):
         chart.update();
       }
     }
-    const linear = data.map(d => ({ x: d.X_linear, y: d.Y_linear, label: d.naam, type: d.type, gemeente: d.gemeente, size: d.size, brin: d.BRIN }));
-    const log = data.map(d => ({ x: d.X_log, y: d.Y_log, label: d.naam, type: d.type, gemeente: d.gemeente, size: d.size, brin: d.BRIN }));
+    let linear = data.map(d => ({ x: d.X_linear, y: d.Y_linear, label: d.naam, type: d.type, gemeente: d.gemeente, size: d.size, brin: d.BRIN }));
+    let log = data.map(d => ({ x: d.X_log, y: d.Y_log, label: d.naam, type: d.type, gemeente: d.gemeente, size: d.size, brin: d.BRIN }));
 
     let selectedGemeenten = new Set();
     var DEFAULT_GEMEENTEN = ["'S-GRAVENHAGE", 'AMSTERDAM', 'UTRECHT', 'ROTTERDAM'];
@@ -383,7 +479,10 @@ def build_html(data, excluded=None):
       /* 只显示勾选的 gemeenten：未勾选任何时显示为空，图例仅包含当前勾选项 */
       let result = byText.filter(p => p.gemeente && selectedGemeenten.has(p.gemeente));
       var showVMBOEl = document.getElementById('showVMBO');
-      if (showVMBOEl && !showVMBOEl.checked) result = result.filter(function(p) { return p.type !== 'VMBO'; });
+      if (showVMBOEl && !showVMBOEl.checked) {
+        if (currentMode === 'vo') result = result.filter(function(p) { return p.type !== 'VMBO'; });
+        else result = result.filter(function(p) { return p.type !== 'Sbo'; });
+      }
       return result;
     }
     function getGemeentenInList() {
@@ -433,7 +532,78 @@ def build_html(data, excluded=None):
       const points = getFilteredPoints(coord === 'log' ? log : linear);
       chart.data.datasets = makeDatasets(points);
       document.getElementById('schoolCount').textContent = points.length;
+      if (points.length > 0) {
+        const ys = points.map(function(p) { return p.y; });
+        const minY = Math.min.apply(null, ys);
+        const maxY = Math.max.apply(null, ys);
+        const range = maxY - minY || 1;
+        const pad = range * 0.05;
+        chart.options.scales.y.min = Math.min(minY - pad, minY * 0.95);
+        chart.options.scales.y.max = maxY * 1.05;
+        if (chart.options.scales.y.min < 0 && (currentMode === 'vo' || (currentMode === 'po' && coord === 'linear'))) chart.options.scales.y.min = 0;
+        chart.options.scales.y.afterBuildTicks = undefined;
+        chart.options.scales.y.ticks = { stepSize: undefined };
+      }
       chart.update();
+    }
+    function setChartScaleForMode() {
+      const isLog = document.querySelector('input[name="coord"]:checked') && document.querySelector('input[name="coord"]:checked').value === 'log';
+      chart.options.scales.x.title.text = isLog ? t('axisXLog') : t('axisXLinear');
+      chart.options.scales.y.title.text = isLog ? t('axisYLog') : t('axisYLinear');
+      if (currentMode === 'po') {
+        if (isLog) {
+          chart.options.scales.x.min = -0.02; chart.options.scales.x.max = 0.35;
+          chart.options.scales.x.afterBuildTicks = undefined; chart.options.scales.x.ticks = { stepSize: 0.05 };
+          chart.options.scales.y.min = -0.05; chart.options.scales.y.max = 1.05;
+          chart.options.scales.y.afterBuildTicks = undefined; chart.options.scales.y.ticks = { stepSize: 0.2 };
+        } else {
+          chart.options.scales.x.min = -5; chart.options.scales.x.max = 105;
+          chart.options.scales.x.afterBuildTicks = function(axis) { axis.ticks = [0,10,20,30,40,50,60,70,80,90,100].map(function(v){ return { value: v }; }); };
+          chart.options.scales.x.ticks = { stepSize: 10 };
+          chart.options.scales.y.min = -50; chart.options.scales.y.max = 1050;
+          chart.options.scales.y.afterBuildTicks = function(axis) { axis.ticks = [0,200,400,600,800,1000].map(function(v){ return { value: v }; }); };
+          chart.options.scales.y.ticks = { stepSize: 200 };
+        }
+      } else {
+        if (isLog) {
+          chart.options.scales.x.min = -0.02; chart.options.scales.x.max = 0.35;
+          chart.options.scales.x.afterBuildTicks = undefined; chart.options.scales.x.ticks = { stepSize: 0.05 };
+          chart.options.scales.y.min = -0.02; chart.options.scales.y.max = 0.35;
+          chart.options.scales.y.afterBuildTicks = undefined; chart.options.scales.y.ticks = { stepSize: 0.05 };
+        } else {
+          chart.options.scales.x.min = -5; chart.options.scales.x.max = 105;
+          chart.options.scales.x.afterBuildTicks = function(axis) { axis.ticks = [0,10,20,30,40,50,60,70,80,90,100].map(function(v){ return { value: v }; }); };
+          chart.options.scales.x.ticks = { stepSize: 10 };
+          chart.options.scales.y.min = -5; chart.options.scales.y.max = 105;
+          chart.options.scales.y.afterBuildTicks = function(axis) { axis.ticks = [0,10,20,30,40,50,60,70,80,90,100].map(function(v){ return { value: v }; }); };
+          chart.options.scales.y.ticks = { stepSize: 10 };
+        }
+      }
+      chart.update();
+    }
+    function updateNavButtons() {
+      document.querySelectorAll('.navSchoolType').forEach(function(btn) {
+        const active = btn.getAttribute('data-mode') === currentMode;
+        btn.classList.toggle('bg-slate-200', active); btn.classList.toggle('dark:bg-slate-600', active);
+        btn.classList.toggle('bg-transparent', !active);
+        btn.classList.toggle('text-slate-800', active); btn.classList.toggle('dark:text-slate-100', active);
+        btn.classList.toggle('text-slate-600', !active); btn.classList.toggle('dark:text-slate-400', !active);
+      });
+    }
+    function switchMode(mode) {
+      if (mode === currentMode) return;
+      currentMode = mode;
+      localStorage.setItem('schools-mode', mode);
+      data = mode === 'vo' ? dataVO : dataPO;
+      linear = data.map(d => ({ x: d.X_linear, y: d.Y_linear, label: d.naam, type: d.type, gemeente: d.gemeente, size: d.size, brin: d.BRIN }));
+      log = data.map(d => ({ x: d.X_log, y: d.Y_log, label: d.naam, type: d.type, gemeente: d.gemeente, size: d.size, brin: d.BRIN }));
+      updateExcludedSection();
+      applyLanguage();
+      setChartScaleForMode();
+      selectedGemeenten = new Set();
+      renderGemeenteCheckboxes();
+      refreshChart();
+      updateNavButtons();
     }
 
     /** 确定性 hash：gemeente 名字 -> 颜色。同一名字始终得到同一颜色。相似名字用黄金角+独立 S/L 拉开区分。 */
@@ -672,31 +842,15 @@ def build_html(data, excluded=None):
 
     document.querySelectorAll('input[name="coord"]').forEach(radio => {
       radio.addEventListener('change', () => {
-        const isLog = radio.value === 'log';
-        chart.options.scales.x.title.text = isLog ? t('axisXLog') : t('axisXLinear');
-        chart.options.scales.y.title.text = isLog ? t('axisYLog') : t('axisYLinear');
-        if (isLog) {
-          chart.options.scales.x.min = -0.02;
-          chart.options.scales.x.max = 0.35;
-          chart.options.scales.x.afterBuildTicks = undefined;
-          chart.options.scales.x.ticks = { stepSize: 0.05 };
-          chart.options.scales.y.min = -0.02;
-          chart.options.scales.y.max = 0.35;
-          chart.options.scales.y.afterBuildTicks = undefined;
-          chart.options.scales.y.ticks = { stepSize: 0.05 };
-        } else {
-          chart.options.scales.x.min = -5;
-          chart.options.scales.x.max = 105;
-          chart.options.scales.x.afterBuildTicks = function(axis) { axis.ticks = [0,10,20,30,40,50,60,70,80,90,100].map(function(v){ return { value: v }; }); };
-          chart.options.scales.x.ticks = { stepSize: 10 };
-          chart.options.scales.y.min = -5;
-          chart.options.scales.y.max = 105;
-          chart.options.scales.y.afterBuildTicks = function(axis) { axis.ticks = [0,10,20,30,40,50,60,70,80,90,100].map(function(v){ return { value: v }; }); };
-          chart.options.scales.y.ticks = { stepSize: 10 };
-        }
+        setChartScaleForMode();
         refreshChart();
       });
     });
+    document.getElementById('navVO').addEventListener('click', function() { switchMode('vo'); });
+    document.getElementById('navPO').addEventListener('click', function() { switchMode('po'); });
+    updateExcludedSection();
+    updateNavButtons();
+    setChartScaleForMode();
     renderGemeenteCheckboxes();
     refreshChart();
   </script>
@@ -713,9 +867,11 @@ def main():
     if not os.path.exists(CSV_PATH):
         print(f"找不到 {CSV_PATH}，请先运行 calc_xy_coords.py", file=sys.stderr)
         return 1
-    data = load_data()
-    excluded = load_excluded()
-    html = build_html(data, excluded)
+    data_vo = load_data_vo()
+    excluded_vo = load_excluded(EXCLUDED_PATH)
+    data_po = load_data_po()
+    excluded_po = load_excluded(EXCLUDED_PATH_PO)
+    html = build_html(data_vo, excluded_vo, data_po, excluded_po)
 
     if args.static:
         out_dir = os.path.dirname(PUBLIC_INDEX)

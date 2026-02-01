@@ -1,2 +1,6 @@
 # Vercel 静态构建输出（由 view_xy_server.py --static 生成）
 public/
+
+# 数据文件（DUO/CBS 抓取与计算产出）
+*.csv
+*.gpkg
