@@ -277,7 +277,7 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
         excludedTitle_po: 'Primary schools excluded (too few pupils)',
         excludedDesc_po: 'The following schools were not included because total advised pupils (across years) are below the threshold.',
         algorithmTitle_po: 'How X and Y are calculated (primary)',
-        algorithmBody_po: '<p><strong>X (horizontal):</strong> VWO-advice share = (VWO + 0.5×HAVO_VWO + 0.5×HAVO) / total advised pupils, as a percentage. Higher X = more pupils advised to academic tracks.</p><p><strong>Y (vertical):</strong> Mean WOZ = average WOZ value of dwellings (×1000 €) for the school postcode (PC4), from CBS, weighted by year. Dot size = total advised pupils.</p>',
+        algorithmBody_po: '<p><strong>X (horizontal):</strong> VWO-advice share = (VWO + 0.5×HAVO_VWO + 0.1×HAVO) / total advised pupils, as a percentage. Higher X = more pupils advised to academic tracks.</p><p><strong>Y (vertical):</strong> Mean WOZ = average WOZ value of dwellings (×1000 €) for the school postcode (PC4), from CBS, weighted by year.</p><p>Dot size = total advised pupils.</p><p><strong>WOZ data:</strong> CBS publishes WOZ by postcode for <strong>2021, 2022 and 2023</strong> only. For school years that map to 2019 or 2020 we use the nearest available year (e.g. 2021). If a postcode has no WOZ in CBS, Y is shown as 0.</p>',
         tooltipCandidates_po: 'pupils (advised)'
       },
       zh: {
@@ -326,7 +326,7 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
         excludedTitle_po: '因人数过少未纳入的小学',
         excludedDesc_po: '以下学校因建议人数合计低于阈值未参与图表。',
         algorithmTitle_po: 'X 与 Y 的计算方式（小学）',
-        algorithmBody_po: '<p><strong>X（横轴）：</strong>VWO 升学率 = (VWO + 0.5×HAVO_VWO + 0.5×HAVO) / 总建议人数，百分比。X 越高表示升学术向越多。</p><p><strong>Y（纵轴）：</strong>学校邮编(PC4)对应的 CBS WOZ 均值（千欧），按年加权。点大小 = 建议人数合计。</p>',
+        algorithmBody_po: '<p><strong>X（横轴）：</strong>VWO 升学率 = (VWO + 0.5×HAVO_VWO + 0.1×HAVO) / 总建议人数，百分比。X 越高表示升学术向越多。</p><p><strong>Y（纵轴）：</strong>学校邮编(PC4)对应的 CBS WOZ 均值（千欧），按年加权。</p><p>点大小 = 建议人数合计。</p><p><strong>WOZ 数据说明：</strong>CBS 按邮编公布的 WOZ 仅有 <strong>2021、2022、2023</strong> 年。对应到 2019 或 2020 学年时，采用最近可用年份（如 2021）的 WOZ；若某邮编在 CBS 中无 WOZ，则 Y 显示为 0。</p>',
         tooltipCandidates_po: '人数(建议)'
       },
       nl: {
@@ -375,7 +375,7 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
         excludedTitle_po: 'Basisscholen uitgesloten (te weinig leerlingen)',
         excludedDesc_po: 'De volgende scholen zijn niet opgenomen omdat het totaal geadviseerde leerlingen onder de drempel ligt.',
         algorithmTitle_po: 'Hoe X en Y worden berekend (primair)',
-        algorithmBody_po: '<p><strong>X (horizontaal):</strong> VWO-adviesaandeel = (VWO + 0,5×HAVO_VWO + 0,5×HAVO) / totaal geadviseerde leerlingen, in procent. Hogere X = meer advies naar academische richting.</p><p><strong>Y (verticaal):</strong> Gemiddelde WOZ-waarde woningen (×1000 €) voor de postcode (PC4) van de school, CBS, gewogen naar jaar. Puntgrootte = totaal geadviseerde leerlingen.</p>',
+        algorithmBody_po: '<p><strong>X (horizontaal):</strong> VWO-adviesaandeel = (VWO + 0,5×HAVO_VWO + 0,1×HAVO) / totaal geadviseerde leerlingen, in procent. Hogere X = meer advies naar academische richting.</p><p><strong>Y (verticaal):</strong> Gemiddelde WOZ-waarde woningen (×1000 €) voor de postcode (PC4) van de school, CBS, gewogen naar jaar.</p><p>Puntgrootte = totaal geadviseerde leerlingen.</p><p><strong>WOZ-data:</strong> CBS publiceert WOZ per postcode alleen voor <strong>2021, 2022 en 2023</strong>. Voor schooljaren die op 2019 of 2020 vallen gebruiken we het dichtstbijzijnde beschikbare jaar (bijv. 2021). Als een postcode geen WOZ heeft in CBS, is Y = 0.</p>',
         tooltipCandidates_po: 'leerlingen (advies)'
       }
     };

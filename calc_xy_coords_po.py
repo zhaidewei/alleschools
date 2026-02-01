@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 从 DUO 小学 Schooladviezen CSV 与 CBS WOZ 邮编数据计算每所小学的 X/Y 坐标。
-- X：VWO 升学率（0–100%）= (VWO + 0.5×HAVO_VWO + 0.5×HAVO) / 总建议人数，按年加权。
+- X：VWO 升学率（0–100%）= (VWO + 0.5×HAVO_VWO + 0.1×HAVO) / 总建议人数，按年加权。
 - Y：学校邮编(PC4)对应的 WOZ 均值（千欧），按年加权；允许某年缺失（如 2024、2025 无 WOZ）。
 - 输出 schools_xy_coords_po.csv，格式与中学 schools_xy_coords.csv 类似，命名区分小学(PO)。
 """
@@ -130,8 +130,8 @@ def load_schooladviezen(base: str) -> Dict[str, dict]:
                 niet = parse_int(row.get("ADVIES_NIET_MOGELIJK") or "")
 
                 total = vso + pro + vmbo_b + vmbo_b_k + vmbo_k + vmbo_k_gt + vmbo_gt + vmbo_gt_havo + havo + havo_vwo + vwo + niet
-                # VWO 升学等价人数：VWO=1，HAVO_VWO=0.5，HAVO=0.5
-                vwo_equiv = vwo + 0.5 * havo_vwo + 0.5 * havo
+                # VWO 升学等价人数：VWO=1，HAVO_VWO=0.5，HAVO=0.1
+                vwo_equiv = vwo + 0.5 * havo_vwo + 0.1 * havo
 
                 key = (start, end)
                 if brin not in schools:
