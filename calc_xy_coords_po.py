@@ -9,7 +9,7 @@ import csv
 import json
 import math
 import os
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 
@@ -39,12 +39,13 @@ def parse_int(s: str) -> int:
         return 0
 
 
-def load_woz(base: str) -> Dict[Tuple[str, int], float]:
-    """(pc4, year) -> woz_waarde。pc4 为 4 位字符串。"""
+def load_woz(base: str) -> Tuple[Dict[Tuple[str, int], float], List[int]]:
+    """(pc4, year) -> woz_waarde；pc4 为 4 位字符串。返回 (woz_dict, 可用年份列表)。"""
     path = os.path.join(base, "cbs_woz_per_postcode_year.csv")
     if not os.path.exists(path):
-        return {}
+        return {}, []
     out = {}
+    years_set = set()
     with open(path, "r", encoding="utf-8") as f:
         r = csv.DictReader(f)
         for row in r:
@@ -57,9 +58,29 @@ def load_woz(base: str) -> Dict[Tuple[str, int], float]:
                 y = int(year)
                 v = float(val)
                 out[(pc4, y)] = v
+                years_set.add(y)
             except (ValueError, TypeError):
                 continue
-    return out
+    return out, sorted(years_set)
+
+
+def get_woz_for_year(woz: Dict[Tuple[str, int], float], available_years: List[int], pc4: str, year: int) -> Optional[float]:
+    """若 (pc4, year) 存在则返回；否则用该 pc4 下最近可用年份的 WOZ。"""
+    if (pc4, year) in woz:
+        return woz[(pc4, year)]
+    if not available_years:
+        return None
+    # 找该 pc4 在 available_years 中任意一年的值（优先同年或最近年）
+    best = None
+    best_diff = 9999
+    for ay in available_years:
+        key = (pc4, ay)
+        if key in woz:
+            d = abs(ay - year)
+            if d < best_diff:
+                best_diff = d
+                best = woz[key]
+    return best
 
 
 def load_schooladviezen(base: str) -> Dict[str, dict]:
@@ -128,11 +149,12 @@ def load_schooladviezen(base: str) -> Dict[str, dict]:
 
 def main() -> int:
     base = BASE
-    woz = load_woz(base)
+    woz, woz_years = load_woz(base)
     if not woz:
         print("未找到 cbs_woz_per_postcode_year.csv，Y 将全部为 0")
+        woz_years = []
     else:
-        print(f"已加载 WOZ: {len(woz)} 条 (pc4, year)")
+        print(f"已加载 WOZ: {len(woz)} 条 (pc4, year)，可用年份: {woz_years}")
 
     schools = load_schooladviezen(base)
     if not schools:
@@ -172,9 +194,11 @@ def main() -> int:
             sum_w_x += w * x_year
 
             woz_year = WOZ_YEARS[i]
-            if pc4 and (pc4, woz_year) in woz:
-                sum_w_y += w * woz[(pc4, woz_year)]
-                sum_w_y_weights += w
+            if pc4:
+                woz_val = get_woz_for_year(woz, woz_years, pc4, woz_year)
+                if woz_val is not None:
+                    sum_w_y += w * woz_val
+                    sum_w_y_weights += w
 
         x_linear = sum_w_x / sum_w if sum_w > 0 else 0.0
         # Y 仅用有 WOZ 的年份加权（允许年份缺失，如 2024/2025 无 WOZ）
