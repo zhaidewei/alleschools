@@ -4,3 +4,6 @@ public/
 # 数据文件（DUO/CBS 抓取与计算产出）
 *.csv
 *.gpkg
+# 以下两份 CSV 由 calc_xy_coords*.py 生成，Vercel 静态构建需要读它们，需提交
+!schools_xy_coords.csv
+!schools_xy_coords_po.csv
