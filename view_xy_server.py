@@ -108,7 +108,7 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
   <style>.chartjs-tooltip { max-width: min(320px, 90vw); overflow-wrap: break-word; word-break: break-word; transform-origin: bottom center; } #shareWrap.open #shareDropdown { opacity: 1; visibility: visible; } details summary { list-style: none; } details summary::-webkit-details-marker { display: none; } .input-wrap { position: relative; } .input-hint { position: absolute; left: 0; right: 0; top: 100%; margin-top: 4px; padding: 8px 10px; font-size: 0.75rem; line-height: 1.35; color: var(--hint-text, #475569); background: var(--hint-bg, #f1f5f9); border: 1px solid var(--hint-border, #e2e8f0); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); z-index: 30; opacity: 0; visibility: hidden; transition: opacity 0.15s, visibility 0.15s; pointer-events: none; max-width: min(100%, 420px); } .input-wrap.show-hint .input-hint, .input-wrap:hover .input-hint { opacity: 1; visibility: visible; } .dark .input-hint { --hint-text: #94a3b8; --hint-bg: #334155; --hint-border: #475569; }</style>
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-200 font-sans antialiased">
-  <div id="wrap" class="max-w-6xl mx-auto px-3 sm:px-6 py-8">
+  <div id="wrap" class="max-w-6xl mx-auto px-[2vw] sm:px-6 py-8">
     <div class="flex flex-wrap justify-between items-center gap-4 mb-2">
       <div class="flex items-center gap-1 rounded-lg border border-slate-300 dark:border-slate-500 p-0.5">
         <button type="button" id="navVO" class="navSchoolType px-3 py-1.5 text-sm font-medium rounded-md border-0 bg-slate-200 dark:bg-slate-600 text-slate-800 dark:text-slate-100" data-mode="vo">中学</button>
@@ -142,14 +142,14 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
     <div id="chartWrap" class="mb-8">
       <h1 id="titleMain" class="text-xl font-semibold text-slate-800 dark:text-slate-100 tracking-tight"><a href="/" class="text-slate-800 dark:text-slate-100 hover:text-slate-600 dark:hover:text-slate-300">🏫 Dutch secondary school map</a>: academic level × science focus</h1>
       <p id="subtitleMain" class="mt-1 text-sm text-slate-500 dark:text-slate-400">Data from DUO (excluding international schools). X = academic strength, Y = science share. Dot size = graduation count. <strong id="schoolCount" class="font-medium text-slate-700 dark:text-slate-300">0</strong> schools shown.</p>
-      <div class="mt-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-600 shadow-sm p-3 sm:p-6">
+      <div class="mt-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-600 shadow-sm p-[2vw] sm:p-6">
         <div class="w-full aspect-[4/3] min-h-[55vh] sm:min-h-[420px] relative">
           <canvas id="chart" class="w-full h-full block"></canvas>
           <div id="chartLabels" class="absolute inset-0 pointer-events-none overflow-hidden" style="left:0;top:0;right:0;bottom:0;"></div>
         </div>
       </div>
     </div>
-    <div class="controls flex flex-wrap items-center gap-4 sm:gap-6 py-4 px-3 sm:px-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-600 shadow-sm">
+    <div class="controls flex flex-wrap items-center gap-4 sm:gap-6 py-4 px-[2vw] sm:px-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-600 shadow-sm">
       <div id="schoolSearchWrap" class="input-wrap flex items-center gap-2 flex-1 min-w-[200px] basis-[200px]">
         <label id="labelSchoolSearch" class="text-sm font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">School search</label>
         <input type="text" id="schoolSearch" placeholder="Name or acronym (e.g. HWC)" class="flex-1 min-w-[120px] rounded-lg border border-slate-300 dark:border-slate-500 px-3 py-2 text-sm text-slate-800 dark:text-slate-200 dark:bg-slate-700 placeholder-slate-400 dark:placeholder-slate-500 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" title="">
