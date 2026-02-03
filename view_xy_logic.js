@@ -19,16 +19,23 @@
     return s.split(',').map(function (t) { return t.trim().toUpperCase(); }).filter(Boolean);
   }
 
-  /** 点 p 是否匹配任意一个搜索词（校名、BRIN、gemeente、邮编） */
+  /** 从校名生成首字母缩写（按空格分词，取每词首字母） */
+  function acronymFromName(naam) {
+    if (!naam || !String(naam).trim()) return '';
+    return String(naam).trim().split(/\s+/).map(function (w) { return (w[0] || '').toUpperCase(); }).join('');
+  }
+
+  /** 点 p 是否匹配任意一个搜索词（校名、首字母缩写、BRIN、gemeente、邮编） */
   function pointMatchesSearch(p, searchTerms) {
     if (!searchTerms || searchTerms.length === 0) return true;
     const naam = (p.label || '').toUpperCase();
+    const acr = acronymFromName(p.label || '');
     const brin = (p.brin || '').toUpperCase();
     const gemeente = (p.gemeente || '').toUpperCase();
     const postcode = (p.postcode || '').toUpperCase().replace(/\s/g, '');
     return searchTerms.some(function (term) {
       const termNorm = term.replace(/\s/g, '');
-      return naam.includes(term) || brin.includes(term) || gemeente.includes(term) || postcode.includes(termNorm);
+      return naam.includes(term) || (acr && acr.includes(termNorm)) || brin.includes(term) || gemeente.includes(term) || postcode.includes(termNorm);
     });
   }
 
@@ -112,6 +119,7 @@
   const VIEW_XY = {
     parseSearchTerms: parseSearchTerms,
     parseGemeenteFilter: parseGemeenteFilter,
+    acronymFromName: acronymFromName,
     pointMatchesSearch: pointMatchesSearch,
     getNameHighlights: getNameHighlights,
     hashString: hashString,

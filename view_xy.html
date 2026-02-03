@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <script>document.documentElement.classList.toggle('dark', localStorage.getItem('theme')==='dark');</script>
-  <style>.chartjs-tooltip { max-width: min(320px, 90vw); overflow-wrap: break-word; word-break: break-word; transform-origin: bottom center; } #shareWrap.open #shareDropdown { opacity: 1; visibility: visible; } details summary { list-style: none; } details summary::-webkit-details-marker { display: none; }</style>
+  <style>.chartjs-tooltip { max-width: min(320px, 90vw); overflow-wrap: break-word; word-break: break-word; transform-origin: bottom center; } #shareWrap.open #shareDropdown { opacity: 1; visibility: visible; } details summary { list-style: none; } details summary::-webkit-details-marker { display: none; } .input-wrap { position: relative; } .input-hint { position: absolute; left: 0; right: 0; top: 100%; margin-top: 4px; padding: 8px 10px; font-size: 0.75rem; line-height: 1.35; color: var(--hint-text, #475569); background: var(--hint-bg, #f1f5f9); border: 1px solid var(--hint-border, #e2e8f0); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); z-index: 30; opacity: 0; visibility: hidden; transition: opacity 0.15s, visibility 0.15s; pointer-events: none; max-width: min(100%, 420px); } .input-wrap.show-hint .input-hint, .input-wrap:hover .input-hint { opacity: 1; visibility: visible; } .dark .input-hint { --hint-text: #94a3b8; --hint-bg: #334155; --hint-border: #475569; }</style>
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-200 font-sans antialiased">
   <div id="wrap" class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
@@ -60,13 +60,15 @@
       </div>
     </div>
     <div class="controls flex flex-wrap items-center gap-4 sm:gap-6 py-4 px-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-600 shadow-sm">
-      <div class="flex items-center gap-2">
+      <div id="schoolSearchWrap" class="input-wrap flex items-center gap-2 flex-1 min-w-0">
         <label id="labelSchoolSearch" class="text-sm font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">School search</label>
-        <input type="text" id="schoolSearch" placeholder="Search by name or acronym (e.g. HWC), comma for multiple, partial match highlighted" class="flex-1 min-w-[200px] rounded-lg border border-slate-300 dark:border-slate-500 px-3 py-2 text-sm text-slate-800 dark:text-slate-200 dark:bg-slate-700 placeholder-slate-400 dark:placeholder-slate-500 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400">
+        <input type="text" id="schoolSearch" placeholder="Name or acronym (e.g. HWC)" class="flex-1 min-w-[120px] rounded-lg border border-slate-300 dark:border-slate-500 px-3 py-2 text-sm text-slate-800 dark:text-slate-200 dark:bg-slate-700 placeholder-slate-400 dark:placeholder-slate-500 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" title="">
+        <div id="schoolSearchHint" class="input-hint" role="tooltip" aria-live="polite"></div>
       </div>
-      <div class="flex items-center gap-2">
+      <div id="gemeenteFilterWrap" class="input-wrap flex items-center gap-2 flex-1 min-w-0">
         <label id="labelGemeente" class="text-sm font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">City hall filter</label>
-        <input type="text" id="gemeenteFilter" placeholder="Leave empty for all, comma for multiple" class="flex-1 min-w-[180px] rounded-lg border border-slate-300 dark:border-slate-500 px-3 py-2 text-sm text-slate-800 dark:text-slate-200 dark:bg-slate-700 placeholder-slate-400 dark:placeholder-slate-500 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400">
+        <input type="text" id="gemeenteFilter" placeholder="Empty = all, comma for multiple" class="flex-1 min-w-[120px] rounded-lg border border-slate-300 dark:border-slate-500 px-3 py-2 text-sm text-slate-800 dark:text-slate-200 dark:bg-slate-700 placeholder-slate-400 dark:placeholder-slate-500 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" title="">
+        <div id="gemeenteFilterHint" class="input-hint" role="tooltip" aria-live="polite"></div>
       </div>
       <div class="flex flex-wrap items-center gap-4">
         <label class="inline-flex items-center gap-2 cursor-pointer text-sm text-slate-600 dark:text-slate-400">
@@ -176,8 +178,10 @@
         subtitleAfter: ' schools shown.',
         labelSchoolSearch: 'School search',
         schoolSearchPlaceholder: 'Search by name or acronym (e.g. HWC), comma for multiple, partial match highlighted',
+        schoolSearchPlaceholderShort: 'Name or acronym (e.g. HWC)',
         labelGemeente: 'City hall filter',
         gemeentePlaceholder: 'Leave empty for all, comma for multiple',
+        gemeentePlaceholderShort: 'Empty = all, comma for multiple',
         labelLinear: 'Linear scale',
         labelLog: 'Log scale',
         labelShowVMBO: 'Include VMBO-only schools',
@@ -230,8 +234,10 @@
         subtitleAfter: ' 所学校。',
         labelSchoolSearch: '学校搜索',
         schoolSearchPlaceholder: '按校名或首字母缩写（如 HWC）搜索，逗号分隔多个，部分匹配高亮',
+        schoolSearchPlaceholderShort: '校名或缩写（如 HWC）',
         labelGemeente: '市政厅 过滤',
         gemeentePlaceholder: '不输入显示全部，多个用逗号分隔',
+        gemeentePlaceholderShort: '空=全部，逗号分隔',
         labelLinear: '线性坐标',
         labelLog: '对数坐标',
         labelShowVMBO: '包括纯 VMBO 学校',
@@ -284,8 +290,10 @@
         subtitleAfter: ' scholen getoond.',
         labelSchoolSearch: 'Zoek school',
         schoolSearchPlaceholder: 'Zoek op naam of afkorting (bijv. HWC), komma voor meerdere, deelmatch gemarkeerd',
+        schoolSearchPlaceholderShort: 'Naam of afkorting (bijv. HWC)',
         labelGemeente: 'Gemeentefilter',
         gemeentePlaceholder: 'Leeg = alle, komma voor meerdere',
+        gemeentePlaceholderShort: 'Leeg = alle, komma voor meerdere',
         labelLinear: 'Lineaire schaal',
         labelLog: 'Logschaal',
         labelShowVMBO: 'Inclusief alleen VMBO-scholen',
@@ -346,11 +354,21 @@
       var labelSchoolSearch = document.getElementById('labelSchoolSearch');
       if (labelSchoolSearch) labelSchoolSearch.textContent = t('labelSchoolSearch');
       var schoolSearch = document.getElementById('schoolSearch');
-      if (schoolSearch) schoolSearch.placeholder = t('schoolSearchPlaceholder');
+      if (schoolSearch) {
+        schoolSearch.placeholder = t('schoolSearchPlaceholderShort');
+        schoolSearch.title = t('schoolSearchPlaceholder');
+      }
+      var schoolSearchHint = document.getElementById('schoolSearchHint');
+      if (schoolSearchHint) schoolSearchHint.textContent = t('schoolSearchPlaceholder');
       var labelGemeente = document.getElementById('labelGemeente');
       if (labelGemeente) labelGemeente.textContent = t('labelGemeente');
       var gemeenteFilter = document.getElementById('gemeenteFilter');
-      if (gemeenteFilter) gemeenteFilter.placeholder = t('gemeentePlaceholder');
+      if (gemeenteFilter) {
+        gemeenteFilter.placeholder = t('gemeentePlaceholderShort');
+        gemeenteFilter.title = t('gemeentePlaceholder');
+      }
+      var gemeenteFilterHint = document.getElementById('gemeenteFilterHint');
+      if (gemeenteFilterHint) gemeenteFilterHint.textContent = t('gemeentePlaceholder');
       var labelLinear = document.getElementById('labelLinear');
       if (labelLinear) labelLinear.textContent = t('labelLinear');
       var labelLog = document.getElementById('labelLog');
@@ -559,6 +577,28 @@
         });
       });
     }
+    function setSampleTooltip() {
+      if (getSchoolSearchTerms().length > 0) {
+        if (chart.tooltip) chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+        chart.update();
+        return;
+      }
+      const datasets = chart.data.datasets || [];
+      const withData = datasets.map(function(ds, i) { return { i: i, len: (ds.data && ds.data.length) || 0 }; }).filter(function(o) { return o.len > 0; });
+      if (withData.length === 0) return;
+      const chosen = withData[Math.floor(Math.random() * withData.length)];
+      const datasetIndex = chosen.i;
+      const dataArr = chart.data.datasets[datasetIndex].data;
+      const index = Math.floor(Math.random() * dataArr.length);
+      const pt = dataArr[index];
+      if (!pt || chart.scales == null || !chart.scales.x || !chart.scales.y) return;
+      const px = chart.scales.x.getPixelForValue(pt.x);
+      const py = chart.scales.y.getPixelForValue(pt.y);
+      if (chart.tooltip && typeof chart.tooltip.setActiveElements === 'function') {
+        chart.tooltip.setActiveElements([{ datasetIndex: datasetIndex, index: index }], { x: px, y: py });
+        chart.update();
+      }
+    }
     function refreshChart() {
       const coord = document.querySelector('input[name="coord"]:checked').value;
       const points = getFilteredPoints(coord === 'log' ? log : linear);
@@ -577,7 +617,7 @@
         chart.options.scales.y.ticks = { stepSize: undefined };
       }
       chart.update();
-      requestAnimationFrame(function() { updateChartLabels(); });
+      requestAnimationFrame(function() { updateChartLabels(); setSampleTooltip(); });
     }
     function setChartScaleForMode() {
       const isLog = document.querySelector('input[name="coord"]:checked') && document.querySelector('input[name="coord"]:checked').value === 'log';
@@ -869,19 +909,27 @@
       refreshChart();
     });
 
-    document.getElementById('schoolSearch').addEventListener('input', function() { refreshChart(); updateShareLinks(); });
-    document.getElementById('schoolSearch').addEventListener('change', function() { refreshChart(); updateShareLinks(); });
+    var schoolSearchInput = document.getElementById('schoolSearch');
+    var schoolSearchWrap = document.getElementById('schoolSearchWrap');
+    schoolSearchInput.addEventListener('input', function() { refreshChart(); updateShareLinks(); });
+    schoolSearchInput.addEventListener('change', function() { refreshChart(); updateShareLinks(); });
+    schoolSearchInput.addEventListener('focus', function() { if (schoolSearchWrap) schoolSearchWrap.classList.add('show-hint'); });
+    schoolSearchInput.addEventListener('blur', function() { if (schoolSearchWrap) schoolSearchWrap.classList.remove('show-hint'); });
 
-    document.getElementById('gemeenteFilter').addEventListener('input', function() {
+    var gemeenteFilterInput = document.getElementById('gemeenteFilter');
+    var gemeenteFilterWrap = document.getElementById('gemeenteFilterWrap');
+    gemeenteFilterInput.addEventListener('input', function() {
       renderGemeenteCheckboxes();
       refreshChart();
       updateShareLinks();
     });
-    document.getElementById('gemeenteFilter').addEventListener('change', function() {
+    gemeenteFilterInput.addEventListener('change', function() {
       renderGemeenteCheckboxes();
       refreshChart();
       updateShareLinks();
     });
+    gemeenteFilterInput.addEventListener('focus', function() { if (gemeenteFilterWrap) gemeenteFilterWrap.classList.add('show-hint'); });
+    gemeenteFilterInput.addEventListener('blur', function() { if (gemeenteFilterWrap) gemeenteFilterWrap.classList.remove('show-hint'); });
 
     var showVMBOEl = document.getElementById('showVMBO');
     if (showVMBOEl) showVMBOEl.addEventListener('change', refreshChart);

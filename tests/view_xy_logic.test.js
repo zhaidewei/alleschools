@@ -32,6 +32,22 @@ describe('parseGemeenteFilter', function () {
   });
 });
 
+describe('acronymFromName', function () {
+  it('returns empty for empty or whitespace', function () {
+    assert.strictEqual(VIEW_XY.acronymFromName(''), '');
+    assert.strictEqual(VIEW_XY.acronymFromName('   '), '');
+    assert.strictEqual(VIEW_XY.acronymFromName(null), '');
+  });
+  it('takes first letter of each word, uppercase', function () {
+    assert.strictEqual(VIEW_XY.acronymFromName('H Wesselink College'), 'HWC');
+    assert.strictEqual(VIEW_XY.acronymFromName('Amsterdam School'), 'AS');
+    assert.strictEqual(VIEW_XY.acronymFromName('single'), 'S');
+  });
+  it('trims and collapses spaces', function () {
+    assert.strictEqual(VIEW_XY.acronymFromName('  a  b  '), 'AB');
+  });
+});
+
 describe('pointMatchesSearch', function () {
   it('returns true when no terms', function () {
     assert.strictEqual(VIEW_XY.pointMatchesSearch({ label: 'X' }, []), true);
@@ -40,6 +56,13 @@ describe('pointMatchesSearch', function () {
   it('matches on label (naam)', function () {
     assert.strictEqual(VIEW_XY.pointMatchesSearch({ label: 'Amsterdam School', brin: '', gemeente: '', postcode: '' }, ['AMS']), true);
     assert.strictEqual(VIEW_XY.pointMatchesSearch({ label: 'Amsterdam School', brin: '', gemeente: '', postcode: '' }, ['OTHER']), false);
+  });
+  it('matches on acronym (full and partial)', function () {
+    var p = { label: 'H Wesselink College', brin: '', gemeente: '', postcode: '' };
+    assert.strictEqual(VIEW_XY.pointMatchesSearch(p, ['HWC']), true);
+    assert.strictEqual(VIEW_XY.pointMatchesSearch(p, ['WC']), true);
+    assert.strictEqual(VIEW_XY.pointMatchesSearch(p, ['HW']), true);
+    assert.strictEqual(VIEW_XY.pointMatchesSearch(p, ['XY']), false);
   });
   it('matches on brin, gemeente, postcode', function () {
     assert.strictEqual(VIEW_XY.pointMatchesSearch({ label: '', brin: '02QZ00', gemeente: '', postcode: '' }, ['02QZ']), true);
