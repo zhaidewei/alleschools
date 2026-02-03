@@ -62,7 +62,7 @@
     <div class="controls flex flex-wrap items-center gap-4 sm:gap-6 py-4 px-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-600 shadow-sm">
       <div class="flex items-center gap-2">
         <label id="labelSchoolSearch" class="text-sm font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">School search</label>
-        <input type="text" id="schoolSearch" placeholder="Search by name or BRIN, comma for multiple, partial match highlighted" class="flex-1 min-w-[200px] rounded-lg border border-slate-300 dark:border-slate-500 px-3 py-2 text-sm text-slate-800 dark:text-slate-200 dark:bg-slate-700 placeholder-slate-400 dark:placeholder-slate-500 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400">
+        <input type="text" id="schoolSearch" placeholder="Search by name or acronym (e.g. HWC), comma for multiple, partial match highlighted" class="flex-1 min-w-[200px] rounded-lg border border-slate-300 dark:border-slate-500 px-3 py-2 text-sm text-slate-800 dark:text-slate-200 dark:bg-slate-700 placeholder-slate-400 dark:placeholder-slate-500 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400">
       </div>
       <div class="flex items-center gap-2">
         <label id="labelGemeente" class="text-sm font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">City hall filter</label>
@@ -175,7 +175,7 @@
         subtitleBefore: 'Data from DUO (excluding international schools). X = academic strength, Y = science share. Dot size = graduation count. ',
         subtitleAfter: ' schools shown.',
         labelSchoolSearch: 'School search',
-        schoolSearchPlaceholder: 'Search by name or BRIN, comma for multiple, partial match highlighted',
+        schoolSearchPlaceholder: 'Search by name or acronym (e.g. HWC), comma for multiple, partial match highlighted',
         labelGemeente: 'City hall filter',
         gemeentePlaceholder: 'Leave empty for all, comma for multiple',
         labelLinear: 'Linear scale',
@@ -229,7 +229,7 @@
         subtitleBefore: '数据来自DUO（不含国际学校），X轴代表学术强度，Y轴代表理科占比，点的大小代表毕业人数。共 ',
         subtitleAfter: ' 所学校。',
         labelSchoolSearch: '学校搜索',
-        schoolSearchPlaceholder: '按校名或 BRIN 搜索，逗号分隔多个，部分匹配高亮',
+        schoolSearchPlaceholder: '按校名或首字母缩写（如 HWC）搜索，逗号分隔多个，部分匹配高亮',
         labelGemeente: '市政厅 过滤',
         gemeentePlaceholder: '不输入显示全部，多个用逗号分隔',
         labelLinear: '线性坐标',
@@ -283,7 +283,7 @@
         subtitleBefore: 'Data van DUO (zonder internationale scholen). X = academisch niveau, Y = bètandeel. Puntgrootte = aantal geslaagden. ',
         subtitleAfter: ' scholen getoond.',
         labelSchoolSearch: 'Zoek school',
-        schoolSearchPlaceholder: 'Zoek op naam of BRIN, komma voor meerdere, deelmatch gemarkeerd',
+        schoolSearchPlaceholder: 'Zoek op naam of afkorting (bijv. HWC), komma voor meerdere, deelmatch gemarkeerd',
         labelGemeente: 'Gemeentefilter',
         gemeentePlaceholder: 'Leeg = alle, komma voor meerdere',
         labelLinear: 'Lineaire schaal',
@@ -683,15 +683,20 @@
       if (!raw) return [];
       return raw.split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
     }
+    function acronymFromName(naam) {
+      if (!naam || !String(naam).trim()) return '';
+      return String(naam).trim().split(/\s+/).map(w => (w[0] || '').toUpperCase()).join('');
+    }
     function pointMatchesSearch(p, searchTerms) {
       if (!searchTerms || searchTerms.length === 0) return true;
       const naam = (p.label || '').toUpperCase();
+      const acr = acronymFromName(p.label || '');
       const brin = (p.brin || '').toUpperCase();
       const gemeente = (p.gemeente || '').toUpperCase();
       const postcode = (p.postcode || '').toUpperCase().replace(/\s/g, '');
       return searchTerms.some(term => {
         const termNorm = term.replace(/\s/g, '');
-        return naam.includes(term) || brin.includes(term) || gemeente.includes(term) || postcode.includes(termNorm);
+        return naam.includes(term) || (acr && acr.includes(termNorm)) || brin.includes(term) || gemeente.includes(term) || postcode.includes(termNorm);
       });
     }
     function getNameHighlights(label, searchTerms) {
