@@ -108,6 +108,40 @@
     };
   }
 
+  /**
+   * 从 meta.i18n 中按优先级（lang -> en -> 任意一种）查找某个 metric 的定义。
+   * 返回值类似 { label, short, description }，找不到时返回 null。
+   */
+  function getMetricFromMeta(meta, metricId, lang) {
+    if (!meta || !metricId || !meta.i18n || typeof meta.i18n !== 'object') {
+      return null;
+    }
+    const tried = new Set();
+    const order = [];
+    if (lang && meta.i18n[lang]) {
+      order.push(lang);
+      tried.add(lang);
+    }
+    if (meta.i18n.en && !tried.has('en')) {
+      order.push('en');
+      tried.add('en');
+    }
+    Object.keys(meta.i18n).forEach(function (code) {
+      if (!tried.has(code)) {
+        order.push(code);
+        tried.add(code);
+      }
+    });
+    for (let i = 0; i < order.length; i++) {
+      const code = order[i];
+      const loc = meta.i18n[code];
+      if (!loc || !loc.metrics) continue;
+      const metric = loc.metrics[metricId];
+      if (metric) return metric;
+    }
+    return null;
+  }
+
   /** 仅按 gemeente 文本筛选：parts 为空则返回全部，否则保留 gemeente 包含任意 part 的点 */
   function filterPointsByGemeenteText(points, parts) {
     if (!parts || parts.length === 0) return points;
@@ -127,6 +161,7 @@
     gemeenteToBorderColor: gemeenteToBorderColor,
     sizeToRadius: sizeToRadius,
     filterPointsByGemeenteText: filterPointsByGemeenteText,
+    getMetricFromMeta: getMetricFromMeta,
   };
 
   if (typeof module !== 'undefined' && module.exports) {

@@ -1,3 +1,4 @@
 # 开发与 pre-commit 用
 pytest>=7.0.0
 pre-commit>=3.0.0
+PyYAML>=6.0.0

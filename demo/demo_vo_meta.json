@@ -1,0 +1,140 @@
+{
+  "version": "1.0.0",
+  "layer": "vo",
+  "source": {
+    "duo": "VO examens 2019–2024",
+    "cbs": "WOZ per PC4 2019–2024"
+  },
+  "axes": {
+    "x": {
+      "field": "x_linear",
+      "scale": "linear",
+      "domain": [0, 100],
+      "metric_id": "vo_vwo_pass_share"
+    },
+    "y": {
+      "field": "y_linear",
+      "scale": "linear",
+      "domain": [0, 100],
+      "metric_id": "vo_science_pass_share"
+    },
+    "size": {
+      "field": "size",
+      "metric_id": "vo_candidates_total"
+    }
+  },
+  "fields": {
+    "id": { "kind": "id" },
+    "brin": { "kind": "id" },
+    "name": {
+      "kind": "dimension",
+      "searchable": true
+    },
+    "municipality": {
+      "kind": "dimension",
+      "searchable": true
+    },
+    "postcode": {
+      "kind": "dimension",
+      "searchable": true
+    },
+    "pc4": {
+      "kind": "dimension",
+      "searchable": true
+    },
+    "school_type": {
+      "kind": "dimension",
+      "searchable": true
+    },
+    "x_linear": { "kind": "metric" },
+    "y_linear": { "kind": "metric" },
+    "x_log": { "kind": "metric" },
+    "y_log": { "kind": "metric" },
+    "size": { "kind": "metric" },
+    "years_covered": { "kind": "dimension" },
+    "flags": { "kind": "dimension" }
+  },
+  "i18n": {
+    "nl": {
+      "metrics": {
+        "vo_vwo_pass_share": {
+          "label": "VWO-slaagpercentage",
+          "short": "VWO geslaagd %",
+          "description": "Gewogen aandeel geslaagde VWO-kandidaten over alle beschikbare examenjaren."
+        },
+        "vo_science_pass_share": {
+          "label": "Bètaprofiel slaagpercentage",
+          "short": "Bèta geslaagd %",
+          "description": "Indicatief slaagpercentage voor natuurprofiel/vakken (voorbeeld指标，仅用于 demo)。"
+        },
+        "vo_candidates_total": {
+          "label": "Totaal aantal examenkandidaten",
+          "short": "Kandidaten",
+          "description": "Totaal aantal examenkandidaten over alle jaren，用于散点大小。"
+        }
+      },
+      "dimensions": {
+        "school_type": {
+          "values": {
+            "HAVO_VWO": "HAVO/VWO",
+            "VMBO": "VMBO"
+          }
+        }
+      }
+    },
+    "en": {
+      "metrics": {
+        "vo_vwo_pass_share": {
+          "label": "VWO pass rate",
+          "short": "VWO pass %",
+          "description": "Weighted share of VWO candidates who passed the final exams across all years."
+        },
+        "vo_science_pass_share": {
+          "label": "Science-track pass rate",
+          "short": "Science pass %",
+          "description": "Illustrative pass rate for science-oriented profiles/subjects (demo metric)."
+        },
+        "vo_candidates_total": {
+          "label": "Total exam candidates",
+          "short": "Candidates",
+          "description": "Total number of exam candidates across all years, used for point size."
+        }
+      },
+      "dimensions": {
+        "school_type": {
+          "values": {
+            "HAVO_VWO": "HAVO/VWO",
+            "VMBO": "VMBO"
+          }
+        }
+      }
+    },
+    "zh": {
+      "metrics": {
+        "vo_vwo_pass_share": {
+          "label": "VWO 毕业率",
+          "short": "VWO 毕业 %",
+          "description": "按年份加权的 VWO 考试通过率。"
+        },
+        "vo_science_pass_share": {
+          "label": "理科方向通过率",
+          "short": "理科通过 %",
+          "description": "用于示意的理科方向通过率 demo 指标。"
+        },
+        "vo_candidates_total": {
+          "label": "总考生人数",
+          "short": "考生数",
+          "description": "所有年份的总考生人数，用于散点大小。"
+        }
+      },
+      "dimensions": {
+        "school_type": {
+          "values": {
+            "HAVO_VWO": "HAVO/VWO",
+            "VMBO": "VMBO"
+          }
+        }
+      }
+    }
+  }
+}

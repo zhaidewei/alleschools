@@ -1,5 +1,5 @@
 {
-  "buildCommand": "python3 view_xy_server.py --static",
+  "buildCommand": "bash rerun_data.sh && python3 view_xy_server.py --static",
   "outputDirectory": "public",
   "framework": null
 }

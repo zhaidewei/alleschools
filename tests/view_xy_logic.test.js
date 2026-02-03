@@ -160,3 +160,49 @@ describe('filterPointsByGemeenteText', function () {
     assert.strictEqual(out[0].gemeente, "'s-Gravenhage");
   });
 });
+
+describe('getMetricFromMeta', function () {
+  const meta = {
+    i18n: {
+      nl: {
+        metrics: {
+          po_vwo_advice_share: {
+            label: 'VWO-advies aandeel',
+            short: 'VWO-advies %',
+          },
+        },
+      },
+      en: {
+        metrics: {
+          po_vwo_advice_share: {
+            label: 'VWO advice share',
+            short: 'VWO advice %',
+          },
+        },
+      },
+    },
+  };
+
+  it('returns null when meta or metricId missing', function () {
+    assert.strictEqual(VIEW_XY.getMetricFromMeta(null, 'x', 'en'), null);
+    assert.strictEqual(VIEW_XY.getMetricFromMeta({}, 'x', 'en'), null);
+    assert.strictEqual(VIEW_XY.getMetricFromMeta(meta, '', 'en'), null);
+  });
+
+  it('prefers requested lang when available', function () {
+    const m = VIEW_XY.getMetricFromMeta(meta, 'po_vwo_advice_share', 'nl');
+    assert.ok(m);
+    assert.strictEqual(m.label, 'VWO-advies aandeel');
+  });
+
+  it('falls back to en when requested lang missing', function () {
+    const m = VIEW_XY.getMetricFromMeta(meta, 'po_vwo_advice_share', 'zh');
+    assert.ok(m);
+    assert.strictEqual(m.label, 'VWO advice share');
+  });
+
+  it('returns null when metricId not found in any language', function () {
+    const m = VIEW_XY.getMetricFromMeta(meta, 'unknown_metric', 'nl');
+    assert.strictEqual(m, null);
+  });
+});

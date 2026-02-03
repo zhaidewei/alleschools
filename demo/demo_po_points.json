@@ -1,0 +1,266 @@
+[
+  {
+    "id": "00AP00",
+    "layer": "po",
+    "brin": "00AP00",
+    "name": "Wereldwijs",
+    "municipality": "Zoetermeer",
+    "postcode": "2716PH",
+    "pc4": "2716",
+    "school_type": "Bo",
+    "x_linear": 30.53,
+    "y_linear": 279.95,
+    "x_log": 0.1157,
+    "y_log": 0.5797,
+    "size": 83,
+    "years_covered": [
+      "2019-2020",
+      "2020-2021",
+      "2021-2022",
+      "2022-2023",
+      "2023-2024",
+      "2024-2025"
+    ],
+    "flags": {
+      "has_full_woz": true,
+      "low_sample_excluded": false
+    }
+  },
+  {
+    "id": "00AR00",
+    "layer": "po",
+    "brin": "00AR00",
+    "name": "BS \"De Maasparel",
+    "municipality": "Maasgouw",
+    "postcode": "6107AW",
+    "pc4": "6107",
+    "school_type": "Bo",
+    "x_linear": 27.27,
+    "y_linear": 292.57,
+    "x_log": 0.1047,
+    "y_log": 0.5939,
+    "size": 98,
+    "years_covered": [
+      "2019-2020",
+      "2020-2021",
+      "2021-2022",
+      "2022-2023",
+      "2023-2024",
+      "2024-2025"
+    ],
+    "flags": {
+      "has_full_woz": true,
+      "low_sample_excluded": false
+    }
+  },
+  {
+    "id": "00AV00",
+    "layer": "po",
+    "brin": "00AV00",
+    "name": "De Morgenster",
+    "municipality": "Nissewaard",
+    "postcode": "3201CN",
+    "pc4": "3201",
+    "school_type": "Bo",
+    "x_linear": 26.21,
+    "y_linear": 247.24,
+    "x_log": 0.1011,
+    "y_log": 0.5406,
+    "size": 53,
+    "years_covered": [
+      "2019-2020",
+      "2020-2021",
+      "2021-2022",
+      "2022-2023",
+      "2023-2024",
+      "2024-2025"
+    ],
+    "flags": {
+      "has_full_woz": true,
+      "low_sample_excluded": false
+    }
+  },
+  {
+    "id": "00AZ00",
+    "layer": "po",
+    "brin": "00AZ00",
+    "name": "De Stapsteen",
+    "municipality": "Molenlanden",
+    "postcode": "2971AR",
+    "pc4": "2971",
+    "school_type": "Bo",
+    "x_linear": 26.29,
+    "y_linear": 362.05,
+    "x_log": 0.1014,
+    "y_log": 0.6647,
+    "size": 77,
+    "years_covered": [
+      "2019-2020",
+      "2020-2021",
+      "2021-2022",
+      "2022-2023",
+      "2023-2024",
+      "2024-2025"
+    ],
+    "flags": {
+      "has_full_woz": true,
+      "low_sample_excluded": false
+    }
+  },
+  {
+    "id": "00BA00",
+    "layer": "po",
+    "brin": "00BA00",
+    "name": "OBS De Klimboom",
+    "municipality": "Overbetuwe",
+    "postcode": "6666EB",
+    "pc4": "6666",
+    "school_type": "Bo",
+    "x_linear": 34.55,
+    "y_linear": 259.0,
+    "x_log": 0.1289,
+    "y_log": 0.5551,
+    "size": 11,
+    "years_covered": [
+      "2019-2020"
+    ],
+    "flags": {
+      "has_full_woz": true,
+      "low_sample_excluded": false
+    }
+  },
+  {
+    "id": "00BB00",
+    "layer": "po",
+    "brin": "00BB00",
+    "name": "Obs Letterwies",
+    "municipality": "Oldambt",
+    "postcode": "9944AR",
+    "pc4": "9944",
+    "school_type": "Bo",
+    "x_linear": 17.21,
+    "y_linear": 230.22,
+    "x_log": 0.0689,
+    "y_log": 0.5188,
+    "size": 50,
+    "years_covered": [
+      "2019-2020",
+      "2020-2021",
+      "2022-2023",
+      "2023-2024",
+      "2024-2025"
+    ],
+    "flags": {
+      "has_full_woz": true,
+      "low_sample_excluded": false
+    }
+  },
+  {
+    "id": "00BS00",
+    "layer": "po",
+    "brin": "00BS00",
+    "name": "Geref Basisschool",
+    "municipality": "Dalfsen",
+    "postcode": "7711KP",
+    "pc4": "7711",
+    "school_type": "Bo",
+    "x_linear": 24.66,
+    "y_linear": 355.48,
+    "x_log": 0.0957,
+    "y_log": 0.6585,
+    "size": 97,
+    "years_covered": [
+      "2019-2020",
+      "2020-2021",
+      "2021-2022",
+      "2022-2023",
+      "2023-2024",
+      "2024-2025"
+    ],
+    "flags": {
+      "has_full_woz": true,
+      "low_sample_excluded": false
+    }
+  },
+  {
+    "id": "00BW00",
+    "layer": "po",
+    "brin": "00BW00",
+    "name": "Jenaplanschool De Vlieger",
+    "municipality": "Sittard-Geleen",
+    "postcode": "6131KJ",
+    "pc4": "6131",
+    "school_type": "Bo",
+    "x_linear": 22.1,
+    "y_linear": 224.43,
+    "x_log": 0.0867,
+    "y_log": 0.5111,
+    "size": 82,
+    "years_covered": [
+      "2019-2020",
+      "2020-2021",
+      "2021-2022",
+      "2022-2023",
+      "2023-2024",
+      "2024-2025"
+    ],
+    "flags": {
+      "has_full_woz": true,
+      "low_sample_excluded": false
+    }
+  },
+  {
+    "id": "00BZ00",
+    "layer": "po",
+    "brin": "00BZ00",
+    "name": "Geref SBO Het Speelwerk",
+    "municipality": "Zwolle",
+    "postcode": "8031HL",
+    "pc4": "8031",
+    "school_type": "Sbo",
+    "x_linear": 0.19,
+    "y_linear": 216.81,
+    "x_log": 0.0008,
+    "y_log": 0.5008,
+    "size": 88,
+    "years_covered": [
+      "2019-2020",
+      "2020-2021",
+      "2021-2022",
+      "2022-2023",
+      "2023-2024",
+      "2024-2025"
+    ],
+    "flags": {
+      "has_full_woz": true,
+      "low_sample_excluded": false
+    }
+  },
+  {
+    "id": "00CD00",
+    "layer": "po",
+    "brin": "00CD00",
+    "name": "Basisschool De Lockaert",
+    "municipality": "Oss",
+    "postcode": "5345JG",
+    "pc4": "5345",
+    "school_type": "Bo",
+    "x_linear": 31.28,
+    "y_linear": 298.9,
+    "x_log": 0.1182,
+    "y_log": 0.6009,
+    "size": 119,
+    "years_covered": [
+      "2019-2020",
+      "2020-2021",
+      "2021-2022",
+      "2022-2023",
+      "2023-2024",
+      "2024-2025"
+    ],
+    "flags": {
+      "has_full_woz": true,
+      "low_sample_excluded": false
+    }
+  }
+]

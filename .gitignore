@@ -2,12 +2,26 @@
 public/
 
 # 数据文件（DUO/CBS 抓取与计算产出）
-*.csv
 *.gpkg
-# 以下两份 CSV 由 calc_xy_coords*.py 生成，Vercel 静态构建需要读它们，需提交
-!schools_xy_coords.csv
-!schools_xy_coords_po.csv
+
+# 外部原始数据统一放在 raw_data/ 下，由 CLI fetch 写入，不进版本控制
+raw_data/
+
+# 纯生成输出：集中放在 generated/ 下，不进入版本控制
+generated/
+
+run_report_*.json
 
 # 本地开发
 .venv/
 .pytest_cache/
+
+# feature 中间信息
+P*_*/
+
+# Local Archive
+archive/
+
+# dev temp
+refactor/
+backlogs/

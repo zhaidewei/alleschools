@@ -1,0 +1,262 @@
+[
+  {
+    "id": "00AH00",
+    "layer": "vo",
+    "brin": "00AH00",
+    "name": "Het Stedelijk Kottenpark",
+    "municipality": "ENSCHEDE",
+    "postcode": "7522GK",
+    "pc4": "7522",
+    "school_type": "HAVO_VWO",
+    "x_linear": 40.52,
+    "y_linear": 53.27,
+    "x_log": 0.1477,
+    "y_log": 0.1855,
+    "size": 878,
+    "years_covered": [
+      "2019-2020",
+      "2020-2021",
+      "2021-2022",
+      "2022-2023",
+      "2023-2024"
+    ],
+    "flags": {
+      "has_full_woz": true,
+      "low_sample_excluded": false
+    }
+  },
+  {
+    "id": "00AH07",
+    "layer": "vo",
+    "brin": "00AH07",
+    "name": "Het Stedelijk College Zuid",
+    "municipality": "ENSCHEDE",
+    "postcode": "7541WG",
+    "pc4": "7541",
+    "school_type": "HAVO_VWO",
+    "x_linear": 12.7,
+    "y_linear": 17.45,
+    "x_log": 0.0519,
+    "y_log": 0.0699,
+    "size": 845,
+    "years_covered": [
+      "2019-2020",
+      "2020-2021",
+      "2021-2022",
+      "2022-2023",
+      "2023-2024"
+    ],
+    "flags": {
+      "has_full_woz": true,
+      "low_sample_excluded": false
+    }
+  },
+  {
+    "id": "00AH08",
+    "layer": "vo",
+    "brin": "00AH08",
+    "name": "Het Stedelijk Zwering",
+    "municipality": "ENSCHEDE",
+    "postcode": "7545BN",
+    "pc4": "7545",
+    "school_type": "VMBO",
+    "x_linear": 0.0,
+    "y_linear": 15.27,
+    "x_log": 0.0,
+    "y_log": 0.0617,
+    "size": 402,
+    "years_covered": [
+      "2019-2020",
+      "2020-2021",
+      "2021-2022",
+      "2022-2023",
+      "2023-2024"
+    ],
+    "flags": {
+      "has_full_woz": true,
+      "low_sample_excluded": false
+    }
+  },
+  {
+    "id": "00AH09",
+    "layer": "vo",
+    "brin": "00AH09",
+    "name": "Het Stedelijk Innova",
+    "municipality": "ENSCHEDE",
+    "postcode": "7533BM",
+    "pc4": "7533",
+    "school_type": "HAVO_VWO",
+    "x_linear": 0.0,
+    "y_linear": 4.85,
+    "x_log": 0.0,
+    "y_log": 0.0206,
+    "size": 296,
+    "years_covered": [
+      "2019-2020",
+      "2020-2021",
+      "2021-2022",
+      "2022-2023",
+      "2023-2024"
+    ],
+    "flags": {
+      "has_full_woz": true,
+      "low_sample_excluded": false
+    }
+  },
+  {
+    "id": "00AH17",
+    "layer": "vo",
+    "brin": "00AH17",
+    "name": "Het Stedelijk Alpha",
+    "municipality": "ENSCHEDE",
+    "postcode": "7543BK",
+    "pc4": "7543",
+    "school_type": "VMBO",
+    "x_linear": 0.0,
+    "y_linear": 32.01,
+    "x_log": 0.0,
+    "y_log": 0.1206,
+    "size": 561,
+    "years_covered": [
+      "2019-2020",
+      "2020-2021",
+      "2021-2022",
+      "2022-2023",
+      "2023-2024"
+    ],
+    "flags": {
+      "has_full_woz": true,
+      "low_sample_excluded": false
+    }
+  },
+  {
+    "id": "00AQ00",
+    "layer": "vo",
+    "brin": "00AQ00",
+    "name": "Zwin College SGM",
+    "municipality": "SLUIS",
+    "postcode": "4501BE",
+    "pc4": "4501",
+    "school_type": "HAVO_VWO",
+    "x_linear": 14.69,
+    "y_linear": 20.54,
+    "x_log": 0.0595,
+    "y_log": 0.0811,
+    "size": 690,
+    "years_covered": [
+      "2019-2020",
+      "2020-2021",
+      "2021-2022",
+      "2022-2023",
+      "2023-2024"
+    ],
+    "flags": {
+      "has_full_woz": true,
+      "low_sample_excluded": false
+    }
+  },
+  {
+    "id": "00BD00",
+    "layer": "vo",
+    "brin": "00BD00",
+    "name": "Coenecoop College",
+    "municipality": "WADDINXVEEN",
+    "postcode": "2741ST",
+    "pc4": "2741",
+    "school_type": "HAVO_VWO",
+    "x_linear": 11.53,
+    "y_linear": 17.88,
+    "x_log": 0.0474,
+    "y_log": 0.0714,
+    "size": 1100,
+    "years_covered": [
+      "2019-2020",
+      "2020-2021",
+      "2021-2022",
+      "2022-2023",
+      "2023-2024"
+    ],
+    "flags": {
+      "has_full_woz": true,
+      "low_sample_excluded": false
+    }
+  },
+  {
+    "id": "00CB00",
+    "layer": "vo",
+    "brin": "00CB00",
+    "name": "SGM VO Vrije Schoolond",
+    "municipality": "NIJMEGEN",
+    "postcode": "6524AJ",
+    "pc4": "6524",
+    "school_type": "HAVO_VWO",
+    "x_linear": 26.56,
+    "y_linear": 28.73,
+    "x_log": 0.1023,
+    "y_log": 0.1097,
+    "size": 694,
+    "years_covered": [
+      "2019-2020",
+      "2020-2021",
+      "2021-2022",
+      "2022-2023",
+      "2023-2024"
+    ],
+    "flags": {
+      "has_full_woz": true,
+      "low_sample_excluded": false
+    }
+  },
+  {
+    "id": "00CB01",
+    "layer": "vo",
+    "brin": "00CB01",
+    "name": "SGM VO Vrije Schoolond",
+    "municipality": "ZEIST",
+    "postcode": "3707GL",
+    "pc4": "3707",
+    "school_type": "HAVO_VWO",
+    "x_linear": 25.83,
+    "y_linear": 19.27,
+    "x_log": 0.0998,
+    "y_log": 0.0765,
+    "size": 816,
+    "years_covered": [
+      "2019-2020",
+      "2020-2021",
+      "2021-2022",
+      "2022-2023",
+      "2023-2024"
+    ],
+    "flags": {
+      "has_full_woz": true,
+      "low_sample_excluded": false
+    }
+  },
+  {
+    "id": "00CB02",
+    "layer": "vo",
+    "brin": "00CB02",
+    "name": "SGM VO Vrije Schoolond",
+    "municipality": "EINDHOVEN",
+    "postcode": "5631KA",
+    "pc4": "5631",
+    "school_type": "HAVO_VWO",
+    "x_linear": 17.72,
+    "y_linear": 21.75,
+    "x_log": 0.0708,
+    "y_log": 0.0855,
+    "size": 472,
+    "years_covered": [
+      "2019-2020",
+      "2020-2021",
+      "2021-2022",
+      "2022-2023",
+      "2023-2024"
+    ],
+    "flags": {
+      "has_full_woz": true,
+      "low_sample_excluded": false
+    }
+  }
+]

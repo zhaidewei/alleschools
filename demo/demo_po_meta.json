@@ -1,0 +1,140 @@
+{
+  "version": "1.0.0",
+  "layer": "po",
+  "source": {
+    "duo": "Schooladviezen 2019–2025",
+    "cbs": "WOZ per PC4 2019–2024"
+  },
+  "axes": {
+    "x": {
+      "field": "x_linear",
+      "scale": "linear",
+      "domain": [0, 100],
+      "metric_id": "po_vwo_advice_share"
+    },
+    "y": {
+      "field": "y_linear",
+      "scale": "linear",
+      "domain": [0, 800],
+      "metric_id": "po_woz_avg_pc4"
+    },
+    "size": {
+      "field": "size",
+      "metric_id": "po_pupils_total"
+    }
+  },
+  "fields": {
+    "id": { "kind": "id" },
+    "brin": { "kind": "id" },
+    "name": {
+      "kind": "dimension",
+      "searchable": true
+    },
+    "municipality": {
+      "kind": "dimension",
+      "searchable": true
+    },
+    "postcode": {
+      "kind": "dimension",
+      "searchable": true
+    },
+    "pc4": {
+      "kind": "dimension",
+      "searchable": true
+    },
+    "school_type": {
+      "kind": "dimension",
+      "searchable": true
+    },
+    "x_linear": { "kind": "metric" },
+    "y_linear": { "kind": "metric" },
+    "x_log": { "kind": "metric" },
+    "y_log": { "kind": "metric" },
+    "size": { "kind": "metric" },
+    "years_covered": { "kind": "dimension" },
+    "flags": { "kind": "dimension" }
+  },
+  "i18n": {
+    "nl": {
+      "metrics": {
+        "po_vwo_advice_share": {
+          "label": "VWO-advies aandeel",
+          "short": "VWO-advies %",
+          "description": "Gewogen aandeel leerlingen met een VWO-achtig advies over alle beschikbare jaren."
+        },
+        "po_woz_avg_pc4": {
+          "label": "Gemiddelde WOZ (PC4)",
+          "short": "WOZ (×1.000 EUR)",
+          "description": "Gewogen gemiddelde WOZ-waarde van woningen in deze 4-cijferige postcode (PC4)。"
+        },
+        "po_pupils_total": {
+          "label": "Totaal aantal leerlingen (advies)",
+          "short": "Leerlingen",
+          "description": "Totaal aantal leerlingen met afgegeven schooladvies，用于散点大小。"
+        }
+      },
+      "dimensions": {
+        "school_type": {
+          "values": {
+            "Bo": "Basisonderwijs",
+            "Sbo": "Speciaal basisonderwijs"
+          }
+        }
+      }
+    },
+    "en": {
+      "metrics": {
+        "po_vwo_advice_share": {
+          "label": "VWO-equivalent advice share",
+          "short": "VWO advice %",
+          "description": "Weighted share of pupils receiving a VWO-like advice across all years."
+        },
+        "po_woz_avg_pc4": {
+          "label": "Average WOZ (PC4)",
+          "short": "WOZ (×1,000 EUR)",
+          "description": "Weighted average property value (WOZ) for this 4-digit postcode (PC4)."
+        },
+        "po_pupils_total": {
+          "label": "Total pupils with advice",
+          "short": "Pupils",
+          "description": "Total number of pupils with a school advice, used for point size."
+        }
+      },
+      "dimensions": {
+        "school_type": {
+          "values": {
+            "Bo": "Primary school",
+            "Sbo": "Special primary school"
+          }
+        }
+      }
+    },
+    "zh": {
+      "metrics": {
+        "po_vwo_advice_share": {
+          "label": "VWO 等价升学建议占比",
+          "short": "VWO 升学 %",
+          "description": "按年份加权的 VWO 等价升学建议占比。"
+        },
+        "po_woz_avg_pc4": {
+          "label": "平均房产估值（PC4）",
+          "short": "WOZ（千欧）",
+          "description": "该 4 位邮编（PC4）下住房 WOZ 估值的加权平均。"
+        },
+        "po_pupils_total": {
+          "label": "有升学建议的学生总数",
+          "short": "学生数",
+          "description": "有升学建议的学生总数，用于散点大小。"
+        }
+      },
+      "dimensions": {
+        "school_type": {
+          "values": {
+            "Bo": "普通小学",
+            "Sbo": "特殊小学"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "version": "1.0.0",
+  "generated_at": "2026-02-10T00:00:00Z",
+  "datasets": {
+    "vo": {
+      "data_path": "demo_vo_points.json",
+      "meta_path": "demo_vo_meta.json"
+    },
+    "po": {
+      "data_path": "demo_po_points.json",
+      "meta_path": "demo_po_meta.json"
+    }
+  }
+}
