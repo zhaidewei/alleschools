@@ -523,11 +523,15 @@
         overlay.innerHTML = '';
         return;
       }
-      if (!chart.width || !chart.height) return;
+      const canvas = chart.canvas;
+      if (!canvas || !chart.width || !chart.height) return;
       overlay.innerHTML = '';
-      const scaleX = overlay.offsetWidth / chart.width;
-      const scaleY = overlay.offsetHeight / chart.height;
-      if (!scaleX || !scaleY || !isFinite(scaleX) || !isFinite(scaleY)) return;
+      var displayW = canvas.clientWidth;
+      var displayH = canvas.clientHeight;
+      if (!displayW || !displayH) return;
+      var scaleX = displayW / chart.width;
+      var scaleY = displayH / chart.height;
+      if (!isFinite(scaleX) || !isFinite(scaleY)) return;
       const isDark = document.documentElement.classList.contains('dark');
       const textCls = isDark ? 'text-slate-200' : 'text-slate-800';
       const bgCls = isDark ? 'bg-slate-900/95' : 'bg-white/95';
@@ -877,6 +881,22 @@
         }
       },
     });
+
+    function scheduleUpdateChartLabels() {
+      requestAnimationFrame(function() {
+        if (chart && typeof chart.update === 'function') chart.update('resize');
+        requestAnimationFrame(function() { updateChartLabels(); });
+      });
+    }
+    window.addEventListener('resize', scheduleUpdateChartLabels);
+    window.addEventListener('orientationchange', function() {
+      setTimeout(scheduleUpdateChartLabels, 150);
+    });
+    var chartContainer = document.getElementById('chart') && document.getElementById('chart').parentElement;
+    if (chartContainer && typeof ResizeObserver !== 'undefined') {
+      var resizeObserver = new ResizeObserver(function() { scheduleUpdateChartLabels(); });
+      resizeObserver.observe(chartContainer);
+    }
 
     document.getElementById('selectAll').addEventListener('change', function() {
       if (this.checked) {
