@@ -40,7 +40,8 @@
       <div class="relative inline-block group" id="shareWrap">
         <button type="button" id="shareBtn" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg border border-slate-300 dark:border-slate-500 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600">Share</button>
         <div id="shareDropdown" class="absolute right-0 top-full mt-1 py-1 min-w-[10rem] bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-600 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20">
-          <a href="#" id="shareXLink" target="_blank" rel="noopener noreferrer" class="block px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 no-underline rounded-t-lg">Share to X</a>
+          <button type="button" id="shareCopyLink" class="w-full text-left px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 rounded-t-lg border-0 bg-transparent cursor-pointer font-inherit">Copy link</button>
+          <a href="#" id="shareXLink" target="_blank" rel="noopener noreferrer" class="block px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 no-underline">Share to X</a>
           <a href="#" id="shareFbLink" target="_blank" rel="noopener noreferrer" class="block px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 no-underline rounded-b-lg">Share to Facebook</a>
         </div>
       </div>
@@ -150,6 +151,8 @@
         labelLanguage: 'Language',
         labelTheme: 'Theme',
         share: 'Share',
+        shareCopyLink: 'Copy link',
+        shareCopied: 'Copied!',
         shareToX: 'Share to X',
         shareToFacebook: 'Share to Facebook',
         labelLight: 'Light',
@@ -200,6 +203,8 @@
         labelLanguage: '语言',
         labelTheme: '主题',
         share: '分享',
+        shareCopyLink: '复制链接',
+        shareCopied: '已复制',
         shareToX: '分享到 X',
         shareToFacebook: '分享到 Facebook',
         labelLight: '浅色',
@@ -250,6 +255,8 @@
         labelLanguage: 'Taal',
         labelTheme: 'Thema',
         share: 'Delen',
+        shareCopyLink: 'Link kopiëren',
+        shareCopied: 'Gekopieerd!',
         shareToX: 'Delen op X',
         shareToFacebook: 'Delen op Facebook',
         labelLight: 'Licht',
@@ -344,16 +351,13 @@
       if (themeDarkBtn) themeDarkBtn.textContent = t('labelDark');
       var shareBtn = document.getElementById('shareBtn');
       if (shareBtn) shareBtn.textContent = t('share');
+      var shareCopyBtn = document.getElementById('shareCopyLink');
+      if (shareCopyBtn) shareCopyBtn.textContent = t('shareCopyLink');
       var shareXLink = document.getElementById('shareXLink');
-      if (shareXLink) {
-        shareXLink.textContent = t('shareToX');
-        shareXLink.href = 'https://twitter.com/intent/tweet?url=' + encodeURIComponent(window.location.href) + '&text=' + encodeURIComponent(t('titleMain'));
-      }
+      if (shareXLink) shareXLink.textContent = t('shareToX');
       var shareFbLink = document.getElementById('shareFbLink');
-      if (shareFbLink) {
-        shareFbLink.textContent = t('shareToFacebook');
-        shareFbLink.href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(window.location.href);
-      }
+      if (shareFbLink) shareFbLink.textContent = t('shareToFacebook');
+      updateShareLinks();
       var excludedTitle = document.getElementById('excludedTitle');
       if (excludedTitle) excludedTitle.textContent = t('excludedTitle');
       var excludedDesc = document.getElementById('excludedDesc');
@@ -384,6 +388,37 @@
 
     let selectedGemeenten = new Set();
     var DEFAULT_GEMEENTEN = ["'S-GRAVENHAGE", 'AMSTERDAM', 'UTRECHT', 'ROTTERDAM'];
+
+    function getShareUrl() {
+      var base = window.location.origin + window.location.pathname;
+      var q = (document.getElementById('schoolSearch') && document.getElementById('schoolSearch').value || '').trim();
+      var g = (document.getElementById('gemeenteFilter') && document.getElementById('gemeenteFilter').value || '').trim();
+      var parts = [];
+      if (q) parts.push('q=' + encodeURIComponent(q));
+      if (g) parts.push('gemeente=' + encodeURIComponent(g));
+      if (parts.length) base += '?' + parts.join('&');
+      return base;
+    }
+    function updateShareLinks() {
+      var url = getShareUrl();
+      var shareXLink = document.getElementById('shareXLink');
+      if (shareXLink) shareXLink.href = 'https://twitter.com/intent/tweet?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(t('titleMain'));
+      var shareFbLink = document.getElementById('shareFbLink');
+      if (shareFbLink) shareFbLink.href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url);
+    }
+    function applyUrlParams() {
+      var params = new URLSearchParams(window.location.search);
+      var q = params.get('q');
+      var searchEl = document.getElementById('schoolSearch');
+      if (q != null && searchEl) searchEl.value = q;
+      var gemeenteParam = params.get('gemeente');
+      if (gemeenteParam != null) {
+        var filterEl = document.getElementById('gemeenteFilter');
+        if (filterEl) filterEl.value = gemeenteParam;
+        var list = getGemeentenInList();
+        selectedGemeenten = new Set(list);
+      }
+    }
 
     function getPointsByTextFilter(points) {
       const parts = (document.getElementById('gemeenteFilter').value || '').split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
@@ -809,16 +844,18 @@
       refreshChart();
     });
 
-    document.getElementById('schoolSearch').addEventListener('input', refreshChart);
-    document.getElementById('schoolSearch').addEventListener('change', refreshChart);
+    document.getElementById('schoolSearch').addEventListener('input', function() { refreshChart(); updateShareLinks(); });
+    document.getElementById('schoolSearch').addEventListener('change', function() { refreshChart(); updateShareLinks(); });
 
     document.getElementById('gemeenteFilter').addEventListener('input', function() {
       renderGemeenteCheckboxes();
       refreshChart();
+      updateShareLinks();
     });
     document.getElementById('gemeenteFilter').addEventListener('change', function() {
       renderGemeenteCheckboxes();
       refreshChart();
+      updateShareLinks();
     });
 
     var showVMBOEl = document.getElementById('showVMBO');
@@ -868,6 +905,20 @@
     });
     document.addEventListener('click', function() { document.getElementById('shareWrap').classList.remove('open'); });
     document.getElementById('shareWrap').addEventListener('click', function(e) { e.stopPropagation(); });
+    document.getElementById('shareCopyLink').addEventListener('click', function(e) {
+      e.preventDefault();
+      var url = getShareUrl();
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(function() {
+          var btn = document.getElementById('shareCopyLink');
+          var orig = btn.textContent;
+          btn.textContent = t('shareCopied');
+          setTimeout(function() { btn.textContent = orig; }, 1500);
+        }).catch(function() { window.prompt(t('shareCopyLink') || 'Copy link', url); });
+      } else {
+        window.prompt(t('shareCopyLink') || 'Copy link', url);
+      }
+    });
 
     document.querySelectorAll('input[name="coord"]').forEach(radio => {
       radio.addEventListener('change', () => {
@@ -880,8 +931,10 @@
     updateExcludedSection();
     updateNavButtons();
     setChartScaleForMode();
+    applyUrlParams();
     renderGemeenteCheckboxes();
     refreshChart();
+    updateShareLinks();
   </script>
 </body>
 </html>
