@@ -97,6 +97,7 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
   <link rel="icon" href="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ctext%20y%3D%22.9em%22%20font-size%3D%2290%22%3E%F0%9F%8E%AB%3C%2Ftext%3E%3C%2Fsvg%3E">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script>
     tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } }
   </script>
@@ -131,6 +132,7 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
         <button type="button" id="shareBtn" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg border border-slate-300 dark:border-slate-500 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600">Share</button>
         <div id="shareDropdown" class="absolute right-0 top-full mt-1 py-1 min-w-[10rem] bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-600 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20">
           <button type="button" id="shareCopyLink" class="w-full text-left px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 rounded-t-lg border-0 bg-transparent cursor-pointer font-inherit">Copy link</button>
+          <button type="button" id="shareDownloadPicture" class="w-full text-left px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 border-0 bg-transparent cursor-pointer font-inherit">Download picture</button>
           <a href="#" id="shareXLink" target="_blank" rel="noopener noreferrer" class="block px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 no-underline">Share to X</a>
           <a href="#" id="shareFbLink" target="_blank" rel="noopener noreferrer" class="block px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 no-underline rounded-b-lg">Share to Facebook</a>
         </div>
@@ -243,6 +245,8 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
         share: 'Share',
         shareCopyLink: 'Copy link',
         shareCopied: 'Copied!',
+        shareDownloadPicture: 'Download picture',
+        shareDownloading: 'Generating…',
         shareToX: 'Share to X',
         shareToFacebook: 'Share to Facebook',
         labelLight: 'Light',
@@ -295,6 +299,8 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
         share: '分享',
         shareCopyLink: '复制链接',
         shareCopied: '已复制',
+        shareDownloadPicture: '下载图片',
+        shareDownloading: '生成中…',
         shareToX: '分享到 X',
         shareToFacebook: '分享到 Facebook',
         labelLight: '浅色',
@@ -347,6 +353,8 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
         share: 'Delen',
         shareCopyLink: 'Link kopiëren',
         shareCopied: 'Gekopieerd!',
+        shareDownloadPicture: 'Afbeelding downloaden',
+        shareDownloading: 'Bezig…',
         shareToX: 'Delen op X',
         shareToFacebook: 'Delen op Facebook',
         labelLight: 'Licht',
@@ -443,6 +451,8 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
       if (shareBtn) shareBtn.textContent = t('share');
       var shareCopyBtn = document.getElementById('shareCopyLink');
       if (shareCopyBtn) shareCopyBtn.textContent = t('shareCopyLink');
+      var shareDownloadBtn = document.getElementById('shareDownloadPicture');
+      if (shareDownloadBtn) shareDownloadBtn.textContent = t('shareDownloadPicture');
       var shareXLink = document.getElementById('shareXLink');
       if (shareXLink) shareXLink.textContent = t('shareToX');
       var shareFbLink = document.getElementById('shareFbLink');
@@ -1008,6 +1018,30 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
       } else {
         window.prompt(t('shareCopyLink') || 'Copy link', url);
       }
+    });
+    document.getElementById('shareDownloadPicture').addEventListener('click', function(e) {
+      e.preventDefault();
+      var btn = document.getElementById('shareDownloadPicture');
+      var origText = btn.textContent;
+      btn.textContent = typeof t === 'function' ? t('shareDownloading') : 'Generating…';
+      btn.disabled = true;
+      var el = document.getElementById('chartWrap');
+      if (!el || typeof html2canvas === 'undefined') {
+        btn.textContent = origText;
+        btn.disabled = false;
+        return;
+      }
+      html2canvas(el, { scale: 2, logging: false, backgroundColor: null }).then(function(canvas) {
+        var link = document.createElement('a');
+        link.download = 'schools-map.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        btn.textContent = origText;
+        btn.disabled = false;
+      }).catch(function() {
+        btn.textContent = origText;
+        btn.disabled = false;
+      });
     });
 
     document.querySelectorAll('input[name="coord"]').forEach(radio => {
