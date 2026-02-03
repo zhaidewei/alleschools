@@ -575,7 +575,7 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
       const list = getGemeentenInList();
       if (list.length > 0 && selectedGemeenten.size === 0) {
         var defaultSet = new Set(DEFAULT_GEMEENTEN);
-        selectedGemeenten = new Set(list.filter(function(g) { return defaultSet.has(g); }));
+        selectedGemeenten = new Set(list.filter(function(g) { return defaultSet.has((g || '').toUpperCase()); }));
         if (selectedGemeenten.size === 0) selectedGemeenten = new Set(list);
       }
       const container = document.getElementById('gemeenteCheckboxes');
