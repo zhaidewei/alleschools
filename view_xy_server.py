@@ -150,12 +150,12 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
       </div>
     </div>
     <div class="controls flex flex-wrap items-center gap-4 sm:gap-6 py-4 px-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-600 shadow-sm">
-      <div id="schoolSearchWrap" class="input-wrap flex items-center gap-2 flex-1 min-w-0">
+      <div id="schoolSearchWrap" class="input-wrap flex items-center gap-2 flex-1 min-w-[200px] basis-[200px]">
         <label id="labelSchoolSearch" class="text-sm font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">School search</label>
         <input type="text" id="schoolSearch" placeholder="Name or acronym (e.g. HWC)" class="flex-1 min-w-[120px] rounded-lg border border-slate-300 dark:border-slate-500 px-3 py-2 text-sm text-slate-800 dark:text-slate-200 dark:bg-slate-700 placeholder-slate-400 dark:placeholder-slate-500 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" title="">
         <div id="schoolSearchHint" class="input-hint" role="tooltip" aria-live="polite"></div>
       </div>
-      <div id="gemeenteFilterWrap" class="input-wrap flex items-center gap-2 flex-1 min-w-0">
+      <div id="gemeenteFilterWrap" class="input-wrap flex items-center gap-2 flex-1 min-w-[200px] basis-[200px]">
         <label id="labelGemeente" class="text-sm font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">City hall filter</label>
         <input type="text" id="gemeenteFilter" placeholder="Empty = all, comma for multiple" class="flex-1 min-w-[120px] rounded-lg border border-slate-300 dark:border-slate-500 px-3 py-2 text-sm text-slate-800 dark:text-slate-200 dark:bg-slate-700 placeholder-slate-400 dark:placeholder-slate-500 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" title="">
         <div id="gemeenteFilterHint" class="input-hint" role="tooltip" aria-live="polite"></div>
