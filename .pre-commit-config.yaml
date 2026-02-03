@@ -1,0 +1,11 @@
+# 本地 pre-commit：提交前自动跑单元测试
+# 安装：pip install -r requirements-dev.txt && pre-commit install
+# 手动跑：pre-commit run --all-files
+repos:
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: bash run_tests.sh
+        language: system
+        pass_filenames: false

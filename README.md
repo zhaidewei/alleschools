@@ -176,10 +176,32 @@ awk -F';' 'NR==1 {print; next} toupper($11)==toupper("Amstelveen") {print}' vest
 
 ---
 
-## 10. 文件一览（清理后保留）
+## 10. 开发与测试
+
+- **后端/脚本单元测试**：对 `calc_xy_coords.py`、`calc_xy_coords_po.py` 中的解析与判断函数做 **pytest** 测试。
+- **前端逻辑单元测试**：散点图用的纯逻辑（搜索词解析、匹配、高亮区间、gemeente 颜色、筛选等）抽在 `view_xy_logic.js`，由 **Node 内置 test runner** 测试（`node --test tests/view_xy_logic.test.js`）。`view_xy.html` 通过 `<script src="view_xy_logic.js">` 使用同一份逻辑。
+- **依赖**：`pip install -r requirements-dev.txt`（pytest、pre-commit）；Node 需已安装（用于前端测试）。
+- **运行测试**：在项目根目录执行 `./run_tests.sh`（先跑 pytest，再跑 Node 前端逻辑测试），或分别执行 `pytest tests/ -v` 与 `node --test tests/view_xy_logic.test.js`。
+- **pre-commit**：提交前自动跑测试。首次使用：
+
+```bash
+pip install -r requirements-dev.txt   # 或先 python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
+pre-commit install
+```
+
+之后每次 `git commit` 会先执行 `pytest tests/ -v`，通过后才完成提交。
+
+---
+
+## 11. 文件一览（清理后保留）
 
 | 文件 | 说明 |
 |------|------|
+| `requirements-dev.txt` | 开发依赖（pytest、pre-commit） |
+| `tests/` | 单元测试（test_calc_xy_coords.py、test_calc_xy_coords_po.py、view_xy_logic.test.js） |
+| `view_xy_logic.js` | 前端散点图纯逻辑（搜索/筛选/颜色等），供 view_xy.html 与 Node 测试共用 |
+| `.pre-commit-config.yaml` | pre-commit 配置（提交前跑 pytest） |
+| `run_tests.sh` | 本地跑测试脚本（供 pre-commit 调用） |
 | `fetch_duo_examen_all.py` | 从 DUO 下载全量考试人数 CSV → `duo_examen_raw_all.csv` |
 | `duo_examen_raw_all.csv` | DUO 原始数据（全量中学） |
 | `calc_xy_coords.py` | 从 duo_examen_raw_all 计算 X/Y → `schools_xy_coords.csv` |

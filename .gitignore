@@ -7,3 +7,7 @@ public/
 # 以下两份 CSV 由 calc_xy_coords*.py 生成，Vercel 静态构建需要读它们，需提交
 !schools_xy_coords.csv
 !schools_xy_coords_po.csv
+
+# 本地开发
+.venv/
+.pytest_cache/
