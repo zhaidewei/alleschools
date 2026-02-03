@@ -105,7 +105,7 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <script>document.documentElement.classList.toggle('dark', localStorage.getItem('theme')==='dark');</script>
-  <style>.chartjs-tooltip { max-width: min(320px, 90vw); overflow-wrap: break-word; word-break: break-word; transform-origin: bottom center; } #shareWrap.open #shareDropdown { opacity: 1; visibility: visible; }</style>
+  <style>.chartjs-tooltip { max-width: min(320px, 90vw); overflow-wrap: break-word; word-break: break-word; transform-origin: bottom center; } #shareWrap.open #shareDropdown { opacity: 1; visibility: visible; } details summary { list-style: none; } details summary::-webkit-details-marker { display: none; }</style>
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-200 font-sans antialiased">
   <div id="wrap" class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
@@ -188,12 +188,22 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
     </div>
     <div id="excludedSection" class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-600 text-sm text-slate-500 dark:text-slate-400"></div>
     <div id="algorithmSection" class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-600 text-sm text-slate-600 dark:text-slate-400">
-      <h2 id="algorithmTitle" class="text-base font-semibold text-slate-700 dark:text-slate-300 mb-3"></h2>
-      <div id="algorithmBody" class="space-y-2 prose prose-slate max-w-none text-sm"></div>
+      <details class="group/details">
+        <summary id="algorithmTitle" class="text-base font-semibold text-slate-700 dark:text-slate-300 cursor-pointer list-none flex items-center gap-2 [&::-webkit-details-marker]:hidden">
+          <span class="collapsible-arrow transition-transform group-open/details:rotate-90 origin-center">▶</span>
+          <span id="algorithmTitleText"></span>
+        </summary>
+        <div id="algorithmBody" class="mt-3 space-y-2 prose prose-slate max-w-none text-sm"></div>
+      </details>
     </div>
     <div id="disclaimerSection" class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-600 text-sm text-slate-500 dark:text-slate-400">
-      <h2 id="disclaimerTitle" class="text-base font-semibold text-slate-700 dark:text-slate-300 mb-2"></h2>
-      <p id="disclaimerBody" class="text-slate-500 dark:text-slate-400"></p>
+      <details class="group/details">
+        <summary id="disclaimerTitle" class="text-base font-semibold text-slate-700 dark:text-slate-300 cursor-pointer list-none flex items-center gap-2 [&::-webkit-details-marker]:hidden">
+          <span class="collapsible-arrow transition-transform group-open/details:rotate-90 origin-center">▶</span>
+          <span id="disclaimerTitleText"></span>
+        </summary>
+        <p id="disclaimerBody" class="mt-2 text-slate-500 dark:text-slate-400"></p>
+      </details>
     </div>
     <div id="contactSection" class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-600 text-sm text-slate-500 dark:text-slate-400 pb-4">
       <h2 id="contactTitle" class="text-base font-semibold text-slate-700 dark:text-slate-300 mb-2"></h2>
@@ -226,10 +236,10 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
       const el = document.getElementById('excludedSection');
       if (!el) return;
       if (excluded.length === 0) { el.innerHTML = ''; return; }
-      el.innerHTML = '<h2 id="excludedTitle" class="text-base font-semibold text-slate-700 dark:text-slate-300 mb-2"></h2><p id="excludedDesc" class="mb-3 text-slate-500 dark:text-slate-400"></p><ul class="list-disc pl-5 max-h-44 overflow-y-auto space-y-1 text-slate-600 dark:text-slate-400">' +
-        excluded.map(function(s) { return '<li>' + (s.BRIN || '') + ' ' + (s.naam || '') + ' (' + (s.gemeente || '') + ')</li>'; }).join('') + '</ul>';
-      var excludedTitle = document.getElementById('excludedTitle');
-      if (excludedTitle) excludedTitle.textContent = t('excludedTitle');
+      el.innerHTML = '<details class="group/details"><summary id="excludedTitle" class="text-base font-semibold text-slate-700 dark:text-slate-300 cursor-pointer list-none flex items-center gap-2 [&::-webkit-details-marker]:hidden"><span class="collapsible-arrow transition-transform group-open/details:rotate-90 origin-center">▶</span><span id="excludedTitleText"></span></summary><div class="mt-2"><p id="excludedDesc" class="mb-3 text-slate-500 dark:text-slate-400"></p><ul class="list-disc pl-5 max-h-44 overflow-y-auto space-y-1 text-slate-600 dark:text-slate-400">' +
+        excluded.map(function(s) { return '<li>' + (s.BRIN || '') + ' ' + (s.naam || '') + ' (' + (s.gemeente || '') + ')</li>'; }).join('') + '</ul></div></details>';
+      var excludedTitleText = document.getElementById('excludedTitleText');
+      if (excludedTitleText) excludedTitleText.textContent = t('excludedTitle');
       var excludedDesc = document.getElementById('excludedDesc');
       if (excludedDesc) excludedDesc.textContent = t('excludedDesc');
     }
@@ -458,16 +468,16 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
       var shareFbLink = document.getElementById('shareFbLink');
       if (shareFbLink) shareFbLink.textContent = t('shareToFacebook');
       updateShareLinks();
-      var excludedTitle = document.getElementById('excludedTitle');
-      if (excludedTitle) excludedTitle.textContent = t('excludedTitle');
+      var excludedTitleText = document.getElementById('excludedTitleText');
+      if (excludedTitleText) excludedTitleText.textContent = t('excludedTitle');
       var excludedDesc = document.getElementById('excludedDesc');
       if (excludedDesc) excludedDesc.textContent = t('excludedDesc');
-      var algorithmTitle = document.getElementById('algorithmTitle');
-      if (algorithmTitle) algorithmTitle.textContent = t('algorithmTitle');
+      var algorithmTitleText = document.getElementById('algorithmTitleText');
+      if (algorithmTitleText) algorithmTitleText.textContent = t('algorithmTitle');
       var algorithmBody = document.getElementById('algorithmBody');
       if (algorithmBody) algorithmBody.innerHTML = t('algorithmBody');
-      var disclaimerTitle = document.getElementById('disclaimerTitle');
-      if (disclaimerTitle) disclaimerTitle.textContent = t('disclaimerTitle');
+      var disclaimerTitleText = document.getElementById('disclaimerTitleText');
+      if (disclaimerTitleText) disclaimerTitleText.textContent = t('disclaimerTitle');
       var disclaimerBody = document.getElementById('disclaimerBody');
       if (disclaimerBody) disclaimerBody.textContent = t('disclaimerBody');
       var contactTitle = document.getElementById('contactTitle');

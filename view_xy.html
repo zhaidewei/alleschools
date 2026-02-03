@@ -8,7 +8,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script src="view_xy_logic.js"></script>
   <script>
     tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } }
   </script>
@@ -16,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <script>document.documentElement.classList.toggle('dark', localStorage.getItem('theme')==='dark');</script>
-  <style>.chartjs-tooltip { max-width: min(320px, 90vw); overflow-wrap: break-word; word-break: break-word; transform-origin: bottom center; } #shareWrap.open #shareDropdown { opacity: 1; visibility: visible; }</style>
+  <style>.chartjs-tooltip { max-width: min(320px, 90vw); overflow-wrap: break-word; word-break: break-word; transform-origin: bottom center; } #shareWrap.open #shareDropdown { opacity: 1; visibility: visible; } details summary { list-style: none; } details summary::-webkit-details-marker { display: none; }</style>
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-200 font-sans antialiased">
   <div id="wrap" class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
@@ -99,12 +98,22 @@
     </div>
     <div id="excludedSection" class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-600 text-sm text-slate-500 dark:text-slate-400"></div>
     <div id="algorithmSection" class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-600 text-sm text-slate-600 dark:text-slate-400">
-      <h2 id="algorithmTitle" class="text-base font-semibold text-slate-700 dark:text-slate-300 mb-3"></h2>
-      <div id="algorithmBody" class="space-y-2 prose prose-slate max-w-none text-sm"></div>
+      <details class="group/details">
+        <summary id="algorithmTitle" class="text-base font-semibold text-slate-700 dark:text-slate-300 cursor-pointer list-none flex items-center gap-2 [&::-webkit-details-marker]:hidden">
+          <span class="collapsible-arrow transition-transform group-open/details:rotate-90 origin-center">▶</span>
+          <span id="algorithmTitleText"></span>
+        </summary>
+        <div id="algorithmBody" class="mt-3 space-y-2 prose prose-slate max-w-none text-sm"></div>
+      </details>
     </div>
     <div id="disclaimerSection" class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-600 text-sm text-slate-500 dark:text-slate-400">
-      <h2 id="disclaimerTitle" class="text-base font-semibold text-slate-700 dark:text-slate-300 mb-2"></h2>
-      <p id="disclaimerBody" class="text-slate-500 dark:text-slate-400"></p>
+      <details class="group/details">
+        <summary id="disclaimerTitle" class="text-base font-semibold text-slate-700 dark:text-slate-300 cursor-pointer list-none flex items-center gap-2 [&::-webkit-details-marker]:hidden">
+          <span class="collapsible-arrow transition-transform group-open/details:rotate-90 origin-center">▶</span>
+          <span id="disclaimerTitleText"></span>
+        </summary>
+        <p id="disclaimerBody" class="mt-2 text-slate-500 dark:text-slate-400"></p>
+      </details>
     </div>
     <div id="contactSection" class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-600 text-sm text-slate-500 dark:text-slate-400 pb-4">
       <h2 id="contactTitle" class="text-base font-semibold text-slate-700 dark:text-slate-300 mb-2"></h2>
@@ -137,10 +146,10 @@
       const el = document.getElementById('excludedSection');
       if (!el) return;
       if (excluded.length === 0) { el.innerHTML = ''; return; }
-      el.innerHTML = '<h2 id="excludedTitle" class="text-base font-semibold text-slate-700 dark:text-slate-300 mb-2"></h2><p id="excludedDesc" class="mb-3 text-slate-500 dark:text-slate-400"></p><ul class="list-disc pl-5 max-h-44 overflow-y-auto space-y-1 text-slate-600 dark:text-slate-400">' +
-        excluded.map(function(s) { return '<li>' + (s.BRIN || '') + ' ' + (s.naam || '') + ' (' + (s.gemeente || '') + ')</li>'; }).join('') + '</ul>';
-      var excludedTitle = document.getElementById('excludedTitle');
-      if (excludedTitle) excludedTitle.textContent = t('excludedTitle');
+      el.innerHTML = '<details class="group/details"><summary id="excludedTitle" class="text-base font-semibold text-slate-700 dark:text-slate-300 cursor-pointer list-none flex items-center gap-2 [&::-webkit-details-marker]:hidden"><span class="collapsible-arrow transition-transform group-open/details:rotate-90 origin-center">▶</span><span id="excludedTitleText"></span></summary><div class="mt-2"><p id="excludedDesc" class="mb-3 text-slate-500 dark:text-slate-400"></p><ul class="list-disc pl-5 max-h-44 overflow-y-auto space-y-1 text-slate-600 dark:text-slate-400">' +
+        excluded.map(function(s) { return '<li>' + (s.BRIN || '') + ' ' + (s.naam || '') + ' (' + (s.gemeente || '') + ')</li>'; }).join('') + '</ul></div></details>';
+      var excludedTitleText = document.getElementById('excludedTitleText');
+      if (excludedTitleText) excludedTitleText.textContent = t('excludedTitle');
       var excludedDesc = document.getElementById('excludedDesc');
       if (excludedDesc) excludedDesc.textContent = t('excludedDesc');
     }
@@ -369,16 +378,16 @@
       var shareFbLink = document.getElementById('shareFbLink');
       if (shareFbLink) shareFbLink.textContent = t('shareToFacebook');
       updateShareLinks();
-      var excludedTitle = document.getElementById('excludedTitle');
-      if (excludedTitle) excludedTitle.textContent = t('excludedTitle');
+      var excludedTitleText = document.getElementById('excludedTitleText');
+      if (excludedTitleText) excludedTitleText.textContent = t('excludedTitle');
       var excludedDesc = document.getElementById('excludedDesc');
       if (excludedDesc) excludedDesc.textContent = t('excludedDesc');
-      var algorithmTitle = document.getElementById('algorithmTitle');
-      if (algorithmTitle) algorithmTitle.textContent = t('algorithmTitle');
+      var algorithmTitleText = document.getElementById('algorithmTitleText');
+      if (algorithmTitleText) algorithmTitleText.textContent = t('algorithmTitle');
       var algorithmBody = document.getElementById('algorithmBody');
       if (algorithmBody) algorithmBody.innerHTML = t('algorithmBody');
-      var disclaimerTitle = document.getElementById('disclaimerTitle');
-      if (disclaimerTitle) disclaimerTitle.textContent = t('disclaimerTitle');
+      var disclaimerTitleText = document.getElementById('disclaimerTitleText');
+      if (disclaimerTitleText) disclaimerTitleText.textContent = t('disclaimerTitle');
       var disclaimerBody = document.getElementById('disclaimerBody');
       if (disclaimerBody) disclaimerBody.textContent = t('disclaimerBody');
       var contactTitle = document.getElementById('contactTitle');
@@ -432,8 +441,9 @@
     }
 
     function getPointsByTextFilter(points) {
-      const value = document.getElementById('gemeenteFilter') && document.getElementById('gemeenteFilter').value || '';
-      return window.VIEW_XY.filterPointsByGemeenteText(points, window.VIEW_XY.parseGemeenteFilter(value));
+      const parts = (document.getElementById('gemeenteFilter').value || '').split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
+      if (parts.length === 0) return points;
+      return points.filter(p => p.gemeente && parts.some(q => p.gemeente.toUpperCase().includes(q)));
     }
     function getFilteredPoints(points) {
       const byText = getPointsByTextFilter(points);
@@ -629,13 +639,83 @@
       updateNavButtons();
     }
 
-    var hashString = window.VIEW_XY.hashString;
-    var gemeenteToColor = window.VIEW_XY.gemeenteToColor;
-    var gemeenteToBorderColor = window.VIEW_XY.gemeenteToBorderColor;
-    function sizeToRadius(points) { return window.VIEW_XY.sizeToRadius(points); }
-    function getSchoolSearchTerms() { return window.VIEW_XY.parseSearchTerms(document.getElementById('schoolSearch') && document.getElementById('schoolSearch').value || ''); }
-    var pointMatchesSearch = window.VIEW_XY.pointMatchesSearch;
-    var getNameHighlights = window.VIEW_XY.getNameHighlights;
+    /** 确定性 hash：gemeente 名字 -> 颜色。同一名字始终得到同一颜色。相似名字用黄金角+独立 S/L 拉开区分。 */
+    function hashString(s, seed) {
+      let h = seed || 0;
+      const str = (s || '').toString().toUpperCase();
+      for (let i = 0; i < str.length; i++) h = Math.imul(31, h) + str.charCodeAt(i) | 0;
+      return Math.abs(h) >>> 0;
+    }
+    const GOLDEN = 137.508;
+    function gemeenteToColor(gemeente) {
+      const h = hashString(gemeente);
+      const hS = hashString(gemeente, 1);
+      const hL = hashString(gemeente, 2);
+      const hue = (h * GOLDEN) % 360;
+      const sat = 60 + (hS % 35);
+      const light = 35 + (hL % 45);
+      return `hsla(${hue}, ${sat}%, ${light}%, 0.9)`;
+    }
+    function gemeenteToBorderColor(gemeente) {
+      const h = hashString(gemeente);
+      const hS = hashString(gemeente, 1);
+      const hL = hashString(gemeente, 2);
+      const hue = (h * GOLDEN) % 360;
+      const sat = Math.min(85, 60 + (hS % 35) + 10);
+      const light = Math.max(18, 35 + (hL % 45) - 22);
+      return `hsl(${hue}, ${sat}%, ${light}%)`;
+    }
+
+    /** 根据当前可见点的 size 将人数映射为圆点半径（约 4–20px） */
+    function sizeToRadius(points) {
+      const sizes = points.map(p => (p.size != null && p.size > 0) ? p.size : 0).filter(Boolean);
+      if (sizes.length === 0) return () => 8;
+      const minS = Math.min(...sizes);
+      const maxS = Math.max(...sizes);
+      const range = maxS - minS || 1;
+      return function(size) {
+        if (size == null || size <= 0) return 8;
+        return Math.round(4 + 14 * (size - minS) / range);
+      };
+    }
+    function getSchoolSearchTerms() {
+      const raw = (document.getElementById('schoolSearch') && document.getElementById('schoolSearch').value || '').trim();
+      if (!raw) return [];
+      return raw.split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
+    }
+    function pointMatchesSearch(p, searchTerms) {
+      if (!searchTerms || searchTerms.length === 0) return true;
+      const naam = (p.label || '').toUpperCase();
+      const brin = (p.brin || '').toUpperCase();
+      const gemeente = (p.gemeente || '').toUpperCase();
+      const postcode = (p.postcode || '').toUpperCase().replace(/\s/g, '');
+      return searchTerms.some(term => {
+        const termNorm = term.replace(/\s/g, '');
+        return naam.includes(term) || brin.includes(term) || gemeente.includes(term) || postcode.includes(termNorm);
+      });
+    }
+    function getNameHighlights(label, searchTerms) {
+      if (!label || !searchTerms || searchTerms.length === 0) return [];
+      const upper = label.toUpperCase();
+      const ranges = [];
+      for (const term of searchTerms) {
+        let idx = 0;
+        while (true) {
+          const i = upper.indexOf(term, idx);
+          if (i === -1) break;
+          ranges.push([i, i + term.length]);
+          idx = i + 1;
+        }
+      }
+      ranges.sort((a, b) => a[0] - b[0]);
+      const merged = [];
+      for (const [s, e] of ranges) {
+        if (merged.length && s <= merged[merged.length - 1][1]) {
+          merged[merged.length - 1][1] = Math.max(merged[merged.length - 1][1], e);
+        } else merged.push([s, e]);
+      }
+      return merged;
+    }
     function makeDatasets(points) {
       const radiusFn = sizeToRadius(points);
       const searchTerms = getSchoolSearchTerms();
@@ -871,7 +951,7 @@
         btn.disabled = false;
         return;
       }
-      html2canvas(el, { scale: 2, useCORS: true, logging: false, backgroundColor: null }).then(function(canvas) {
+      html2canvas(el, { scale: 2, logging: false, backgroundColor: null }).then(function(canvas) {
         var link = document.createElement('a');
         link.download = 'schools-map.png';
         link.href = canvas.toDataURL('image/png');
