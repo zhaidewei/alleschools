@@ -814,7 +814,25 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
         maintainAspectRatio: true,
         aspectRatio: 4/3,
         plugins: {
-          legend: { position: 'bottom' },
+          legend: {
+            position: 'bottom',
+            labels: {
+              generateLabels: function(chart) {
+                const datasets = chart.data.datasets || [];
+                return datasets.map(function(ds, i) {
+                  const label = ds.label || '';
+                  return {
+                    text: label,
+                    fillStyle: gemeenteToColor(label),
+                    strokeStyle: gemeenteToBorderColor(label),
+                    lineWidth: 1,
+                    hidden: false,
+                    index: i
+                  };
+                });
+              }
+            }
+          },
           tooltip: {
             callbacks: {
               label: function(ctx) {
