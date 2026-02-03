@@ -536,6 +536,12 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
     function updateChartLabels() {
       const overlay = document.getElementById('chartLabels');
       if (!overlay || !chart || !chart.scales || !chart.scales.x || !chart.scales.y) return;
+      const searchEl = document.getElementById('schoolSearch');
+      const hasSearch = searchEl && (searchEl.value || '').trim().length > 0;
+      if (!hasSearch) {
+        overlay.innerHTML = '';
+        return;
+      }
       if (!chart.width || !chart.height) return;
       overlay.innerHTML = '';
       const scaleX = overlay.offsetWidth / chart.width;
