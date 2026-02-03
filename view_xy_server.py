@@ -105,28 +105,29 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <script>document.documentElement.classList.toggle('dark', localStorage.getItem('theme')==='dark');</script>
-  <style>.chartjs-tooltip { max-width: min(320px, 90vw); overflow-wrap: break-word; word-break: break-word; transform-origin: bottom center; } #shareWrap.open #shareDropdown { opacity: 1; visibility: visible; } details summary { list-style: none; } details summary::-webkit-details-marker { display: none; } .input-wrap { position: relative; } .input-hint { position: absolute; left: 0; right: 0; top: 100%; margin-top: 4px; padding: 8px 10px; font-size: 0.75rem; line-height: 1.35; color: var(--hint-text, #475569); background: var(--hint-bg, #f1f5f9); border: 1px solid var(--hint-border, #e2e8f0); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); z-index: 30; opacity: 0; visibility: hidden; transition: opacity 0.15s, visibility 0.15s; pointer-events: none; max-width: min(100%, 420px); } .input-wrap.show-hint .input-hint, .input-wrap:hover .input-hint { opacity: 1; visibility: visible; } .dark .input-hint { --hint-text: #94a3b8; --hint-bg: #334155; --hint-border: #475569; }</style>
+  <style>.chartjs-tooltip { max-width: min(320px, 90vw); overflow-wrap: break-word; word-break: break-word; transform-origin: bottom center; } #shareWrap.open #shareDropdown, #langWrap.open #langDropdown { opacity: 1; visibility: visible; } details summary { list-style: none; } details summary::-webkit-details-marker { display: none; } .input-wrap { position: relative; } .input-hint { position: absolute; left: 0; right: 0; top: 100%; margin-top: 4px; padding: 8px 10px; font-size: 0.75rem; line-height: 1.35; color: var(--hint-text, #475569); background: var(--hint-bg, #f1f5f9); border: 1px solid var(--hint-border, #e2e8f0); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); z-index: 30; opacity: 0; visibility: hidden; transition: opacity 0.15s, visibility 0.15s; pointer-events: none; max-width: min(100%, 420px); } .input-wrap.show-hint .input-hint, .input-wrap:hover .input-hint { opacity: 1; visibility: visible; } .dark .input-hint { --hint-text: #94a3b8; --hint-bg: #334155; --hint-border: #475569; }</style>
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-200 font-sans antialiased">
-  <div id="wrap" class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+  <div id="wrap" class="max-w-6xl mx-auto px-[2vw] sm:px-6 py-8">
     <div class="flex flex-wrap justify-between items-center gap-4 mb-2">
       <div class="flex items-center gap-1 rounded-lg border border-slate-300 dark:border-slate-500 p-0.5">
         <button type="button" id="navVO" class="navSchoolType px-3 py-1.5 text-sm font-medium rounded-md border-0 bg-slate-200 dark:bg-slate-600 text-slate-800 dark:text-slate-100" data-mode="vo">中学</button>
         <button type="button" id="navPO" class="navSchoolType px-3 py-1.5 text-sm font-medium rounded-md border-0 bg-transparent text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700" data-mode="po">小学</button>
       </div>
       <div class="flex items-center gap-4">
-      <div class="flex items-center gap-2">
-        <span id="labelTheme" class="text-sm font-medium text-slate-600 dark:text-slate-400">Theme</span>
-        <button type="button" id="themeLight" class="px-2.5 py-1 text-sm rounded-md border border-slate-300 dark:border-slate-500 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-1 focus:ring-slate-400">Light</button>
-        <button type="button" id="themeDark" class="px-2.5 py-1 text-sm rounded-md border border-slate-300 dark:border-slate-500 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-1 focus:ring-slate-400">Dark</button>
-      </div>
-      <div class="flex items-center gap-2">
-        <label id="labelLanguage" class="text-sm font-medium text-slate-600 dark:text-slate-400">Language</label>
-        <select id="langSelect" class="rounded-lg border border-slate-300 dark:border-slate-500 px-3 py-1.5 text-sm text-slate-800 dark:text-slate-200 dark:bg-slate-700 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400 align-middle">
-          <option value="en">English</option>
-          <option value="zh">中文</option>
-          <option value="nl">Nederlands</option>
-        </select>
+      <button type="button" id="themeToggle" class="p-2 rounded-lg border border-slate-300 dark:border-slate-500 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-1 focus:ring-slate-400 inline-flex items-center justify-center" title="Theme" aria-label="Toggle theme">
+        <span id="themeIcon" aria-hidden="true">
+          <svg class="w-5 h-5 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+          <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        </span>
+      </button>
+      <div class="relative inline-block" id="langWrap">
+        <button type="button" id="langBtn" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-sm rounded-lg border border-slate-300 dark:border-slate-500 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-400" title="Language" aria-label="Language" aria-haspopup="true" aria-expanded="false"><span id="langBtnFlag" class="text-lg">🇬🇧</span><span id="langBtnAbbr">EN</span></button>
+        <div id="langDropdown" class="absolute right-0 top-full mt-1 py-1 min-w-[5rem] bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-600 shadow-lg opacity-0 invisible transition-all z-20">
+          <button type="button" class="lang-option w-full text-left inline-flex items-center gap-1.5 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 border-0 bg-transparent cursor-pointer font-inherit rounded-t-lg first:rounded-t-lg last:rounded-b-lg" data-lang="en"><span class="text-lg">🇬🇧</span><span>EN</span></button>
+          <button type="button" class="lang-option w-full text-left inline-flex items-center gap-1.5 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 border-0 bg-transparent cursor-pointer font-inherit" data-lang="zh"><span class="text-lg">🇨🇳</span><span>CHN</span></button>
+          <button type="button" class="lang-option w-full text-left inline-flex items-center gap-1.5 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 border-0 bg-transparent cursor-pointer font-inherit rounded-b-lg" data-lang="nl"><span class="text-lg">🇳🇱</span><span>NL</span></button>
+        </div>
       </div>
       <div class="relative inline-block group" id="shareWrap">
         <button type="button" id="shareBtn" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg border border-slate-300 dark:border-slate-500 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600">Share</button>
@@ -142,14 +143,14 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
     <div id="chartWrap" class="mb-8">
       <h1 id="titleMain" class="text-xl font-semibold text-slate-800 dark:text-slate-100 tracking-tight"><a href="/" class="text-slate-800 dark:text-slate-100 hover:text-slate-600 dark:hover:text-slate-300">🏫 Dutch secondary school map</a>: academic level × science focus</h1>
       <p id="subtitleMain" class="mt-1 text-sm text-slate-500 dark:text-slate-400">Data from DUO (excluding international schools). X = academic strength, Y = science share. Dot size = graduation count. <strong id="schoolCount" class="font-medium text-slate-700 dark:text-slate-300">0</strong> schools shown.</p>
-      <div class="mt-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-600 shadow-sm p-4 sm:p-6">
-        <div class="w-full aspect-[4/3] min-h-[420px] relative">
+      <div class="mt-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-600 shadow-sm p-[2vw] sm:p-6">
+        <div class="w-full aspect-[4/3] min-h-[55vh] sm:min-h-[420px] relative">
           <canvas id="chart" class="w-full h-full block"></canvas>
           <div id="chartLabels" class="absolute inset-0 pointer-events-none overflow-hidden" style="left:0;top:0;right:0;bottom:0;"></div>
         </div>
       </div>
     </div>
-    <div class="controls flex flex-wrap items-center gap-4 sm:gap-6 py-4 px-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-600 shadow-sm">
+    <div class="controls flex flex-wrap items-center gap-4 sm:gap-6 py-4 px-[2vw] sm:px-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-600 shadow-sm">
       <div id="schoolSearchWrap" class="input-wrap flex items-center gap-2 flex-1 min-w-[200px] basis-[200px]">
         <label id="labelSchoolSearch" class="text-sm font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">School search</label>
         <input type="text" id="schoolSearch" placeholder="Name or acronym (e.g. HWC)" class="flex-1 min-w-[120px] rounded-lg border border-slate-300 dark:border-slate-500 px-3 py-2 text-sm text-slate-800 dark:text-slate-200 dark:bg-slate-700 placeholder-slate-400 dark:placeholder-slate-500 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" title="">
@@ -423,17 +424,18 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
       const modeKey = key + '_' + currentMode;
       return (lang[modeKey] !== undefined ? lang[modeKey] : lang[key]) || L.en[modeKey] || L.en[key] || key;
     }
+    var LANG_DISPLAY = { en: { flag: '🇬🇧', abbr: 'EN' }, zh: { flag: '🇨🇳', abbr: 'CHN' }, nl: { flag: '🇳🇱', abbr: 'NL' } };
     function applyLanguage() {
-      var langSel = document.getElementById('langSelect');
-      currentLang = (langSel && langSel.value) || 'en';
-      if (langSel) langSel.value = currentLang;
       localStorage.setItem('schools-lang', currentLang);
+      var d = LANG_DISPLAY[currentLang] || LANG_DISPLAY.en;
+      var langBtnFlag = document.getElementById('langBtnFlag');
+      var langBtnAbbr = document.getElementById('langBtnAbbr');
+      if (langBtnFlag) langBtnFlag.textContent = d.flag;
+      if (langBtnAbbr) langBtnAbbr.textContent = d.abbr;
       var navVO = document.getElementById('navVO');
       if (navVO) navVO.textContent = t('navVO');
       var navPO = document.getElementById('navPO');
       if (navPO) navPO.textContent = t('navPO');
-      var labelLanguage = document.getElementById('labelLanguage');
-      if (labelLanguage) labelLanguage.textContent = t('labelLanguage');
       var countEl = document.getElementById('schoolCount');
       var count = countEl ? countEl.textContent : '0';
       document.title = t('titleMain');
@@ -469,12 +471,8 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
       if (labelSelectAll) labelSelectAll.textContent = t('labelSelectAll');
       var labelDeselectAll = document.getElementById('labelDeselectAll');
       if (labelDeselectAll) labelDeselectAll.textContent = t('labelDeselectAll');
-      var labelThemeEl = document.getElementById('labelTheme');
-      if (labelThemeEl) labelThemeEl.textContent = t('labelTheme');
-      var themeLightBtn = document.getElementById('themeLight');
-      if (themeLightBtn) themeLightBtn.textContent = t('labelLight');
-      var themeDarkBtn = document.getElementById('themeDark');
-      if (themeDarkBtn) themeDarkBtn.textContent = t('labelDark');
+      var themeToggleBtn = document.getElementById('themeToggle');
+      if (themeToggleBtn) themeToggleBtn.title = isDarkTheme() ? t('labelLight') : t('labelDark');
       var shareBtn = document.getElementById('shareBtn');
       if (shareBtn) shareBtn.textContent = t('share');
       var shareCopyBtn = document.getElementById('shareCopyLink');
@@ -575,7 +573,7 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
       const list = getGemeentenInList();
       if (list.length > 0 && selectedGemeenten.size === 0) {
         var defaultSet = new Set(DEFAULT_GEMEENTEN);
-        selectedGemeenten = new Set(list.filter(function(g) { return defaultSet.has(g); }));
+        selectedGemeenten = new Set(list.filter(function(g) { return defaultSet.has((g || '').toUpperCase()); }));
         if (selectedGemeenten.size === 0) selectedGemeenten = new Set(list);
       }
       const container = document.getElementById('gemeenteCheckboxes');
@@ -615,11 +613,15 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
         overlay.innerHTML = '';
         return;
       }
-      if (!chart.width || !chart.height) return;
+      const canvas = chart.canvas;
+      if (!canvas || !chart.width || !chart.height) return;
       overlay.innerHTML = '';
-      const scaleX = overlay.offsetWidth / chart.width;
-      const scaleY = overlay.offsetHeight / chart.height;
-      if (!scaleX || !scaleY || !isFinite(scaleX) || !isFinite(scaleY)) return;
+      var displayW = canvas.clientWidth;
+      var displayH = canvas.clientHeight;
+      if (!displayW || !displayH) return;
+      var scaleX = displayW / chart.width;
+      var scaleY = displayH / chart.height;
+      if (!isFinite(scaleX) || !isFinite(scaleY)) return;
       const isDark = document.documentElement.classList.contains('dark');
       const textCls = isDark ? 'text-slate-200' : 'text-slate-800';
       const bgCls = isDark ? 'bg-slate-900/95' : 'bg-white/95';
@@ -970,6 +972,22 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
       },
     });
 
+    function scheduleUpdateChartLabels() {
+      requestAnimationFrame(function() {
+        if (chart && typeof chart.update === 'function') chart.update('resize');
+        requestAnimationFrame(function() { updateChartLabels(); });
+      });
+    }
+    window.addEventListener('resize', scheduleUpdateChartLabels);
+    window.addEventListener('orientationchange', function() {
+      setTimeout(scheduleUpdateChartLabels, 150);
+    });
+    var chartContainer = document.getElementById('chart') && document.getElementById('chart').parentElement;
+    if (chartContainer && typeof ResizeObserver !== 'undefined') {
+      var resizeObserver = new ResizeObserver(function() { scheduleUpdateChartLabels(); });
+      resizeObserver.observe(chartContainer);
+    }
+
     document.getElementById('selectAll').addEventListener('change', function() {
       if (this.checked) {
         const list = getGemeentenInList();
@@ -1024,12 +1042,30 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
     var showVMBOEl = document.getElementById('showVMBO');
     if (showVMBOEl) showVMBOEl.addEventListener('change', refreshChart);
 
-    document.getElementById('langSelect').addEventListener('change', function() {
-      currentLang = this.value;
-      localStorage.setItem('schools-lang', currentLang);
-      applyLanguage();
+    var langBtn = document.getElementById('langBtn');
+    var langWrap = document.getElementById('langWrap');
+    if (langBtn && langWrap) {
+      langBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        langWrap.classList.toggle('open');
+        langBtn.setAttribute('aria-expanded', langWrap.classList.contains('open'));
+      });
+    }
+    document.addEventListener('click', function() {
+      document.getElementById('shareWrap').classList.remove('open');
+      if (langWrap) { langWrap.classList.remove('open'); if (langBtn) langBtn.setAttribute('aria-expanded', 'false'); }
     });
-    document.getElementById('langSelect').value = currentLang;
+    if (langWrap) langWrap.addEventListener('click', function(e) { e.stopPropagation(); });
+    document.querySelectorAll('.lang-option').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        currentLang = this.getAttribute('data-lang');
+        localStorage.setItem('schools-lang', currentLang);
+        applyLanguage();
+        if (langWrap) langWrap.classList.remove('open');
+        if (langBtn) langBtn.setAttribute('aria-expanded', 'false');
+      });
+    });
+    currentLang = localStorage.getItem('schools-lang') || 'en';
     applyLanguage();
 
     function isDarkTheme() { return document.documentElement.classList.contains('dark'); }
@@ -1053,13 +1089,10 @@ def build_html(data_vo, excluded_vo, data_po, excluded_po):
       localStorage.setItem('theme', dark ? 'dark' : 'light');
       updateChartTheme(dark);
       requestAnimationFrame(function() { updateChartLabels(); });
-      var lightBtn = document.getElementById('themeLight');
-      var darkBtn = document.getElementById('themeDark');
-      if (lightBtn) { lightBtn.classList.toggle('bg-slate-200', !dark); lightBtn.classList.toggle('dark:bg-slate-600', dark); }
-      if (darkBtn) { darkBtn.classList.toggle('bg-slate-200', dark); darkBtn.classList.toggle('dark:bg-slate-600', !dark); }
+      var themeToggleBtn = document.getElementById('themeToggle');
+      if (themeToggleBtn) themeToggleBtn.title = dark ? t('labelLight') : t('labelDark');
     }
-    document.getElementById('themeLight').addEventListener('click', function() { applyTheme(false); });
-    document.getElementById('themeDark').addEventListener('click', function() { applyTheme(true); });
+    document.getElementById('themeToggle').addEventListener('click', function() { applyTheme(!isDarkTheme()); });
     applyTheme(isDarkTheme());
 
     document.getElementById('shareBtn').addEventListener('click', function(e) {
