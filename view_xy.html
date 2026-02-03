@@ -50,15 +50,16 @@
       <h1 id="titleMain" class="text-xl font-semibold text-slate-800 dark:text-slate-100 tracking-tight"><a href="/" class="text-slate-800 dark:text-slate-100 hover:text-slate-600 dark:hover:text-slate-300">🏫 Dutch secondary school map</a>: academic level × science focus</h1>
       <p id="subtitleMain" class="mt-1 text-sm text-slate-500 dark:text-slate-400">Data from DUO (excluding international schools). X = academic strength, Y = science share. Dot size = graduation count. <strong id="schoolCount" class="font-medium text-slate-700 dark:text-slate-300">0</strong> schools shown.</p>
       <div class="mt-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-600 shadow-sm p-4 sm:p-6">
-        <div class="w-full aspect-[4/3] min-h-[420px]">
+        <div class="w-full aspect-[4/3] min-h-[420px] relative">
           <canvas id="chart" class="w-full h-full block"></canvas>
+          <div id="chartLabels" class="absolute inset-0 pointer-events-none overflow-hidden" style="left:0;top:0;right:0;bottom:0;"></div>
         </div>
       </div>
     </div>
     <div class="controls flex flex-wrap items-center gap-4 sm:gap-6 py-4 px-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-600 shadow-sm">
       <div class="flex items-center gap-2">
         <label id="labelSchoolSearch" class="text-sm font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">School search</label>
-        <input type="text" id="schoolSearch" placeholder="Search by name or BRIN, matches highlighted" class="flex-1 min-w-[200px] rounded-lg border border-slate-300 dark:border-slate-500 px-3 py-2 text-sm text-slate-800 dark:text-slate-200 dark:bg-slate-700 placeholder-slate-400 dark:placeholder-slate-500 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400">
+        <input type="text" id="schoolSearch" placeholder="Search by name or BRIN, comma for multiple, partial match highlighted" class="flex-1 min-w-[200px] rounded-lg border border-slate-300 dark:border-slate-500 px-3 py-2 text-sm text-slate-800 dark:text-slate-200 dark:bg-slate-700 placeholder-slate-400 dark:placeholder-slate-500 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400">
       </div>
       <div class="flex items-center gap-2">
         <label id="labelGemeente" class="text-sm font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">City hall filter</label>
@@ -157,7 +158,7 @@
         subtitleBefore: 'Data from DUO (excluding international schools). X = academic strength, Y = science share. Dot size = graduation count. ',
         subtitleAfter: ' schools shown.',
         labelSchoolSearch: 'School search',
-        schoolSearchPlaceholder: 'Search by name, BRIN or postcode, matches highlighted',
+        schoolSearchPlaceholder: 'Search by name or BRIN, comma for multiple, partial match highlighted',
         labelGemeente: 'City hall filter',
         gemeentePlaceholder: 'Leave empty for all, comma for multiple',
         labelLinear: 'Linear scale',
@@ -207,7 +208,7 @@
         subtitleBefore: '数据来自DUO（不含国际学校），X轴代表学术强度，Y轴代表理科占比，点的大小代表毕业人数。共 ',
         subtitleAfter: ' 所学校。',
         labelSchoolSearch: '学校搜索',
-        schoolSearchPlaceholder: '按校名、BRIN 或邮编搜索，匹配项高亮',
+        schoolSearchPlaceholder: '按校名或 BRIN 搜索，逗号分隔多个，部分匹配高亮',
         labelGemeente: '市政厅 过滤',
         gemeentePlaceholder: '不输入显示全部，多个用逗号分隔',
         labelLinear: '线性坐标',
@@ -257,7 +258,7 @@
         subtitleBefore: 'Data van DUO (zonder internationale scholen). X = academisch niveau, Y = bètandeel. Puntgrootte = aantal geslaagden. ',
         subtitleAfter: ' scholen getoond.',
         labelSchoolSearch: 'Zoek school',
-        schoolSearchPlaceholder: 'Zoek op naam, BRIN of postcode, treffers gemarkeerd',
+        schoolSearchPlaceholder: 'Zoek op naam of BRIN, komma voor meerdere, deelmatch gemarkeerd',
         labelGemeente: 'Gemeentefilter',
         gemeentePlaceholder: 'Leeg = alle, komma voor meerdere',
         labelLinear: 'Lineaire schaal',
@@ -442,6 +443,61 @@
       document.getElementById('selectAll').checked = allSelected;
       document.getElementById('deselectAll').checked = noneSelected;
     }
+    function updateChartLabels() {
+      const overlay = document.getElementById('chartLabels');
+      if (!overlay || !chart || !chart.scales || !chart.scales.x || !chart.scales.y) return;
+      if (!chart.width || !chart.height) return;
+      overlay.innerHTML = '';
+      const scaleX = overlay.offsetWidth / chart.width;
+      const scaleY = overlay.offsetHeight / chart.height;
+      if (!scaleX || !scaleY || !isFinite(scaleX) || !isFinite(scaleY)) return;
+      const isDark = document.documentElement.classList.contains('dark');
+      const textCls = isDark ? 'text-slate-200' : 'text-slate-800';
+      const bgCls = isDark ? 'bg-slate-900/95' : 'bg-white/95';
+      const borderCls = isDark ? 'border-slate-500' : 'border-slate-300';
+      const highlightCls = 'bg-amber-400/60 dark:bg-amber-500/50';
+      chart.data.datasets.forEach(function(ds) {
+        if (!ds.data) return;
+        ds.data.forEach(function(pt) {
+          if (!pt.matched || !pt.naam) return;
+          const x = chart.scales.x.getPixelForValue(pt.x);
+          const y = chart.scales.y.getPixelForValue(pt.y);
+          const r = (typeof ds.pointRadius === 'function' ? ds.pointRadius({ raw: pt, dataIndex: 0, datasetIndex: 0, chart: chart }) : (ds.pointRadius || 8)) || 8;
+          const labelTop = (y - r - 22) * scaleY;
+          const labelLeft = x * scaleX;
+          const el = document.createElement('div');
+          el.className = 'absolute text-xs font-medium whitespace-nowrap px-2 py-1 rounded border shadow-sm ' + bgCls + ' ' + borderCls + ' ' + textCls;
+          el.style.left = (labelLeft) + 'px';
+          el.style.top = (labelTop) + 'px';
+          el.style.transform = 'translate(-50%, 0)';
+          const highlights = pt.nameHighlights || [];
+          if (highlights.length === 0) {
+            el.textContent = pt.naam;
+          } else {
+            const name = pt.naam;
+            let last = 0;
+            highlights.forEach(function(range) {
+              if (range[0] > last) {
+                const span = document.createElement('span');
+                span.textContent = name.slice(last, range[0]);
+                el.appendChild(span);
+              }
+              const hi = document.createElement('span');
+              hi.className = 'rounded px-0.5 ' + highlightCls;
+              hi.textContent = name.slice(range[0], range[1]);
+              el.appendChild(hi);
+              last = range[1];
+            });
+            if (last < name.length) {
+              const span = document.createElement('span');
+              span.textContent = name.slice(last);
+              el.appendChild(span);
+            }
+          }
+          overlay.appendChild(el);
+        });
+      });
+    }
     function refreshChart() {
       const coord = document.querySelector('input[name="coord"]:checked').value;
       const points = getFilteredPoints(coord === 'log' ? log : linear);
@@ -460,6 +516,7 @@
         chart.options.scales.y.ticks = { stepSize: undefined };
       }
       chart.update();
+      requestAnimationFrame(function() { updateChartLabels(); });
     }
     function setChartScaleForMode() {
       const isLog = document.querySelector('input[name="coord"]:checked') && document.querySelector('input[name="coord"]:checked').value === 'log';
@@ -560,31 +617,59 @@
         return Math.round(4 + 14 * (size - minS) / range);
       };
     }
-    function getSchoolSearchTerm() {
-      return (document.getElementById('schoolSearch') && document.getElementById('schoolSearch').value || '').trim().toUpperCase();
+    function getSchoolSearchTerms() {
+      const raw = (document.getElementById('schoolSearch') && document.getElementById('schoolSearch').value || '').trim();
+      if (!raw) return [];
+      return raw.split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
     }
-    function pointMatchesSearch(p, searchTerm) {
-      if (!searchTerm) return true;
+    function pointMatchesSearch(p, searchTerms) {
+      if (!searchTerms || searchTerms.length === 0) return true;
       const naam = (p.label || '').toUpperCase();
       const brin = (p.brin || '').toUpperCase();
       const gemeente = (p.gemeente || '').toUpperCase();
       const postcode = (p.postcode || '').toUpperCase().replace(/\s/g, '');
-      const termNorm = searchTerm.replace(/\s/g, '');
-      return naam.includes(searchTerm) || brin.includes(searchTerm) || gemeente.includes(searchTerm) || postcode.includes(termNorm);
+      return searchTerms.some(term => {
+        const termNorm = term.replace(/\s/g, '');
+        return naam.includes(term) || brin.includes(term) || gemeente.includes(term) || postcode.includes(termNorm);
+      });
+    }
+    function getNameHighlights(label, searchTerms) {
+      if (!label || !searchTerms || searchTerms.length === 0) return [];
+      const upper = label.toUpperCase();
+      const ranges = [];
+      for (const term of searchTerms) {
+        let idx = 0;
+        while (true) {
+          const i = upper.indexOf(term, idx);
+          if (i === -1) break;
+          ranges.push([i, i + term.length]);
+          idx = i + 1;
+        }
+      }
+      ranges.sort((a, b) => a[0] - b[0]);
+      const merged = [];
+      for (const [s, e] of ranges) {
+        if (merged.length && s <= merged[merged.length - 1][1]) {
+          merged[merged.length - 1][1] = Math.max(merged[merged.length - 1][1], e);
+        } else merged.push([s, e]);
+      }
+      return merged;
     }
     function makeDatasets(points) {
       const radiusFn = sizeToRadius(points);
-      const searchTerm = getSchoolSearchTerm();
+      const searchTerms = getSchoolSearchTerms();
       const byGemeente = {};
       points.forEach(p => {
         const g = p.gemeente || '(未知)';
         if (!byGemeente[g]) byGemeente[g] = [];
-        const matched = pointMatchesSearch(p, searchTerm);
+        const matched = pointMatchesSearch(p, searchTerms);
+        const nameHighlights = getNameHighlights(p.label, searchTerms);
         byGemeente[g].push({
           x: p.x, y: p.y, naam: p.label, type: p.type, postcode: p.postcode || '',
           r: radiusFn(p.size),
           size: p.size,
-          matched: matched
+          matched: matched,
+          nameHighlights: nameHighlights
         });
       });
       const gemeenten = Object.keys(byGemeente).sort();
@@ -648,7 +733,7 @@
               },
               afterBody: function() { setTimeout(updateTooltipScale, 0); }
             }
-          }
+          },
         },
         scales: {
           x: {
@@ -743,6 +828,7 @@
       document.documentElement.classList.toggle('dark', dark);
       localStorage.setItem('theme', dark ? 'dark' : 'light');
       updateChartTheme(dark);
+      requestAnimationFrame(function() { updateChartLabels(); });
       var lightBtn = document.getElementById('themeLight');
       var darkBtn = document.getElementById('themeDark');
       if (lightBtn) { lightBtn.classList.toggle('bg-slate-200', !dark); lightBtn.classList.toggle('dark:bg-slate-600', dark); }
