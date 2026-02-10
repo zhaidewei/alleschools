@@ -16,12 +16,12 @@ High‑level pipeline for both VO (secondary) and PO (primary):
 
 | Step | Input | Script / action | Output |
 |------|-------|-----------------|--------|
-| Fetch VO exams | DUO CSV URL | `python3 fetch_duo_examen_all.py` | `duo_examen_raw_all.csv` |
-| Compute VO coordinates | `duo_examen_raw_all.csv` (or fallback `duo_examen_raw.csv`) + optional `duo_vestigingen_vo.csv` | `python3 calc_xy_coords.py` | `schools_xy_coords.csv`, `excluded_schools.json` |
-| Fetch PO school advice | DUO CSV URLs per school year | `python3 fetch_duo_schooladviezen.py` | `duo_schooladviezen_YYYY_YYYY.csv` (per year) |
-| Fetch WOZ by postcode | CBS PC4 Geopackage zips | `python3 fetch_cbs_woz_postcode.py` | `cbs_woz_per_postcode_year.csv` (pc4, year, woz_waarde) |
-| Compute PO coordinates | `duo_schooladviezen_*.csv` + `cbs_woz_per_postcode_year.csv` | `python3 calc_xy_coords_po.py` | `schools_xy_coords_po.csv`, `excluded_schools_po.json` |
-| Serve / build front‑end | `schools_xy_coords.csv`, `excluded_schools.json`, optional `schools_xy_coords_po.csv`, `excluded_schools_po.json`, `view_xy.html` | `python3 view_xy_server.py` or `python3 view_xy_server.py --static` | Local HTTP server on `http://localhost:8082` or static `public/index.html` |
+| Fetch VO exams | DUO CSV URL | `python -m alleschools.cli fetch --vo` | `raw_data/duo_examen_raw_all.csv` (+ `raw_data/duo_vestigingen_vo.csv`) |
+| Compute VO coordinates | Raw VO inputs under `raw_data/` | `python -m alleschools.cli vo` (or `etl --vo`) | `generated/schools_xy_coords.csv`, `generated/excluded_schools.json`, JSON/GeoJSON/long‑table exports, `run_report_vo.json` |
+| Fetch PO school advice | DUO CSV URLs per school year | `python -m alleschools.cli fetch --po` | `raw_data/duo_schooladviezen_YYYY_YYYY.csv` (per year) |
+| Fetch WOZ by postcode | CBS PC4 Geopackage zips | `python -m alleschools.cli fetch --cbs-woz` (or `fetch --all`) | `raw_data/cbs_woz_per_postcode_year.csv` (pc4, year, woz_waarde) |
+| Compute PO coordinates | Raw PO + WOZ inputs under `raw_data/` | `python -m alleschools.cli po` (or `etl --po`) | `generated/schools_xy_coords_po.csv`, `generated/excluded_schools_po.json`, JSON/GeoJSON/long‑table exports, `run_report_po.json` |
+| Serve / build front‑end | Outputs under `generated/` (+ `view_xy.html`) | `python3 view_xy_server.py` or `python3 view_xy_server.py --static` | Local HTTP server on `http://localhost:8082` or static `public/index.html` |
 
 You can use VO only, PO only, or both; the front‑end can toggle between the two layers.
 
@@ -34,14 +34,21 @@ You can use VO only, PO only, or both; the front‑end can toggle between the tw
 - **Source**: DUO Open Onderwijsdata →  
   “Voortgezet onderwijs” → “Examens vmbo, havo en vwo” →  
   **Examenkandidaten en geslaagden** (CSV 2019–2024).  
-- **Script**: `fetch_duo_examen_all.py` downloads the combined CSV and saves it as `duo_examen_raw_all.csv`.
+- **Recommended**: use the unified CLI to download VO inputs into `raw_data/`:
 
 ```bash
-python3 fetch_duo_examen_all.py
+python -m alleschools.cli fetch --vo
 ```
 
-- **Keep**: `duo_examen_raw_all.csv` is the raw exams dataset for all secondary schools.  
-  It is consumed by `calc_xy_coords.py`.
+This writes (by default):
+
+- `raw_data/duo_examen_raw_all.csv` – raw exams dataset for all secondary schools;  
+- `raw_data/duo_vestigingen_vo.csv` – VO campuses with BRIN / postcode mapping.
+
+These raw files are consumed by both:
+
+- the legacy script `calc_xy_coords.py`, and  
+- the refactored VO pipeline via `python -m alleschools.cli vo` / `python -m alleschools.cli etl --vo`.
 
 ---
 
@@ -67,15 +74,15 @@ python3 fetch_duo_examen_all.py
 #### VO postcode source
 
 The exams CSV (`duo_examen_raw_all.csv`) does **not** contain postcodes.  
-`calc_xy_coords.py` reads DUO’s **Alle vestigingen VO** CSV  
+`calc_xy_coords.py` (and the refactored VO pipeline) read DUO’s **Alle vestigingen VO** CSV  
 ([direct CSV](https://duo.nl/open_onderwijsdata/images/02.-alle-vestigingen-vo.csv)) into `duo_vestigingen_vo.csv`:
 
 - It maps `VESTIGINGSCODE` to `POSTCODE`.
 - For each BRIN in the exams CSV, it looks up the postcode via `VESTIGINGSCODE`.
-- If `duo_vestigingen_vo.csv` is missing, you can generate it via:
+- If `duo_vestigingen_vo.csv` is missing, you can (re)generate it together with the exams CSV via:
 
 ```bash
-python3 download_duo_vestigingen_vo.py
+python -m alleschools.cli fetch --vo
 ```
 
 #### VO coordinate definitions
@@ -121,16 +128,17 @@ The primary‑school (PO) layer combines **DUO school advice (schooladviezen)** 
 - **Source**: DUO Open Onderwijsdata →  
   “Primair onderwijs” → “Aantal leerlingen” → **Schooladviezen**  
   ([overview page](https://duo.nl/open_onderwijsdata/primair-onderwijs/aantal-leerlingen/schooladviezen.jsp)).
-- **Script**: `fetch_duo_schooladviezen.py`
-  - Downloads multiple school years.
-  - Saves them as:
-    - `duo_schooladviezen_2019_2020.csv`
-    - …
-    - up to `duo_schooladviezen_2024_2025.csv`
+- **Recommended**: use the unified CLI to download all required school years into `raw_data/`:
 
 ```bash
-python3 fetch_duo_schooladviezen.py
+python -m alleschools.cli fetch --po
 ```
+
+This downloads multiple school years and saves them as:
+
+- `raw_data/duo_schooladviezen_2019_2020.csv`
+- …
+- up to `raw_data/duo_schooladviezen_2024_2025.csv`
 
 Each CSV contains, per BRIN campus, the counts of pupils receiving each type of advice (`VWO`, `HAVO_VWO`, `HAVO`, `VMBO_*`, `VSO`, `PRO`, etc.), along with postcode and municipality.
 
@@ -138,19 +146,23 @@ Each CSV contains, per BRIN campus, the counts of pupils receiving each type of 
 
 - **Source**: CBS “Gegevens per postcode (PC4)” –  
   [overview page (Dutch)](https://www.cbs.nl/nl-nl/dossier/nederland-regionaal/geografische-data/gegevens-per-postcode)
-- **Script**: `fetch_cbs_woz_postcode.py`
-  - Downloads relevant zip files for multiple years:
-    - e.g. `2025-cbs_pc4_2024_v1.zip`, `2025-cbs_pc4_2023_v2.zip`, etc.
-  - Extracts the Geopackage (.gpkg) and reads the table containing:
-    - `postcode`
-    - `gemiddelde_woz_waarde_woning`
-  - Filters out CBS “missing / not yet published” codes and negative WOZ values.
-  - Writes a simplified CSV:
-    - `cbs_woz_per_postcode_year.csv` with columns: `pc4`, `year`, `woz_waarde` (in **thousands of euros**).
+- **Recommended**: use the unified CLI (which internally uses `alleschools.fetch_cbs_woz`) to download and preprocess WOZ data into `raw_data/`:
 
 ```bash
-python3 fetch_cbs_woz_postcode.py
+python -m alleschools.cli fetch --cbs-woz
+# or fetch everything (VO + PO + CBS) in one go:
+python -m alleschools.cli fetch --all
 ```
+
+This will:
+
+- Download the relevant CBS PC4 zip files for multiple years, e.g. `2025-cbs_pc4_2024_v1.zip`, `2025-cbs_pc4_2023_v2.zip`, etc.
+- Extract the Geopackage (.gpkg) and read the table containing:
+  - `postcode`
+  - `gemiddelde_woz_waarde_woning`
+- Filter out CBS “missing / not yet published” codes and negative WOZ values.
+- Write a simplified CSV:
+  - `raw_data/cbs_woz_per_postcode_year.csv` with columns: `pc4`, `year`, `woz_waarde` (in **thousands of euros**).
 
 > Note: At the time of writing, CBS publishes WOZ per postcode for a limited set of years  
 > (e.g. 2021–2023, with 2024 in progress). The script is designed to be re‑run as new years appear.
@@ -304,11 +316,12 @@ This repository is preconfigured for **Vercel static hosting**:
 
 1. Push the repo to GitHub/GitLab/Bitbucket, or import it into Vercel.
 2. Vercel reads `vercel.json` in the project root:
-   - **buildCommand**: `python3 view_xy_server.py --static`
+   - **buildCommand**: `bash rerun_data.sh && python3 view_xy_server.py --static`
    - **outputDirectory**: `public`
-3. Before deploying, make sure `schools_xy_coords.csv` / `excluded_schools.json` (and, if desired, `schools_xy_coords_po.csv` / `excluded_schools_po.json`) are **already present** in the repo:
-   - Either run the pipelines locally and commit the generated CSV/JSON,
-   - or generate them in CI before Vercel’s static build step.
+3. `rerun_data.sh` uses the unified CLI (`python -m alleschools.cli full --all` + schema validation) to:
+   - fetch / refresh raw inputs into `raw_data/`,
+   - recompute all VO/PO outputs into `generated/`,
+   - and only then build the static HTML.
 
 For local preview of the static build:
 
@@ -520,26 +533,22 @@ Cleaned‑up file list (grouped by purpose):
 
 | File | Description |
 |------|-------------|
-| `fetch_duo_examen_all.py` | Download DUO “Examenkandidaten en geslaagden 2019–2024” → `duo_examen_raw_all.csv`. |
-| `duo_examen_raw_all.csv` | Raw DUO exams data (all secondary schools), downloaded by the script above. |
-| `duo_examen_raw.csv` | Optional small sample (e.g. for quick experiments); used only if `duo_examen_raw_all.csv` is missing. |
-| `download_duo_vestigingen_vo.py` | Download DUO “Alle vestigingen VO” → `duo_vestigingen_vo.csv` (BRIN / postcode mapping). |
-| `duo_vestigingen_vo.csv` | DUO VO campuses with BRIN, names, addresses, and postcodes; used to add postcodes to the VO coordinates. |
-| `calc_xy_coords.py` | Compute VO coordinates (VWO pass share × science share) from DUO exams CSV → `schools_xy_coords.csv`, `excluded_schools.json`. |
-| `schools_xy_coords.csv` | VO school coordinates: BRIN, name, municipality, postcode, type, `X_linear`, `Y_linear`, `X_log`, `Y_log`, `candidates_total`. |
+| `raw_data/duo_examen_raw_all.csv` | Raw DUO exams data (all secondary schools), typically generated via `python -m alleschools.cli fetch --vo`. |
+| `raw_data/duo_examen_raw.csv` | Optional small sample (e.g. for quick experiments); used only if `duo_examen_raw_all.csv` is missing. |
+| `raw_data/duo_vestigingen_vo.csv` | DUO VO campuses with BRIN, names, addresses, and postcodes; used to add postcodes to the VO coordinates (also fetched by `python -m alleschools.cli fetch --vo`). |
+| `calc_xy_coords.py` | Legacy script to compute VO coordinates (VWO pass share × science share) from DUO exams CSV → `schools_xy_coords.csv`, `excluded_schools.json`. The refactored pipeline instead runs via `python -m alleschools.cli vo` / `etl --vo` and writes into `generated/`. |
+| `schools_xy_coords.csv` | VO school coordinates produced by the legacy script: BRIN, name, municipality, postcode, type, `X_linear`, `Y_linear`, `X_log`, `Y_log`, `candidates_total`. |
 | `excluded_schools.json` | VO schools excluded from the chart due to too few HAVO/VWO candidates (5‑year total below threshold). |
 
 ### 11.2 PO + WOZ pipeline (primary schools)
 
 | File | Description |
 |------|-------------|
-| `fetch_duo_schooladviezen.py` | Download DUO primary “Schooladviezen” for multiple school years → `duo_schooladviezen_YYYY_YYYY.csv`. |
-| `duo_schooladviezen_YYYY_YYYY.csv` | Per‑year DUO school advice CSVs (input to `calc_xy_coords_po.py`). |
-| `fetch_cbs_woz_postcode.py` | Download CBS PC4 Geopackage zips and extract postcode‑level **average WOZ** values → `cbs_woz_per_postcode_year.csv`. |
-| `cbs_woz_per_postcode_year.csv` | Simplified CBS WOZ dataset: `pc4`, `year`, `woz_waarde` (thousand euros), used to compute PO Y coordinates. |
+| `raw_data/duo_schooladviezen_YYYY_YYYY.csv` | Per‑year DUO school advice CSVs (input to both `calc_xy_coords_po.py` and the refactored PO pipeline). Usually generated via `python -m alleschools.cli fetch --po`. |
+| `raw_data/cbs_woz_per_postcode_year.csv` | Simplified CBS WOZ dataset: `pc4`, `year`, `woz_waarde` (thousand euros), used to compute PO Y coordinates. Generated via `python -m alleschools.cli fetch --cbs-woz` (or `fetch --all`). |
 | `pc4_2023_v2.xlsx`, `pc4_2024_v1.xlsx` | Intermediate CBS PC4 files (may be historical artefacts; kept for reference). |
-| `calc_xy_coords_po.py` | Compute PO coordinates (VWO‑advice share × WOZ) from DUO school advice + CBS WOZ → `schools_xy_coords_po.csv`, `excluded_schools_po.json`. |
-| `schools_xy_coords_po.csv` | PO school coordinates: BRIN, name, municipality, postcode, type, `X_linear`, `Y_linear`, `X_log`, `Y_log`, `pupils_total`. |
+| `calc_xy_coords_po.py` | Legacy script to compute PO coordinates (VWO‑advice share × WOZ) from DUO school advice + CBS WOZ → `schools_xy_coords_po.csv`, `excluded_schools_po.json`. The refactored pipeline instead runs via `python -m alleschools.cli po` / `etl --po` and writes into `generated/`. |
+| `schools_xy_coords_po.csv` | PO school coordinates produced by the legacy script: BRIN, name, municipality, postcode, type, `X_linear`, `Y_linear`, `X_log`, `Y_log`, `pupils_total`. |
 | `excluded_schools_po.json` | PO schools excluded due to too few pupils (total advice count below threshold). |
 
 ### 11.3 Front‑end and serving
@@ -575,7 +584,7 @@ Key components:
 | `refactor/UI_DESIGN.md` | UI/UX design for a schema‑driven front‑end that consumes the `SCHEMA.md` data/meta contract. |
 | `refactor/P0_P1_P2_plan.md` | Implementation roadmap for the refactor (P0/P1/P2 stages: modularization, richer exports, schema validator, privacy rules, etc.). |
 | `config.yaml` | Central configuration for inputs, outputs, thresholds, weights, and quality rules per layer (`vo` / `po`). |
-| `alleschools/*` | Internal package for loaders, indicators, exporters, pipelines, and (eventually) CLI and schema validator; see `refactor/P0_P1_P2_plan.md` for the current status. |
+| `alleschools/*` | Internal package for loaders, indicators, exporters, pipelines, CLI entrypoints, and schema validator; see `refactor/P0_P1_P2_plan.md` for the current status. |
 | `schools_xy_coords_geo.json` | Example GeoJSON export for VO coordinates, produced by the refactored exporters for map tooling (geometry may be null or populated depending on PC4→lat/lon lookup). |
 | `run_report_po.json` / `run_report_vo.json` | Structured **run reports** emitted by the refactored pipelines. Each report records the effective config snapshot, input files, generated outputs (CSV/JSON/GeoJSON/long table), basic row/column counts, data‑quality summary, and the schema version used (matching the meta JSON). |
 | `data_quality_report_po.json` / `data_quality_report_vo.json` | Optional **data quality reports** produced by the quality module, referenced from the run reports. They typically contain checks such as duplicate BRINs, missing postcodes, very small sample sizes, and other anomalies. |

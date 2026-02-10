@@ -1,0 +1,2 @@
+# Build / runtime deps (Vercel build 与 alleschools CLI 需要)
+PyYAML>=6.0.0
