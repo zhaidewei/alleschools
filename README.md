@@ -66,8 +66,7 @@ These raw files are consumed by both:
     - `gemeente`
     - `postcode`
     - `type` – `HAVO/VWO` or `VMBO`
-    - `X_linear`, `Y_linear` – linear coordinates
-    - `X_log`, `Y_log` – log‑scaled coordinates
+    - `X_linear`, `Y_linear` – linear coordinates (axes are linear only; log scale has been removed)
     - `candidates_total` – total exam candidates over 5 years (all types), used for dot size.
   - `excluded_schools.json` – HAVO/VWO schools excluded because they have too few candidates (see below).
 
@@ -106,11 +105,6 @@ python -m alleschools.cli fetch --vo
   - If the 5‑year total HAVO+VWO exam candidates for a school is **< 20**, it:
     - is **not** written to `schools_xy_coords.csv`;
     - goes into `excluded_schools.json` instead (to avoid extreme, tiny‑sample points like 100/100).
-- **Log coordinates**:
-  - To keep values in a compact range for charts, both axes also get:
-    - \( X_{\text{log}} = \log_{10}(1 + X_{\text{linear}}/100) \)
-    - \( Y_{\text{log}} = \log_{10}(1 + Y_{\text{linear}}/100) \)
-
 Run:
 
 ```bash
@@ -182,7 +176,6 @@ This will:
     - `type` – `Bo` or `Sbo` (special primary); anything else is normalized to `Bo`.
     - `X_linear` – weighted average VWO‑equivalent advice share (%).
     - `Y_linear` – weighted average WOZ (thousand euros).
-    - `X_log`, `Y_log` – log‑scaled versions.
     - `pupils_total` – total advised pupils across years.
   - `excluded_schools_po.json` – PO schools excluded due to too few pupils.
 
@@ -205,9 +198,6 @@ For each school and each school year, `calc_xy_coords_po.py`:
     - For each year, finds `woz_waarde` for the given `pc4` and reference year.
     - Years with missing WOZ (e.g. future years not yet published) are simply skipped.
     - `Y_linear` = weighted average of available WOZ values.
-  - **Log coordinates**:
-    - \( X_{\text{log}} = \log_{10}(1 + X_{\text{linear}}/100) \)
-    - \( Y_{\text{log}} = \log_{10}(1 + Y_{\text{linear}}/100) \) if `Y_linear > 0`, else `0.0`.
 
 #### Minimum pupils and exclusions (PO)
 
@@ -249,13 +239,13 @@ python3 view_xy_server.py
 
 - **Layers**:
   - Toggle between **Secondary (VO)** and **Primary (PO)** in the top‑left switch.
-- **Axes**:
+- **Axes** (linear only; log scale has been removed):
   - VO:
-    - X = VWO pass share (%), 0–100, or log scale.
-    - Y = science pass share (%), 0–100, or log scale.
+    - X = VWO pass share (%), 0–100.
+    - Y = science pass share (%), 0–100.
   - PO:
-    - X = VWO‑advice share (%), 0–100, or log scale.
-    - Y = average WOZ per PC4 (thousand euros), linear or log scale.
+    - X = VWO‑advice share (%), 0–100.
+    - Y = average WOZ per PC4 (thousand euros).
 - **Dot size**:
   - VO: proportional to `candidates_total` (5‑year sum of exam candidates).
   - PO: proportional to `pupils_total` (total pupils with advice).
@@ -320,7 +310,7 @@ This repository is preconfigured for **Vercel static hosting**:
    - **outputDirectory**: `public`
 3. `rerun_data.sh` uses the unified CLI (`python -m alleschools.cli full --all` + schema validation) to:
    - fetch / refresh raw inputs into `raw_data/`,
-   - recompute all VO/PO outputs into `generated/`,
+   - recompute all VO/PO outputs into `generated/` (linear coordinates only; if you have older outputs that included log-scale fields, a full rerun is recommended so meta/points match the current schema).
    - and only then build the static HTML.
 
 For local preview of the static build:
@@ -537,7 +527,7 @@ Cleaned‑up file list (grouped by purpose):
 | `raw_data/duo_examen_raw.csv` | Optional small sample (e.g. for quick experiments); used only if `duo_examen_raw_all.csv` is missing. |
 | `raw_data/duo_vestigingen_vo.csv` | DUO VO campuses with BRIN, names, addresses, and postcodes; used to add postcodes to the VO coordinates (also fetched by `python -m alleschools.cli fetch --vo`). |
 | `calc_xy_coords.py` | Legacy script to compute VO coordinates (VWO pass share × science share) from DUO exams CSV → `schools_xy_coords.csv`, `excluded_schools.json`. The refactored pipeline instead runs via `python -m alleschools.cli vo` / `etl --vo` and writes into `generated/`. |
-| `schools_xy_coords.csv` | VO school coordinates produced by the legacy script: BRIN, name, municipality, postcode, type, `X_linear`, `Y_linear`, `X_log`, `Y_log`, `candidates_total`. |
+| `schools_xy_coords.csv` | VO school coordinates (legacy script): BRIN, name, municipality, postcode, type, `X_linear`, `Y_linear`, `candidates_total`. Refactored pipeline outputs linear only. |
 | `excluded_schools.json` | VO schools excluded from the chart due to too few HAVO/VWO candidates (5‑year total below threshold). |
 
 ### 11.2 PO + WOZ pipeline (primary schools)
@@ -548,7 +538,7 @@ Cleaned‑up file list (grouped by purpose):
 | `raw_data/cbs_woz_per_postcode_year.csv` | Simplified CBS WOZ dataset: `pc4`, `year`, `woz_waarde` (thousand euros), used to compute PO Y coordinates. Generated via `python -m alleschools.cli fetch --cbs-woz` (or `fetch --all`). |
 | `pc4_2023_v2.xlsx`, `pc4_2024_v1.xlsx` | Intermediate CBS PC4 files (may be historical artefacts; kept for reference). |
 | `calc_xy_coords_po.py` | Legacy script to compute PO coordinates (VWO‑advice share × WOZ) from DUO school advice + CBS WOZ → `schools_xy_coords_po.csv`, `excluded_schools_po.json`. The refactored pipeline instead runs via `python -m alleschools.cli po` / `etl --po` and writes into `generated/`. |
-| `schools_xy_coords_po.csv` | PO school coordinates produced by the legacy script: BRIN, name, municipality, postcode, type, `X_linear`, `Y_linear`, `X_log`, `Y_log`, `pupils_total`. |
+| `schools_xy_coords_po.csv` | PO school coordinates (legacy script): BRIN, name, municipality, postcode, type, `X_linear`, `Y_linear`, `pupils_total`. Refactored pipeline outputs linear only. |
 | `excluded_schools_po.json` | PO schools excluded due to too few pupils (total advice count below threshold). |
 
 ### 11.3 Front‑end and serving

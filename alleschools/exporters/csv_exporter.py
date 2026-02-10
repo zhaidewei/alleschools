@@ -17,8 +17,6 @@ PO_FIELDNAMES: Sequence[str] = [
     "type",
     "X_linear",
     "Y_linear",
-    "X_log",
-    "Y_log",
     "pupils_total",
 ]
 
@@ -37,8 +35,6 @@ VO_FIELDNAMES: Sequence[str] = [
     "type",
     "X_linear",
     "Y_linear",
-    "X_log",
-    "Y_log",
     "candidates_total",
 ]
 

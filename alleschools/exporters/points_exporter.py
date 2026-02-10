@@ -29,8 +29,6 @@ def _po_row_to_point(row: Mapping[str, Any]) -> Dict[str, Any]:
         "school_type": row.get("type"),
         "x_linear": row.get("X_linear"),
         "y_linear": row.get("Y_linear"),
-        "x_log": row.get("X_log"),
-        "y_log": row.get("Y_log"),
         "size": row.get("pupils_total"),
         "years_covered": years_list,
         "flags": {
@@ -59,8 +57,6 @@ def _vo_row_to_point(row: Mapping[str, Any]) -> Dict[str, Any]:
         "school_type": row.get("type"),
         "x_linear": row.get("X_linear"),
         "y_linear": row.get("Y_linear"),
-        "x_log": row.get("X_log"),
-        "y_log": row.get("Y_log"),
         "size": row.get("candidates_total"),
         "years_covered": years_list,
         "flags": {

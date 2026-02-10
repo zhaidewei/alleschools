@@ -24,8 +24,6 @@ def test_validate_points_schema_happy_path() -> None:
             "school_type": "Bo",
             "x_linear": 1.0,
             "y_linear": 2.0,
-            "x_log": 0.01,
-            "y_log": 0.02,
             "size": 50,
             "years_covered": ["2019-2020"],
             "flags": {"has_full_woz": True, "low_sample_excluded": False},
@@ -49,8 +47,6 @@ def test_validate_points_schema_reports_missing_and_type_errors() -> None:
             "school_type": "Bo",
             "x_linear": "not-a-number",
             "y_linear": 2.0,
-            "x_log": 0.01,
-            "y_log": 0.02,
             "size": 50,
             "years_covered": "2019-2020",  # 应为 list
             "flags": [],

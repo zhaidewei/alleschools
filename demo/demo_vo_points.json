@@ -10,8 +10,6 @@
     "school_type": "HAVO_VWO",
     "x_linear": 40.52,
     "y_linear": 53.27,
-    "x_log": 0.1477,
-    "y_log": 0.1855,
     "size": 878,
     "years_covered": [
       "2019-2020",
@@ -36,8 +34,6 @@
     "school_type": "HAVO_VWO",
     "x_linear": 12.7,
     "y_linear": 17.45,
-    "x_log": 0.0519,
-    "y_log": 0.0699,
     "size": 845,
     "years_covered": [
       "2019-2020",
@@ -62,8 +58,6 @@
     "school_type": "VMBO",
     "x_linear": 0.0,
     "y_linear": 15.27,
-    "x_log": 0.0,
-    "y_log": 0.0617,
     "size": 402,
     "years_covered": [
       "2019-2020",
@@ -88,8 +82,6 @@
     "school_type": "HAVO_VWO",
     "x_linear": 0.0,
     "y_linear": 4.85,
-    "x_log": 0.0,
-    "y_log": 0.0206,
     "size": 296,
     "years_covered": [
       "2019-2020",
@@ -114,8 +106,6 @@
     "school_type": "VMBO",
     "x_linear": 0.0,
     "y_linear": 32.01,
-    "x_log": 0.0,
-    "y_log": 0.1206,
     "size": 561,
     "years_covered": [
       "2019-2020",
@@ -140,8 +130,6 @@
     "school_type": "HAVO_VWO",
     "x_linear": 14.69,
     "y_linear": 20.54,
-    "x_log": 0.0595,
-    "y_log": 0.0811,
     "size": 690,
     "years_covered": [
       "2019-2020",
@@ -166,8 +154,6 @@
     "school_type": "HAVO_VWO",
     "x_linear": 11.53,
     "y_linear": 17.88,
-    "x_log": 0.0474,
-    "y_log": 0.0714,
     "size": 1100,
     "years_covered": [
       "2019-2020",
@@ -192,8 +178,6 @@
     "school_type": "HAVO_VWO",
     "x_linear": 26.56,
     "y_linear": 28.73,
-    "x_log": 0.1023,
-    "y_log": 0.1097,
     "size": 694,
     "years_covered": [
       "2019-2020",
@@ -218,8 +202,6 @@
     "school_type": "HAVO_VWO",
     "x_linear": 25.83,
     "y_linear": 19.27,
-    "x_log": 0.0998,
-    "y_log": 0.0765,
     "size": 816,
     "years_covered": [
       "2019-2020",
@@ -244,8 +226,6 @@
     "school_type": "HAVO_VWO",
     "x_linear": 17.72,
     "y_linear": 21.75,
-    "x_log": 0.0708,
-    "y_log": 0.0855,
     "size": 472,
     "years_covered": [
       "2019-2020",

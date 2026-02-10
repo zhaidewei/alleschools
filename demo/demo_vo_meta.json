@@ -9,13 +9,19 @@
     "x": {
       "field": "x_linear",
       "scale": "linear",
-      "domain": [0, 100],
+      "domain": [
+        0,
+        100
+      ],
       "metric_id": "vo_vwo_pass_share"
     },
     "y": {
       "field": "y_linear",
       "scale": "linear",
-      "domain": [0, 100],
+      "domain": [
+        0,
+        100
+      ],
       "metric_id": "vo_science_pass_share"
     },
     "size": {
@@ -24,8 +30,12 @@
     }
   },
   "fields": {
-    "id": { "kind": "id" },
-    "brin": { "kind": "id" },
+    "id": {
+      "kind": "id"
+    },
+    "brin": {
+      "kind": "id"
+    },
     "name": {
       "kind": "dimension",
       "searchable": true
@@ -46,13 +56,21 @@
       "kind": "dimension",
       "searchable": true
     },
-    "x_linear": { "kind": "metric" },
-    "y_linear": { "kind": "metric" },
-    "x_log": { "kind": "metric" },
-    "y_log": { "kind": "metric" },
-    "size": { "kind": "metric" },
-    "years_covered": { "kind": "dimension" },
-    "flags": { "kind": "dimension" }
+    "x_linear": {
+      "kind": "metric"
+    },
+    "y_linear": {
+      "kind": "metric"
+    },
+    "size": {
+      "kind": "metric"
+    },
+    "years_covered": {
+      "kind": "dimension"
+    },
+    "flags": {
+      "kind": "dimension"
+    }
   },
   "i18n": {
     "nl": {

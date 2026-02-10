@@ -19,8 +19,6 @@ def test_export_po_points_structure(tmp_path: Path) -> None:
             "type": "Bo",
             "X_linear": 1.0,
             "Y_linear": 2.0,
-            "X_log": 0.01,
-            "Y_log": 0.02,
             "pupils_total": 50,
             "years_covered": "2019-2020,2020-2021",
             "has_full_woz": True,
@@ -58,8 +56,6 @@ def test_export_vo_points_structure(tmp_path: Path) -> None:
             "type": "HAVO/VWO",
             "X_linear": 10.0,
             "Y_linear": 20.0,
-            "X_log": 0.1,
-            "Y_log": 0.2,
             "candidates_total": 100,
             "years_covered": "2019-2020",
         }

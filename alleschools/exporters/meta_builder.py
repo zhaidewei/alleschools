@@ -53,8 +53,6 @@ def build_po_meta(
             "school_type": {"kind": "dimension", "searchable": True},
             "x_linear": {"kind": "metric"},
             "y_linear": {"kind": "metric"},
-            "x_log": {"kind": "metric"},
-            "y_log": {"kind": "metric"},
             "size": {"kind": "metric"},
         },
         "i18n": {
@@ -195,8 +193,6 @@ def build_vo_meta(
             "school_type": {"kind": "dimension", "searchable": True},
             "x_linear": {"kind": "metric"},
             "y_linear": {"kind": "metric"},
-            "x_log": {"kind": "metric"},
-            "y_log": {"kind": "metric"},
             "size": {"kind": "metric"},
         },
         "i18n": {

@@ -56,10 +56,6 @@
         <input type="text" id="mobileSchoolSearch" placeholder="Name or acronym" class="w-full rounded-lg border border-slate-300 dark:border-slate-500 px-3 py-1.5 text-sm text-slate-800 dark:text-slate-200 dark:bg-slate-800 placeholder-slate-400 dark:placeholder-slate-500 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400">
       </div>
       <div class="flex items-center justify-between gap-3">
-        <div class="inline-flex rounded-full bg-slate-100 dark:bg-slate-800 p-0.5 border border-slate-200 dark:border-slate-700">
-          <button type="button" id="mobileScaleLinear" class="segmented-btn rounded-full">Linear</button>
-          <button type="button" id="mobileScaleLog" class="segmented-btn rounded-full">Log</button>
-        </div>
         <button type="button" id="mobileSboToggle" class="hidden items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 bg-white/80 dark:bg-slate-800/80" aria-pressed="false">
           <span class="inline-block w-2 h-2 rounded-full bg-emerald-500/80"></span>
           <span id="mobileSboLabel">Sbo</span>
@@ -89,14 +85,6 @@
         <div id="gemeenteFilterHint" class="input-hint" role="tooltip" aria-live="polite"></div>
       </div>
       <div class="flex flex-wrap items-center gap-4">
-        <label class="inline-flex items-center gap-2 cursor-pointer text-sm text-slate-600 dark:text-slate-400">
-          <input type="radio" name="coord" value="linear" checked class="rounded-full border-slate-300 text-slate-600 focus:ring-slate-400">
-          <span id="labelLinear">Linear scale</span>
-        </label>
-        <label class="inline-flex items-center gap-2 cursor-pointer text-sm text-slate-600 dark:text-slate-400">
-          <input type="radio" name="coord" value="log" class="rounded-full border-slate-300 text-slate-600 focus:ring-slate-400">
-          <span id="labelLog">Log scale</span>
-        </label>
         <label class="inline-flex items-center gap-2 cursor-pointer text-sm text-slate-600 dark:text-slate-400">
           <input type="checkbox" id="showVMBO" class="rounded border-slate-300 text-slate-600 focus:ring-slate-400">
           <span id="labelShowVMBO">Include VMBO-only schools</span>
@@ -215,9 +203,7 @@
       return null;
     }
 
-    function getAxisTitleFromMeta(axisKey, isLog) {
-      // 暂时只用 meta 提供线性轴的语义 label；对数轴仍使用原有文案（包含 log 提示）。
-      if (isLog) return null;
+    function getAxisTitleFromMeta(axisKey) {
       if (!meta || !meta.axes || !meta.i18n) return null;
       var axesCfg = meta.axes[axisKey];
       if (!axesCfg || !axesCfg.metric_id) return null;
@@ -284,7 +270,7 @@
   </script>
   <script>
     // 简单前端 build 标记，便于确认是否加载了最新版本
-    window.__VIEW_XY_BUILD_ID__ = '2026-02-10-tooltip-v2';
+    window.__VIEW_XY_BUILD_ID__ = '2026-02-10-linear-only';
     console.log('[view_xy] build', window.__VIEW_XY_BUILD_ID__);
     let currentLang = localStorage.getItem('schools-lang') || 'en';
     const L = {
@@ -311,17 +297,13 @@
         labelGemeente: 'City hall filter',
         gemeentePlaceholder: 'Leave empty for all, comma for multiple',
         gemeentePlaceholderShort: 'Empty = all, comma for multiple',
-        labelLinear: 'Linear scale',
-        labelLog: 'Log scale',
         labelShowVMBO: 'Include VMBO-only schools',
         labelSelectAll: 'Select all',
         labelDeselectAll: 'Deselect all',
         excludedTitle: 'Schools excluded (too few data points)',
         excludedDesc: 'The following schools were not included in the chart because HAVO/VWO exam candidates (5-year total) are below 20.',
         axisXLinear: 'VWO share (%) — 100% most academic',
-        axisXLog: 'VWO share (log10(1+x/100))',
         axisYLinear: 'Science share (%)',
-        axisYLog: 'Science share (log10(1+y/100))',
         tooltipCandidates: '5-yr candidates',
         tooltipPostcode: 'Postcode',
         algorithmTitle: 'How X and Y are calculated',
@@ -335,8 +317,6 @@
         subtitleBefore_po: 'Data from DUO schooladviezen + CBS WOZ. X = VWO-advice share (%), Y = mean WOZ (×1000 €). Dot size = pupils. ',
         axisXLinear_po: 'VWO-advice share (%)',
         axisYLinear_po: 'Mean WOZ (×1000 €)',
-        axisXLog_po: 'VWO-advice share (log)',
-        axisYLog_po: 'WOZ (log)',
         labelShowSbo: 'Include Sbo-only schools',
         excludedTitle_po: 'Primary schools excluded (too few pupils)',
         excludedDesc_po: 'The following schools were not included because total advised pupils (across years) are below the threshold.',
@@ -367,17 +347,13 @@
         labelGemeente: '市政厅 过滤',
         gemeentePlaceholder: '不输入显示全部，多个用逗号分隔',
         gemeentePlaceholderShort: '空=全部，逗号分隔',
-        labelLinear: '线性坐标',
-        labelLog: '对数坐标',
         labelShowVMBO: '包括纯 VMBO 学校',
         labelSelectAll: '全选',
         labelDeselectAll: '全部取消',
         excludedTitle: '因数据点过少未纳入图表的学校',
         excludedDesc: '以下学校因 HAVO/VWO 考生数过少（5 年合计 < 20）未参与坐标计算，故未出现在上图中。',
         axisXLinear: 'VWO 通过人数占比 (%) — 100% 学术性最强',
-        axisXLog: 'VWO 通过人数占比 (log10(1+x/100))',
         axisYLinear: '理科占比 (%)',
-        axisYLog: '理科占比 (log10(1+y/100))',
         tooltipCandidates: '5年考生',
         tooltipPostcode: '邮编',
         algorithmTitle: 'X 与 Y 的计算方式',
@@ -391,8 +367,6 @@
         subtitleBefore_po: '数据来自 DUO 毕业建议 + CBS WOZ。X = VWO 升学率(%)，Y = 邮编 WOZ 均值(千欧)，点大小 = 人数。共 ',
         axisXLinear_po: 'VWO 升学率 (%)',
         axisYLinear_po: 'WOZ 均值 (千欧)',
-        axisXLog_po: 'VWO 升学率 (对数)',
-        axisYLog_po: 'WOZ (对数)',
         labelShowSbo: '包括纯 Sbo 学校',
         excludedTitle_po: '因人数过少未纳入的小学',
         excludedDesc_po: '以下学校因建议人数合计低于阈值未参与图表。',
@@ -423,17 +397,13 @@
         labelGemeente: 'Gemeentefilter',
         gemeentePlaceholder: 'Leeg = alle, komma voor meerdere',
         gemeentePlaceholderShort: 'Leeg = alle, komma voor meerdere',
-        labelLinear: 'Lineaire schaal',
-        labelLog: 'Logschaal',
         labelShowVMBO: 'Inclusief alleen VMBO-scholen',
         labelSelectAll: 'Alles selecteren',
         labelDeselectAll: 'Alles deselecteren',
         excludedTitle: 'Scholen uitgesloten (te weinig datapunten)',
         excludedDesc: 'De volgende scholen zijn niet in de grafiek opgenomen omdat HAVO/VWO-examenkandidaten (5-jaar totaal) onder 20 liggen.',
         axisXLinear: 'VWO-aandeel (%) — 100% meest academisch',
-        axisXLog: 'VWO-aandeel (log10(1+x/100))',
         axisYLinear: 'Bètandeel (%)',
-        axisYLog: 'Bètandeel (log10(1+y/100))',
         tooltipCandidates: '5-jaar kandidaten',
         tooltipPostcode: 'Postcode',
         algorithmTitle: 'Hoe X en Y worden berekend',
@@ -447,8 +417,6 @@
         subtitleBefore_po: 'Data van DUO schooladviezen + CBS WOZ. X = VWO-adviesaandeel (%), Y = gem. WOZ (×1000 €). Puntgrootte = leerlingen. ',
         axisXLinear_po: 'VWO-adviesaandeel (%)',
         axisYLinear_po: 'Gem. WOZ (×1000 €)',
-        axisXLog_po: 'VWO-adviesaandeel (log)',
-        axisYLog_po: 'WOZ (log)',
         labelShowSbo: 'Inclusief alleen Sbo-scholen',
         excludedTitle_po: 'Basisscholen uitgesloten (te weinig leerlingen)',
         excludedDesc_po: 'De volgende scholen zijn niet opgenomen omdat het totaal geadviseerde leerlingen onder de drempel ligt.',
@@ -461,15 +429,6 @@
       const lang = L[currentLang] || L.en;
       const modeKey = key + '_' + currentMode;
       return (lang[modeKey] !== undefined ? lang[modeKey] : lang[key]) || L.en[modeKey] || L.en[key] || key;
-    }
-    function updateMobileScaleButtons() {
-      var mobileScaleLinear = document.getElementById('mobileScaleLinear');
-      var mobileScaleLog = document.getElementById('mobileScaleLog');
-      var coordEl = document.querySelector('input[name="coord"]:checked');
-      if (!mobileScaleLinear || !mobileScaleLog || !coordEl) return;
-      var isLog = coordEl.value === 'log';
-      mobileScaleLinear.classList.toggle('segmented-btn-active', !isLog);
-      mobileScaleLog.classList.toggle('segmented-btn-active', isLog);
     }
     function updateMobileModeSpecificUI() {
       var sboBtn = document.getElementById('mobileSboToggle');
@@ -520,10 +479,6 @@
       }
       var gemeenteFilterHint = document.getElementById('gemeenteFilterHint');
       if (gemeenteFilterHint) gemeenteFilterHint.textContent = t('gemeentePlaceholder');
-      var labelLinear = document.getElementById('labelLinear');
-      if (labelLinear) labelLinear.textContent = t('labelLinear');
-      var labelLog = document.getElementById('labelLog');
-      if (labelLog) labelLog.textContent = t('labelLog');
       var labelShowVMBO = document.getElementById('labelShowVMBO');
       if (labelShowVMBO) labelShowVMBO.textContent = currentMode === 'vo' ? t('labelShowVMBO') : t('labelShowSbo');
       var labelSelectAll = document.getElementById('labelSelectAll');
@@ -565,18 +520,15 @@
       var copyrightText = document.getElementById('copyrightText');
       if (copyrightText) copyrightText.textContent = t('copyrightText');
       if (typeof chart !== 'undefined') {
-        var isLog = document.querySelector('input[name="coord"]:checked') && document.querySelector('input[name="coord"]:checked').value === 'log';
-        var xTitleFromMeta = getAxisTitleFromMeta('x', isLog);
-        var yTitleFromMeta = getAxisTitleFromMeta('y', isLog);
-        chart.options.scales.x.title.text = xTitleFromMeta || (isLog ? t('axisXLog') : t('axisXLinear'));
-        chart.options.scales.y.title.text = yTitleFromMeta || (isLog ? t('axisYLog') : t('axisYLinear'));
+        var xTitleFromMeta = getAxisTitleFromMeta('x');
+        var yTitleFromMeta = getAxisTitleFromMeta('y');
+        chart.options.scales.x.title.text = xTitleFromMeta || t('axisXLinear');
+        chart.options.scales.y.title.text = yTitleFromMeta || t('axisYLinear');
         chart.update();
       }
       updateMobileModeSpecificUI();
-      updateMobileScaleButtons();
     }
-    let linear = data.map(d => ({ x: d.X_linear, y: d.Y_linear, label: d.naam, type: d.type, gemeente: d.gemeente, postcode: d.postcode || '', size: d.size, brin: d.BRIN }));
-    let log = data.map(d => ({ x: d.X_log, y: d.Y_log, label: d.naam, type: d.type, gemeente: d.gemeente, postcode: d.postcode || '', size: d.size, brin: d.BRIN }));
+    let points = data.map(d => ({ x: d.X_linear, y: d.Y_linear, label: d.naam, type: d.type, gemeente: d.gemeente, postcode: d.postcode || '', size: d.size, brin: d.BRIN }));
 
     let selectedGemeenten = new Set();
     var DEFAULT_GEMEENTEN = ["'S-GRAVENHAGE", 'AMSTERDAM', 'UTRECHT', 'ROTTERDAM'];
@@ -600,8 +552,6 @@
       var parts = [];
       if (currentMode) parts.push('layer=' + encodeURIComponent(currentMode));
       if (currentLang) parts.push('lang=' + encodeURIComponent(currentLang));
-      var coordEl = document.querySelector('input[name="coord"]:checked');
-      if (coordEl && coordEl.value) parts.push('scale=' + encodeURIComponent(coordEl.value));
       if (q) parts.push('q=' + encodeURIComponent(q));
       if (g) parts.push('gemeente=' + encodeURIComponent(g));
       // 将当前勾选的城市集合编码到 city= 参数，便于分享时还原精确城市选择
@@ -637,14 +587,7 @@
         localStorage.setItem('schools-lang', currentLang);
         applyLanguage();
       }
-      // scale
-      var scaleParam = params.get('scale');
-      if (scaleParam === 'linear' || scaleParam === 'log') {
-        var radio = document.querySelector('input[name=\"coord\"][value=\"' + scaleParam + '\"]');
-        if (radio) {
-          radio.checked = true;
-        }
-      }
+      // scale=log / scale=linear in URL: ignored; we always use linear (historical link compat)
       // text filters
       var q = params.get('q');
       var searchEl = document.getElementById('schoolSearch');
@@ -694,10 +637,9 @@
       return result;
     }
     function getGemeentenInList() {
-      const coord = document.querySelector('input[name="coord"]:checked').value;
-      const points = getPointsByTextFilter(coord === 'log' ? log : linear);
+      const pts = getPointsByTextFilter(points);
       const set = new Set();
-      points.forEach(p => { if (p.gemeente) set.add(p.gemeente); });
+      pts.forEach(p => { if (p.gemeente) set.add(p.gemeente); });
       return Array.from(set).sort();
     }
     function renderGemeenteCheckboxes() {
@@ -825,9 +767,8 @@
       }
     }
     function refreshChart() {
-      const coord = document.querySelector('input[name="coord"]:checked').value;
-      const points = getFilteredPoints(coord === 'log' ? log : linear);
-      var dss = makeDatasets(points);
+      const filtered = getFilteredPoints(points);
+      var dss = makeDatasets(filtered);
       var terms = getSchoolSearchTerms();
       if (terms.length === 0) {
         legendHighlightGemeenten = null;
@@ -839,16 +780,16 @@
         }
       }
       chart.data.datasets = dss;
-      document.getElementById('schoolCount').textContent = points.length;
-      if (points.length > 0) {
-        const ys = points.map(function(p) { return p.y; });
+      document.getElementById('schoolCount').textContent = filtered.length;
+      if (filtered.length > 0) {
+        const ys = filtered.map(function(p) { return p.y; });
         const minY = Math.min.apply(null, ys);
         const maxY = Math.max.apply(null, ys);
         const range = maxY - minY || 1;
         const pad = range * 0.05;
         chart.options.scales.y.min = Math.min(minY - pad, minY * 0.95);
         chart.options.scales.y.max = maxY * 1.05;
-        if (chart.options.scales.y.min < 0 && (currentMode === 'vo' || (currentMode === 'po' && coord === 'linear'))) chart.options.scales.y.min = 0;
+        if (chart.options.scales.y.min < 0 && (currentMode === 'vo' || currentMode === 'po')) chart.options.scales.y.min = 0;
         chart.options.scales.y.afterBuildTicks = undefined;
         chart.options.scales.y.ticks = { stepSize: undefined };
       }
@@ -857,39 +798,24 @@
       requestAnimationFrame(function() { updateChartLabels(); setSampleTooltip(); });
     }
     function setChartScaleForMode() {
-      const isLog = document.querySelector('input[name="coord"]:checked') && document.querySelector('input[name="coord"]:checked').value === 'log';
-      var xTitleFromMeta = getAxisTitleFromMeta('x', isLog);
-      var yTitleFromMeta = getAxisTitleFromMeta('y', isLog);
-      chart.options.scales.x.title.text = xTitleFromMeta || (isLog ? t('axisXLog') : t('axisXLinear'));
-      chart.options.scales.y.title.text = yTitleFromMeta || (isLog ? t('axisYLog') : t('axisYLinear'));
+      var xTitleFromMeta = getAxisTitleFromMeta('x');
+      var yTitleFromMeta = getAxisTitleFromMeta('y');
+      chart.options.scales.x.title.text = xTitleFromMeta || t('axisXLinear');
+      chart.options.scales.y.title.text = yTitleFromMeta || t('axisYLinear');
       if (currentMode === 'po') {
-        if (isLog) {
-          chart.options.scales.x.min = -0.02; chart.options.scales.x.max = 0.35;
-          chart.options.scales.x.afterBuildTicks = undefined; chart.options.scales.x.ticks = { stepSize: 0.05 };
-          chart.options.scales.y.min = -0.05; chart.options.scales.y.max = 1.05;
-          chart.options.scales.y.afterBuildTicks = undefined; chart.options.scales.y.ticks = { stepSize: 0.2 };
-        } else {
-          chart.options.scales.x.min = -5; chart.options.scales.x.max = 105;
-          chart.options.scales.x.afterBuildTicks = function(axis) { axis.ticks = [0,10,20,30,40,50,60,70,80,90,100].map(function(v){ return { value: v }; }); };
-          chart.options.scales.x.ticks = { stepSize: 10 };
-          chart.options.scales.y.min = -50; chart.options.scales.y.max = 1050;
-          chart.options.scales.y.afterBuildTicks = function(axis) { axis.ticks = [0,200,400,600,800,1000].map(function(v){ return { value: v }; }); };
-          chart.options.scales.y.ticks = { stepSize: 200 };
-        }
+        chart.options.scales.x.min = -5; chart.options.scales.x.max = 105;
+        chart.options.scales.x.afterBuildTicks = function(axis) { axis.ticks = [0,10,20,30,40,50,60,70,80,90,100].map(function(v){ return { value: v }; }); };
+        chart.options.scales.x.ticks = { stepSize: 10 };
+        chart.options.scales.y.min = -50; chart.options.scales.y.max = 1050;
+        chart.options.scales.y.afterBuildTicks = function(axis) { axis.ticks = [0,200,400,600,800,1000].map(function(v){ return { value: v }; }); };
+        chart.options.scales.y.ticks = { stepSize: 200 };
       } else {
-        if (isLog) {
-          chart.options.scales.x.min = -0.02; chart.options.scales.x.max = 0.35;
-          chart.options.scales.x.afterBuildTicks = undefined; chart.options.scales.x.ticks = { stepSize: 0.05 };
-          chart.options.scales.y.min = -0.02; chart.options.scales.y.max = 0.35;
-          chart.options.scales.y.afterBuildTicks = undefined; chart.options.scales.y.ticks = { stepSize: 0.05 };
-        } else {
-          chart.options.scales.x.min = -5; chart.options.scales.x.max = 105;
-          chart.options.scales.x.afterBuildTicks = function(axis) { axis.ticks = [0,10,20,30,40,50,60,70,80,90,100].map(function(v){ return { value: v }; }); };
-          chart.options.scales.x.ticks = { stepSize: 10 };
-          chart.options.scales.y.min = -5; chart.options.scales.y.max = 105;
-          chart.options.scales.y.afterBuildTicks = function(axis) { axis.ticks = [0,10,20,30,40,50,60,70,80,90,100].map(function(v){ return { value: v }; }); };
-          chart.options.scales.y.ticks = { stepSize: 10 };
-        }
+        chart.options.scales.x.min = -5; chart.options.scales.x.max = 105;
+        chart.options.scales.x.afterBuildTicks = function(axis) { axis.ticks = [0,10,20,30,40,50,60,70,80,90,100].map(function(v){ return { value: v }; }); };
+        chart.options.scales.x.ticks = { stepSize: 10 };
+        chart.options.scales.y.min = -5; chart.options.scales.y.max = 105;
+        chart.options.scales.y.afterBuildTicks = function(axis) { axis.ticks = [0,10,20,30,40,50,60,70,80,90,100].map(function(v){ return { value: v }; }); };
+        chart.options.scales.y.ticks = { stepSize: 10 };
       }
       chart.update();
     }
@@ -908,8 +834,7 @@
       localStorage.setItem('schools-mode', mode);
       data = mode === 'vo' ? dataVO : dataPO;
       meta = mode === 'vo' ? metaVO : metaPO;
-      linear = data.map(d => ({ x: d.X_linear, y: d.Y_linear, label: d.naam, type: d.type, gemeente: d.gemeente, postcode: d.postcode || '', size: d.size, brin: d.BRIN }));
-      log = data.map(d => ({ x: d.X_log, y: d.Y_log, label: d.naam, type: d.type, gemeente: d.gemeente, postcode: d.postcode || '', size: d.size, brin: d.BRIN }));
+      points = data.map(d => ({ x: d.X_linear, y: d.Y_linear, label: d.naam, type: d.type, gemeente: d.gemeente, postcode: d.postcode || '', size: d.size, brin: d.BRIN }));
       updateExcludedSection();
       applyLanguage();
       setChartScaleForMode();
@@ -918,7 +843,6 @@
       refreshChart();
       updateNavButtons();
       updateMobileModeSpecificUI();
-      updateMobileScaleButtons();
       updateMobileSboButton();
     }
 
@@ -1380,34 +1304,6 @@
       });
     });
 
-    document.querySelectorAll('input[name="coord"]').forEach(radio => {
-      radio.addEventListener('change', () => {
-        setChartScaleForMode();
-        refreshChart();
-        updateMobileScaleButtons();
-      });
-    });
-    var mobileScaleLinear = document.getElementById('mobileScaleLinear');
-    var mobileScaleLog = document.getElementById('mobileScaleLog');
-    if (mobileScaleLinear && mobileScaleLog) {
-      mobileScaleLinear.addEventListener('click', function() {
-        var linearRadio = document.querySelector('input[name="coord"][value="linear"]');
-        if (linearRadio) {
-          linearRadio.checked = true;
-          var ev = new Event('change', { bubbles: true });
-          linearRadio.dispatchEvent(ev);
-        }
-      });
-      mobileScaleLog.addEventListener('click', function() {
-        var logRadio = document.querySelector('input[name="coord"][value="log"]');
-        if (logRadio) {
-          logRadio.checked = true;
-          var ev = new Event('change', { bubbles: true });
-          logRadio.dispatchEvent(ev);
-        }
-      });
-      updateMobileScaleButtons();
-    }
     // Mobile Filters bottom sheet
     (function setupMobileFiltersSheet() {
       var btn = document.getElementById('mobileFiltersBtn');

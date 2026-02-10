@@ -53,8 +53,6 @@ def validate_points_schema(data: Any, layer: str) -> List[ValidationError]:
         "school_type",
         "x_linear",
         "y_linear",
-        "x_log",
-        "y_log",
         "size",
         "years_covered",
         "flags",
@@ -92,7 +90,7 @@ def validate_points_schema(data: Any, layer: str) -> List[ValidationError]:
             )
 
         # Basic type checks
-        for num_field in ("x_linear", "y_linear", "x_log", "y_log", "size"):
+        for num_field in ("x_linear", "y_linear", "size"):
             if num_field in obj and not isinstance(obj[num_field], (int, float)):
                 errors.append(
                     ValidationError(

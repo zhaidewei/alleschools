@@ -7,7 +7,6 @@ from __future__ import annotations
 未来可以在此扩展时间序列、缺失值策略等。
 """
 
-import math
 from typing import Any, Dict, Iterable, List, Sequence, Tuple
 
 from alleschools.config import SCHOOLJARS, WEIGHTS, WOZ_YEARS, MIN_PUPILS_TOTAL
@@ -189,9 +188,6 @@ def compute_po_xy(
         x_linear = sum_w_x / sum_w if sum_w > 0 else 0.0
         y_linear = sum_w_y / sum_w_y_weights if sum_w_y_weights > 0 else 0.0
 
-        x_log = math.log10(1.0 + x_linear / 100.0)
-        y_log = math.log10(1.0 + y_linear / 100.0) if y_linear > 0 else 0.0
-
         type_label = data.get("soort_po") or "Bo"
         if type_label not in ("Bo", "Sbo"):
             type_label = "Bo"
@@ -208,8 +204,6 @@ def compute_po_xy(
             "type": type_label,
             "X_linear": round(x_linear, 2),
             "Y_linear": round(y_linear, 2),
-            "X_log": round(x_log, 4),
-            "Y_log": round(y_log, 4),
             "pupils_total": pupils_total,
         }
         row["years_covered"] = years_covered_str
@@ -217,15 +211,8 @@ def compute_po_xy(
         row["data_quality_flags"] = ""
         rows_out.append(row)
 
-    # 可选：根据 outliers.clip_percentiles 对 X/Y 进行 winsorization 截断，
-    # 然后重新计算对数坐标，减少极端点对图表的影响。
     if outliers:
         _apply_outlier_clipping(rows_out, "X_linear", "Y_linear", outliers)
-        for row in rows_out:
-            x_linear_val = float(row.get("X_linear") or 0.0)
-            y_linear_val = float(row.get("Y_linear") or 0.0)
-            row["X_log"] = round(math.log10(1.0 + x_linear_val / 100.0), 4)
-            row["Y_log"] = round(math.log10(1.0 + y_linear_val / 100.0), 4) if y_linear_val > 0 else 0.0
 
     return rows_out, excluded
 
@@ -300,8 +287,6 @@ def compute_vo_xy(
             })
             continue
 
-        x_log = math.log10(1.0 + x_linear / 100.0)
-        y_log = math.log10(1.0 + y_linear / 100.0)
         candidates_total = sum(all_kand[y] for y in year_labels)
         postcode = brin_to_postcode.get(brin, "")
         years_covered_str = ",".join(years_used_vo) if years_used_vo else ""
@@ -314,22 +299,14 @@ def compute_vo_xy(
             "type": type_label,
             "X_linear": round(x_linear, 2),
             "Y_linear": round(y_linear, 2),
-            "X_log": round(x_log, 4),
-            "Y_log": round(y_log, 4),
             "candidates_total": candidates_total,
         }
         row_vo["years_covered"] = years_covered_str
         row_vo["data_quality_flags"] = ""
         rows_out.append(row_vo)
 
-    # VO 侧也可选按百分位数截断 X/Y 并重算 log 坐标。
     if outliers:
         _apply_outlier_clipping(rows_out, "X_linear", "Y_linear", outliers)
-        for row in rows_out:
-            x_linear_val = float(row.get("X_linear") or 0.0)
-            y_linear_val = float(row.get("Y_linear") or 0.0)
-            row["X_log"] = round(math.log10(1.0 + x_linear_val / 100.0), 4)
-            row["Y_log"] = round(math.log10(1.0 + y_linear_val / 100.0), 4)
 
     return rows_out, excluded
 

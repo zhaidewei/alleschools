@@ -139,8 +139,6 @@ def load_data_vo():
                     "type": r["type"],
                     "X_linear": float(r["X_linear"]),
                     "Y_linear": float(r["Y_linear"]),
-                    "X_log": float(r["X_log"]),
-                    "Y_log": float(r["Y_log"]),
                     "size": size,
                 }
             )
@@ -170,8 +168,6 @@ def load_data_po():
                     "type": r["type"],
                     "X_linear": float(r["X_linear"]),
                     "Y_linear": float(r["Y_linear"]),
-                    "X_log": float(r["X_log"]),
-                    "Y_log": float(r["Y_log"]),
                     "size": size,
                 }
             )
@@ -227,8 +223,6 @@ def load_demo_data():
                 "type": p.get("school_type", ""),
                 "X_linear": float(p.get("x_linear", 0.0)),
                 "Y_linear": float(p.get("y_linear", 0.0)),
-                "X_log": float(p.get("x_log", 0.0)),
-                "Y_log": float(p.get("y_log", 0.0)),
                 "size": int(p.get("size") or 0),
             }
         )
@@ -251,8 +245,6 @@ def load_demo_data():
                 "type": p.get("school_type", ""),
                 "X_linear": float(p.get("x_linear", 0.0)),
                 "Y_linear": float(p.get("y_linear", 0.0)),
-                "X_log": float(p.get("x_log", 0.0)),
-                "Y_log": float(p.get("y_log", 0.0)),
                 "size": int(p.get("size") or 0),
             }
         )
