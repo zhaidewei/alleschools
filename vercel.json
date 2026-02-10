@@ -1,6 +1,5 @@
 {
-  "installCommand": "uv venv .venv && .venv/bin/uv pip install -r requirements.txt",
-  "buildCommand": ". .venv/bin/activate && bash rerun_data.sh && python3 view_xy_server.py --static",
+  "buildCommand": "bash rerun_data.sh && python3 view_xy_server.py --static",
   "outputDirectory": "public",
   "framework": null
 }
