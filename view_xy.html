@@ -52,8 +52,8 @@
     </div>
     <div id="mobileControls" class="md:hidden mb-4 space-y-3">
       <div class="flex flex-col gap-1">
-        <label for="mobileSchoolSearch" class="text-xs font-medium text-slate-600 dark:text-slate-400">School search</label>
-        <input type="text" id="mobileSchoolSearch" placeholder="Name or acronym" class="w-full rounded-lg border border-slate-300 dark:border-slate-500 px-3 py-1.5 text-sm text-slate-800 dark:text-slate-200 dark:bg-slate-800 placeholder-slate-400 dark:placeholder-slate-500 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400">
+        <label id="labelMobileSchoolSearch" for="mobileSchoolSearch" class="text-xs font-medium text-slate-600 dark:text-slate-400">School search</label>
+        <input type="text" id="mobileSchoolSearch" placeholder="Name or acronym" class="w-full rounded-lg border border-slate-300 dark:border-slate-500 px-3 py-1.5 text-sm text-slate-800 dark:text-slate-200 dark:bg-slate-800 placeholder-slate-400 dark:placeholder-slate-500 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" title="">
       </div>
       <div class="flex items-center justify-between gap-3">
         <button type="button" id="mobileSboToggle" class="hidden items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 bg-white/80 dark:bg-slate-800/80" aria-pressed="false">
@@ -470,6 +470,13 @@
       }
       var schoolSearchHint = document.getElementById('schoolSearchHint');
       if (schoolSearchHint) schoolSearchHint.textContent = t('schoolSearchPlaceholder');
+      var labelMobileSchoolSearch = document.getElementById('labelMobileSchoolSearch');
+      if (labelMobileSchoolSearch) labelMobileSchoolSearch.textContent = t('labelSchoolSearch');
+      var mobileSchoolSearch = document.getElementById('mobileSchoolSearch');
+      if (mobileSchoolSearch) {
+        mobileSchoolSearch.placeholder = t('schoolSearchPlaceholderShort');
+        mobileSchoolSearch.title = t('schoolSearchPlaceholder');
+      }
       var labelGemeente = document.getElementById('labelGemeente');
       if (labelGemeente) labelGemeente.textContent = t('labelGemeente');
       var gemeenteFilter = document.getElementById('gemeenteFilter');
