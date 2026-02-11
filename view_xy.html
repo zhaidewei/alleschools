@@ -76,34 +76,50 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div id="voProfileCard_NT" class="bg-slate-50 dark:bg-slate-900/40 rounded-lg border border-slate-200 dark:border-slate-700 p-2">
               <div class="flex items-center justify-between mb-0.5">
-                <span id="voProfileCardLabel_NT" class="text-xs font-semibold text-slate-700 dark:text-slate-200">NT</span>
+                <div class="relative inline-block group">
+                  <span id="voProfileCardLabel_NT" class="text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-help underline decoration-dotted decoration-slate-400">NT</span>
+                  <div id="voProfileTip_NT" class="absolute left-0 top-full mt-1 z-50 min-w-[260px] max-w-[360px] p-3 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 shadow-xl text-xs text-slate-600 dark:text-slate-300 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-150"></div>
+                </div>
               </div>
               <div class="w-full aspect-[4/3] relative min-h-[180px]">
                 <canvas id="chartNT" class="w-full h-full block"></canvas>
+                <div id="voChartLabels_NT" class="absolute inset-0 pointer-events-none overflow-hidden" style="left:0;top:0;right:0;bottom:0;"></div>
               </div>
             </div>
             <div id="voProfileCard_NG" class="bg-slate-50 dark:bg-slate-900/40 rounded-lg border border-slate-200 dark:border-slate-700 p-2">
               <div class="flex items-center justify-between mb-0.5">
-                <span id="voProfileCardLabel_NG" class="text-xs font-semibold text-slate-700 dark:text-slate-200">NG</span>
+                <div class="relative inline-block group">
+                  <span id="voProfileCardLabel_NG" class="text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-help underline decoration-dotted decoration-slate-400">NG</span>
+                  <div id="voProfileTip_NG" class="absolute left-0 top-full mt-1 z-50 min-w-[260px] max-w-[360px] p-3 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 shadow-xl text-xs text-slate-600 dark:text-slate-300 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-150"></div>
+                </div>
               </div>
               <div class="w-full aspect-[4/3] relative min-h-[180px]">
                 <canvas id="chartNG" class="w-full h-full block"></canvas>
+                <div id="voChartLabels_NG" class="absolute inset-0 pointer-events-none overflow-hidden" style="left:0;top:0;right:0;bottom:0;"></div>
               </div>
             </div>
             <div id="voProfileCard_EM" class="bg-slate-50 dark:bg-slate-900/40 rounded-lg border border-slate-200 dark:border-slate-700 p-2">
               <div class="flex items-center justify-between mb-0.5">
-                <span id="voProfileCardLabel_EM" class="text-xs font-semibold text-slate-700 dark:text-slate-200">EM</span>
+                <div class="relative inline-block group">
+                  <span id="voProfileCardLabel_EM" class="text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-help underline decoration-dotted decoration-slate-400">EM</span>
+                  <div id="voProfileTip_EM" class="absolute left-0 top-full mt-1 z-50 min-w-[260px] max-w-[360px] p-3 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 shadow-xl text-xs text-slate-600 dark:text-slate-300 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-150"></div>
+                </div>
               </div>
               <div class="w-full aspect-[4/3] relative min-h-[180px]">
                 <canvas id="chartEM" class="w-full h-full block"></canvas>
+                <div id="voChartLabels_EM" class="absolute inset-0 pointer-events-none overflow-hidden" style="left:0;top:0;right:0;bottom:0;"></div>
               </div>
             </div>
             <div id="voProfileCard_CM" class="bg-slate-50 dark:bg-slate-900/40 rounded-lg border border-slate-200 dark:border-slate-700 p-2">
               <div class="flex items-center justify-between mb-0.5">
-                <span id="voProfileCardLabel_CM" class="text-xs font-semibold text-slate-700 dark:text-slate-200">CM</span>
+                <div class="relative inline-block group">
+                  <span id="voProfileCardLabel_CM" class="text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-help underline decoration-dotted decoration-slate-400">CM</span>
+                  <div id="voProfileTip_CM" class="absolute left-0 top-full mt-1 z-50 min-w-[260px] max-w-[360px] p-3 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 shadow-xl text-xs text-slate-600 dark:text-slate-300 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-150"></div>
+                </div>
               </div>
               <div class="w-full aspect-[4/3] relative min-h-[180px]">
                 <canvas id="chartCM" class="w-full h-full block"></canvas>
+                <div id="voChartLabels_CM" class="absolute inset-0 pointer-events-none overflow-hidden" style="left:0;top:0;right:0;bottom:0;"></div>
               </div>
             </div>
           </div>
@@ -368,7 +384,7 @@
         labelLight: 'Light',
         labelDark: 'Dark',
         titleMain: '🏫 Dutch VWO schools map',
-        subtitleBefore: 'Data from DUO (excluding international schools). Only schools with VWO. Four profiles: NT (Science/Tech), NG (Science/Health), EM (Economics), CM (Culture). X = VWO share (%), Y = exam score. Dot size = annual candidates (5-yr weighted avg). Under current filters: ',
+        subtitleBefore: 'Data from DUO (excluding international schools). Only schools with VWO. Under current filters: ',
         subtitleAfter: ' schools shown.',
         labelSchoolSearch: 'School search',
         schoolSearchPlaceholder: 'Search by name or acronym (e.g. HWC), comma for multiple, partial match highlighted',
@@ -421,7 +437,7 @@
         labelLight: '浅色',
         labelDark: '深色',
         titleMain: '🏫 荷兰 VWO 中学定位图',
-        subtitleBefore: '数据来自DUO（不含国际学校），仅包含有 VWO 的中学。四科：NT 理工、NG 理生、EM 经社、CM 文社。X = VWO 占比(%)，Y = 考试分数。点大小=每年全校考生数（5年加权平均）。当前筛选条件下展示 ',
+        subtitleBefore: '数据来自DUO（不含国际学校），仅包含有 VWO 的中学。当前筛选条件下展示 ',
         subtitleAfter: ' 所学校。',
         labelSchoolSearch: '学校搜索',
         schoolSearchPlaceholder: '按校名或首字母缩写（如 HWC）搜索，逗号分隔多个，部分匹配高亮',
@@ -474,7 +490,7 @@
         labelLight: 'Licht',
         labelDark: 'Donker',
         titleMain: '🏫 Nederlandse VWO-scholenkaart',
-        subtitleBefore: 'Data van DUO (zonder internationale scholen). Alleen scholen met VWO. Vier profielen: NT, NG, EM, CM. X = VWO-aandeel (%), Y = examencijfer. Puntgrootte = examenkandidaten per jaar (5-jaar gewogen gem.). Onder huidige filters: ',
+        subtitleBefore: 'Data van DUO (zonder internationale scholen). Alleen scholen met VWO. Onder huidige filters: ',
         subtitleAfter: ' scholen getoond.',
         labelSchoolSearch: 'Zoek school',
         schoolSearchPlaceholder: 'Zoek op naam of afkorting (bijv. HWC), komma voor meerdere, deelmatch gemarkeerd',
@@ -640,6 +656,12 @@
       ['NT', 'NG', 'EM', 'CM'].forEach(function (prof) {
         var el = document.getElementById('voProfileCardLabel_' + prof);
         if (el && typeof getVoProfileFullName === 'function') el.textContent = getVoProfileFullName(prof);
+        var tipEl = document.getElementById('voProfileTip_' + prof);
+        if (tipEl && VO_PROFILE_TIPS) {
+          var lang = currentLang || 'en';
+          var tips = VO_PROFILE_TIPS[lang] || VO_PROFILE_TIPS.en;
+          tipEl.innerHTML = tips[prof] || '';
+        }
       });
       updateMobileModeSpecificUI();
     }
@@ -925,6 +947,72 @@
         });
       });
     }
+    function updateVoProfileChartLabels() {
+      if (currentMode !== 'vo' || !voProfilesCharts) return;
+      const searchEl = document.getElementById('schoolSearch');
+      const hasSearch = searchEl && (searchEl.value || '').trim().length > 0;
+      const isDark = document.documentElement.classList.contains('dark');
+      const textCls = isDark ? 'text-slate-200' : 'text-slate-800';
+      const bgCls = isDark ? 'bg-slate-900/95' : 'bg-white/95';
+      const borderCls = isDark ? 'border-slate-500' : 'border-slate-300';
+      const highlightCls = 'bg-amber-400/60 dark:bg-amber-500/50';
+      ['NT', 'NG', 'EM', 'CM'].forEach(function (prof) {
+        var overlay = document.getElementById('voChartLabels_' + prof);
+        var chartProf = voProfilesCharts[prof];
+        if (!overlay || !chartProf || !chartProf.scales || !chartProf.scales.x || !chartProf.scales.y) return;
+        overlay.innerHTML = '';
+        if (!hasSearch) return;
+        var canvas = chartProf.canvas;
+        if (!canvas || !chartProf.width || !chartProf.height) return;
+        var displayW = canvas.clientWidth;
+        var displayH = canvas.clientHeight;
+        if (!displayW || !displayH) return;
+        var scaleX = displayW / chartProf.width;
+        var scaleY = displayH / chartProf.height;
+        if (!isFinite(scaleX) || !isFinite(scaleY)) return;
+        (chartProf.data.datasets || []).forEach(function (ds) {
+          if (!ds.data) return;
+          ds.data.forEach(function (pt) {
+            if (!pt.matched || !pt.naam) return;
+            var x = chartProf.scales.x.getPixelForValue(pt.x);
+            var y = chartProf.scales.y.getPixelForValue(pt.y);
+            var r = (typeof ds.pointRadius === 'function' ? ds.pointRadius({ raw: pt, dataIndex: 0, datasetIndex: 0, chart: chartProf }) : (ds.pointRadius || 8)) || 8;
+            var labelTop = (y - r - 22) * scaleY;
+            var labelLeft = x * scaleX;
+            var el = document.createElement('div');
+            el.className = 'absolute text-xs font-medium whitespace-nowrap px-2 py-1 rounded border shadow-sm ' + bgCls + ' ' + borderCls + ' ' + textCls;
+            el.style.left = labelLeft + 'px';
+            el.style.top = labelTop + 'px';
+            el.style.transform = 'translate(-50%, 0)';
+            var highlights = pt.nameHighlights || [];
+            if (highlights.length === 0) {
+              el.textContent = pt.naam;
+            } else {
+              var name = pt.naam;
+              var last = 0;
+              highlights.forEach(function (range) {
+                if (range[0] > last) {
+                  var span = document.createElement('span');
+                  span.textContent = name.slice(last, range[0]);
+                  el.appendChild(span);
+                }
+                var hi = document.createElement('span');
+                hi.className = 'rounded px-0.5 ' + highlightCls;
+                hi.textContent = name.slice(range[0], range[1]);
+                el.appendChild(hi);
+                last = range[1];
+              });
+              if (last < name.length) {
+                var span2 = document.createElement('span');
+                span2.textContent = name.slice(last);
+                el.appendChild(span2);
+              }
+            }
+            overlay.appendChild(el);
+          });
+        });
+      });
+    }
     function setSampleTooltip() {
       if (getSchoolSearchTerms().length > 0) {
         if (chart.tooltip) chart.tooltip.setActiveElements([], { x: 0, y: 0 });
@@ -986,7 +1074,7 @@
         updateLegendFromGemeenten(gemeentenForLegend);
       } else {
         const filtered = getFilteredPoints(points);
-        var dss = makeDatasets(filtered);
+        var dss = makeDatasets(filtered, points);
         var terms = getSchoolSearchTerms();
         if (terms.length === 0) legendHighlightGemeenten = null;
         else {
@@ -1017,6 +1105,9 @@
         requestAnimationFrame(function() { updateChartLabels(); setSampleTooltip(); });
       }
       refreshVoProfilesCharts();
+      if (isVoOnly) {
+        requestAnimationFrame(function() { setSampleTooltipForVoProfiles(); });
+      }
     }
     function setChartScaleForMode() {
       var xTitleFromMeta = getAxisTitleFromMeta('x');
@@ -1135,16 +1226,20 @@
       return `hsl(${hue}, ${sat}%, ${light}%)`;
     }
 
-    /** 根据当前可见点的 size 将人数映射为圆点半径（约 4–20px） */
+    /** 面积 ∝ 人数：r = k√size，使 339 与 272 的面积比 ≈ 1.25 */
     function sizeToRadius(points) {
       const sizes = points.map(p => (p.size != null && p.size > 0) ? p.size : 0).filter(Boolean);
       if (sizes.length === 0) return () => 8;
       const minS = Math.min(...sizes);
       const maxS = Math.max(...sizes);
-      const range = maxS - minS || 1;
+      if (minS <= 0 || maxS <= minS) return () => 8;
+      var k = 4 / Math.sqrt(minS);
+      var maxR = 4 * Math.sqrt(maxS / minS);
+      var scale = maxR > 18 ? 18 / maxR : 1;
       return function(size) {
         if (size == null || size <= 0) return 8;
-        return Math.round(4 + 14 * (size - minS) / range);
+        var r = k * Math.sqrt(size) * scale;
+        return Math.round(Math.max(4, Math.min(18, r)));
       };
     }
     var legendHighlightGemeenten = null;
@@ -1228,8 +1323,8 @@
       }
       return merged;
     }
-    function makeDatasets(points) {
-      const radiusFn = sizeToRadius(points);
+    function makeDatasets(points, allPointsForScale) {
+      const radiusFn = sizeToRadius(allPointsForScale && allPointsForScale.length > 0 ? allPointsForScale : points);
       const searchTerms = getSchoolSearchTerms();
       const byGemeente = {};
       points.forEach(p => {
@@ -1317,7 +1412,7 @@
                   ') ' +
                   sizeLabel +
                   ': ' +
-                  (p.size != null && p.size > 0 ? p.size : '—')
+                  (p.size != null && p.size > 0 ? Math.round(p.size) : '—')
                 );
                 return lines;
               },
@@ -1380,6 +1475,26 @@
       en: { NT: 'Natuur & Techniek', NG: 'Natuur & Gezondheid', EM: 'Economie & Maatschappij', CM: 'Cultuur & Maatschappij' },
       nl: { NT: 'Natuur & Techniek', NG: 'Natuur & Gezondheid', EM: 'Economie & Maatschappij', CM: 'Cultuur & Maatschappij' }
     };
+    var VO_PROFILE_TIPS = {
+      zh: {
+        NT: '<strong>典型特点：</strong>重数学B、物理<br><strong>常见 WO 专业：</strong>机械工程、电气工程、土木工程、计算机科学、数学、物理、航空航天工程<br><strong>典型大学：</strong>Delft, Eindhoven',
+        NG: '<strong>典型特点：</strong>重生物+化学<br><strong>常见 WO 专业：</strong>医学、生物医学、生物学、药学、牙医、健康科学<br><strong>典型大学：</strong>Leiden, Utrecht',
+        EM: '<strong>典型特点：</strong>重数学A/经济<br><strong>常见 WO 专业：</strong>经济学、商业经济、计量经济、金融学、国际商务、会计学<br><strong>典型大学：</strong>Erasmus Rotterdam, Amsterdam',
+        CM: '<strong>典型特点：</strong>语言、人文、社会科学<br><strong>常见 WO 专业：</strong>法学、心理学、政治学、传播学、历史、文学与语言学<br><strong>典型大学：</strong>Amsterdam, Leiden'
+      },
+      en: {
+        NT: '<strong>Focus:</strong> Math B, Physics<br><strong>Typical WO programmes:</strong> Mechanical Engineering, Electrical Engineering, Civil Engineering, Computer Science, Mathematics, Physics, Aerospace Engineering<br><strong>Typical universities:</strong> Delft, Eindhoven',
+        NG: '<strong>Focus:</strong> Biology + Chemistry<br><strong>Typical WO programmes:</strong> Medicine, Biomedical Sciences, Biology, Pharmacy, Dentistry, Health Sciences<br><strong>Typical universities:</strong> Leiden, Utrecht',
+        EM: '<strong>Focus:</strong> Math A, Economics<br><strong>Typical WO programmes:</strong> Economics, Business Administration, Econometrics, Finance, International Business, Accountancy<br><strong>Typical universities:</strong> Erasmus Rotterdam, Amsterdam',
+        CM: '<strong>Focus:</strong> Languages, Humanities, Social Sciences<br><strong>Typical WO programmes:</strong> Law, Psychology, Political Science, Communication, History, Languages & Culture<br><strong>Typical universities:</strong> Amsterdam, Leiden'
+      },
+      nl: {
+        NT: '<strong>Focus:</strong> Wiskunde B, Natuurkunde<br><strong>Typische WO-opleidingen:</strong> Werktuigbouwkunde, Elektrotechniek, Civiele Techniek, Informatica, Wiskunde, Natuurkunde, Luchtvaarttechniek<br><strong>Typische universiteiten:</strong> Delft, Eindhoven',
+        NG: '<strong>Focus:</strong> Biologie + Scheikunde<br><strong>Typische WO-opleidingen:</strong> Geneeskunde, Biomedische Wetenschappen, Biologie, Farmacie, Tandheelkunde, Gezondheidswetenschappen<br><strong>Typische universiteiten:</strong> Leiden, Utrecht',
+        EM: '<strong>Focus:</strong> Wiskunde A, Economie<br><strong>Typische WO-opleidingen:</strong> Economie, Bedrijfskunde, Econometrie, Finance, International Business, Accountancy<br><strong>Typische universiteiten:</strong> Erasmus Rotterdam, Amsterdam',
+        CM: '<strong>Focus:</strong> Talen, Geesteswetenschappen, Sociale wetenschappen<br><strong>Typische WO-opleidingen:</strong> Rechtsgeleerdheid, Psychologie, Politicologie, Communicatiewetenschap, Geschiedenis, Taal & Cultuur<br><strong>Typische universiteiten:</strong> Amsterdam, Leiden'
+      }
+    };
     var VO_PROFILE_Y_SUFFIX = { zh: '核心科目平均分', en: 'Core subjects avg.', nl: 'Gem. kernvakken' };
     function getVoProfileFullName(prof) {
       var lang = VO_PROFILE_SHORT_LABELS[currentLang] || VO_PROFILE_SHORT_LABELS.en;
@@ -1407,12 +1522,12 @@
 
         var xMin = -5;
         var xMax = 105;
-        var yMin = 4;
+        var yMin = 4.5;
         var yMax = 8;
         var xMetricLabel = t('axisXVoProfiles');
         var yMetricLabel = getVoProfileYAxisLabel();
 
-        voProfilesCharts[prof] = new Chart(canvas, {
+        var ch = new Chart(canvas, {
           type: 'scatter',
           data: { datasets: [] },
           options: {
@@ -1423,6 +1538,9 @@
             plugins: {
               legend: { display: false },
               tooltip: {
+                filter: function (tooltipItem) {
+                  return (tooltipItem.dataset && tooltipItem.dataset.label) !== '_ref';
+                },
                 callbacks: {
                   label: function (ctx) {
                     var p = ctx.raw || {};
@@ -1445,9 +1563,13 @@
                       ') ' +
                       sizeLabel +
                       ': ' +
-                      (p.size != null && p.size > 0 ? p.size : '—')
+                      (p.size != null && p.size > 0 ? Math.round(p.size) : '—')
                     );
                     return lines;
+                  },
+                  afterBody: function () {
+                    var ol = document.getElementById('voChartLabels_' + prof);
+                    if (ol) ol.innerHTML = '';
                   }
                 }
               }
@@ -1468,6 +1590,23 @@
             }
           }
         });
+        voProfilesCharts[prof] = ch;
+        (function () {
+          function maybeRestoreVoLabels() {
+            if (currentMode !== 'vo') return;
+            var terms = getSchoolSearchTerms();
+            if (!terms || terms.length === 0) return;
+            try {
+              for (var p of ['NT', 'NG', 'EM', 'CM']) {
+                var c = voProfilesCharts && voProfilesCharts[p];
+                if (c && c.tooltip && typeof c.tooltip.getActiveElements === 'function' && c.tooltip.getActiveElements().length > 0) return;
+              }
+            } catch (e) { /* ignore */ }
+            updateVoProfileChartLabels();
+          }
+          canvas.addEventListener('mousemove', maybeRestoreVoLabels);
+          canvas.addEventListener('mouseleave', maybeRestoreVoLabels);
+        })();
       });
     }
 
@@ -1495,7 +1634,7 @@
           return;
         }
         card.classList.remove('opacity-40');
-        var radiusFn = sizeToRadius(filteredBase);
+        var radiusFn = sizeToRadius(ptsAll);
         var byGemeente = {};
         filteredBase.forEach(function (p) {
           var g = p.gemeente || '(未知)';
@@ -1516,7 +1655,18 @@
           });
         });
         var gemeenten = Object.keys(byGemeente).sort();
-        chartProf.data.datasets = gemeenten.map(function (g) {
+        var refLineDs = {
+          label: '_ref',
+          data: [{ x: -5, y: 5.5 }, { x: 105, y: 5.5 }],
+          showLine: true,
+          pointRadius: 0,
+          pointHoverRadius: 0,
+          borderColor: 'rgba(100,100,100,0.5)',
+          borderWidth: 1,
+          borderDash: [4, 3],
+          order: 0
+        };
+        chartProf.data.datasets = [refLineDs].concat(gemeenten.map(function (g) {
           var bgColor = gemeenteToColor(g);
           return {
             label: g,
@@ -1536,17 +1686,65 @@
               if (ctx.raw && ctx.raw.matched) return bgColor;
               return 'rgba(120,120,120,0.45)';
             },
-            borderWidth: 1
+            borderWidth: 1,
+            order: 1
           };
-        });
+        }));
         chartProf.update();
       });
+      requestAnimationFrame(updateVoProfileChartLabels);
+    }
+
+    function setSampleTooltipForVoProfiles() {
+      if (getSchoolSearchTerms().length > 0) return;
+      var chartsWithData = [];
+      ['NT', 'NG', 'EM', 'CM'].forEach(function (prof) {
+        var ch = voProfilesCharts && voProfilesCharts[prof];
+        if (!ch || !ch.data || !ch.data.datasets) return;
+        var total = 0;
+        ch.data.datasets.forEach(function (ds, di) {
+          var arr = ds.data;
+          if (arr && arr.length > 0) total += arr.length;
+        });
+        if (total > 0) chartsWithData.push({ prof: prof, chart: ch, total: total });
+      });
+      if (chartsWithData.length === 0) return;
+      var chosen = chartsWithData[Math.floor(Math.random() * chartsWithData.length)];
+      var ch = chosen.chart;
+      var datasets = ch.data.datasets || [];
+      var withData = datasets.map(function (ds, i) {
+        return { i: i, len: (ds.data && ds.data.length) || 0 };
+      }).filter(function (o) {
+        return o.len > 0 && (datasets[o.i].label || '') !== '_ref';
+      });
+      if (withData.length === 0) return;
+      var dsChosen = withData[Math.floor(Math.random() * withData.length)];
+      var datasetIndex = dsChosen.i;
+      var dataArr = ch.data.datasets[datasetIndex].data;
+      var index = Math.floor(Math.random() * dataArr.length);
+      var pt = dataArr[index];
+      if (!pt || !ch.scales || !ch.scales.x || !ch.scales.y) return;
+      var px = ch.scales.x.getPixelForValue(pt.x);
+      var py = ch.scales.y.getPixelForValue(pt.y);
+      if (ch.tooltip && typeof ch.tooltip.setActiveElements === 'function') {
+        ch.tooltip.setActiveElements([{ datasetIndex: datasetIndex, index: index }], { x: px, y: py });
+        ch.update();
+      }
     }
 
     function scheduleUpdateChartLabels() {
       requestAnimationFrame(function() {
         if (chart && typeof chart.update === 'function') chart.update('resize');
-        requestAnimationFrame(function() { updateChartLabels(); });
+        if (currentMode === 'vo' && voProfilesCharts) {
+          ['NT', 'NG', 'EM', 'CM'].forEach(function (p) {
+            var ch = voProfilesCharts[p];
+            if (ch && typeof ch.update === 'function') ch.update('resize');
+          });
+        }
+        requestAnimationFrame(function() {
+          updateChartLabels();
+          if (currentMode === 'vo') updateVoProfileChartLabels();
+        });
       });
     }
     window.addEventListener('resize', scheduleUpdateChartLabels);
@@ -1699,7 +1897,10 @@
       document.documentElement.classList.toggle('dark', dark);
       localStorage.setItem('theme', dark ? 'dark' : 'light');
       updateChartTheme(dark);
-      requestAnimationFrame(function() { updateChartLabels(); });
+      requestAnimationFrame(function() {
+        updateChartLabels();
+        if (currentMode === 'vo') updateVoProfileChartLabels();
+      });
       var themeToggleBtn = document.getElementById('themeToggle');
       if (themeToggleBtn) themeToggleBtn.title = dark ? t('labelLight') : t('labelDark');
     }
