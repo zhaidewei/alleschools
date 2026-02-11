@@ -601,6 +601,7 @@ def run_vo_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
             # backlog 约定：现有 VO 主图的 X 轴（VWO 占比）作为 profiel 图的 Y 轴。
             y_vwo_share = row.get("X_linear")
             candidates_total = row.get("candidates_total")
+            candidates_weighted_avg = row.get("candidates_weighted_avg")
 
             for prof in ("NT", "NG", "EM", "CM"):
                 prof_map = profile_indices.get(prof) or {}
@@ -619,6 +620,11 @@ def run_vo_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
                         "X_profile": float(x_prof),
                         "Y_vwo_share": float(y_vwo_share) if y_vwo_share is not None else None,
                         "candidates_total": int(candidates_total or 0),
+                        "candidates_weighted_avg": (
+                            float(candidates_weighted_avg)
+                            if candidates_weighted_avg is not None
+                            else None
+                        ),
                     }
                 )
 

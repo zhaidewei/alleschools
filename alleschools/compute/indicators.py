@@ -288,6 +288,17 @@ def compute_vo_xy(
             continue
 
         candidates_total = sum(all_kand[y] for y in year_labels)
+        # 加权平均每年考生数，与 X/Y 使用相同年权重
+        sum_w_cand = 0.0
+        sum_w_cand_den = 0.0
+        for year in years_used_vo:
+            i = year_labels.index(year)
+            w = weights[i]
+            sum_w_cand += w * all_kand[year]
+            sum_w_cand_den += w
+        candidates_weighted_avg = (
+            sum_w_cand / sum_w_cand_den if sum_w_cand_den > 0 else 0.0
+        )
         postcode = brin_to_postcode.get(brin, "")
         years_covered_str = ",".join(years_used_vo) if years_used_vo else ""
 
@@ -300,6 +311,7 @@ def compute_vo_xy(
             "X_linear": round(x_linear, 2),
             "Y_linear": round(y_linear, 2),
             "candidates_total": candidates_total,
+            "candidates_weighted_avg": round(candidates_weighted_avg, 2),
         }
         row_vo["years_covered"] = years_covered_str
         row_vo["data_quality_flags"] = ""

@@ -58,6 +58,7 @@ def _vo_row_to_point(row: Mapping[str, Any]) -> Dict[str, Any]:
         "x_linear": row.get("X_linear"),
         "y_linear": row.get("Y_linear"),
         "size": row.get("candidates_total"),
+        "candidates_weighted_avg": row.get("candidates_weighted_avg"),
         "years_covered": years_list,
         "flags": {
             # 目前 VO 未接入 WOZ，先统一为 False，未来如接入可更新

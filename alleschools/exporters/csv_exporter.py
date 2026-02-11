@@ -36,6 +36,7 @@ VO_FIELDNAMES: Sequence[str] = [
     "X_linear",
     "Y_linear",
     "candidates_total",
+    "candidates_weighted_avg",
 ]
 
 VO_META_FIELDNAMES: Sequence[str] = [
@@ -54,6 +55,7 @@ VO_PROFILES_FIELDNAMES: Sequence[str] = [
     "X_profile",
     "Y_vwo_share",
     "candidates_total",
+    "candidates_weighted_avg",
 ]
 
 

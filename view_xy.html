@@ -64,55 +64,51 @@
     </div>
     <div id="chartWrap" class="mb-8">
       <h1 id="titleMain" class="text-xl font-semibold text-slate-800 dark:text-slate-100 tracking-tight"><a href="/" class="text-slate-800 dark:text-slate-100 hover:text-slate-600 dark:hover:text-slate-300">🏫 Dutch secondary school map</a>: academic level × science focus</h1>
-      <p id="subtitleMain" class="mt-1 text-sm text-slate-500 dark:text-slate-400">Data from DUO (excluding international schools). X = academic strength, Y = science share. Dot size = graduation count. <strong id="schoolCount" class="font-medium text-slate-700 dark:text-slate-300">0</strong> schools shown.</p>
+      <p id="subtitleMain" class="mt-1 text-sm text-slate-500 dark:text-slate-400">Data from DUO (excluding international schools). X = academic strength, Y = science share. Dot size = exam candidates (5-yr total). <strong id="schoolCount" class="font-medium text-slate-700 dark:text-slate-300">0</strong> schools shown.</p>
       <div class="mt-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-600 shadow-sm p-[2vw] sm:p-6">
-        <!-- 主图：VO/PO 共用 -->
+        <!-- 主图：仅 PO 模式显示；VO 模式只用下方 4 个 profiel 图 -->
         <div id="mainChartWrap" class="w-full aspect-[4/3] min-h-[55vh] sm:min-h-[420px] relative">
           <canvas id="chart" class="w-full h-full block"></canvas>
           <div id="chartLabels" class="absolute inset-0 pointer-events-none overflow-hidden" style="left:0;top:0;right:0;bottom:0;"></div>
         </div>
-        <div id="customLegend" class="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-3 pt-3 border-t border-slate-200 dark:border-slate-600" style="min-height: 24px;"></div>
-
-        <!-- VO 模式下的 4× profiel 图（NT/NG/EM/CM），在有数据时显示 -->
-        <div id="voProfilesWrap" class="mt-6 hidden">
-          <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">
-            VWO profiles (NT / NG / EM / CM)
-          </h2>
+        <!-- VO 模式：4× profiel 图（NT/NG/EM/CM）作为主视图 -->
+        <div id="voProfilesWrap" class="hidden mt-4">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div id="voProfileCard_NT" class="bg-slate-50 dark:bg-slate-900/40 rounded-lg border border-slate-200 dark:border-slate-700 p-3">
-              <div class="flex items-center justify-between mb-1.5">
+            <div id="voProfileCard_NT" class="bg-slate-50 dark:bg-slate-900/40 rounded-lg border border-slate-200 dark:border-slate-700 p-2">
+              <div class="flex items-center justify-between mb-0.5">
                 <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">NT</span>
               </div>
-              <div class="w-full aspect-[4/3] relative">
+              <div class="w-full aspect-[4/3] relative min-h-[180px]">
                 <canvas id="chartNT" class="w-full h-full block"></canvas>
               </div>
             </div>
-            <div id="voProfileCard_NG" class="bg-slate-50 dark:bg-slate-900/40 rounded-lg border border-slate-200 dark:border-slate-700 p-3">
-              <div class="flex items-center justify-between mb-1.5">
+            <div id="voProfileCard_NG" class="bg-slate-50 dark:bg-slate-900/40 rounded-lg border border-slate-200 dark:border-slate-700 p-2">
+              <div class="flex items-center justify-between mb-0.5">
                 <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">NG</span>
               </div>
-              <div class="w-full aspect-[4/3] relative">
+              <div class="w-full aspect-[4/3] relative min-h-[180px]">
                 <canvas id="chartNG" class="w-full h-full block"></canvas>
               </div>
             </div>
-            <div id="voProfileCard_EM" class="bg-slate-50 dark:bg-slate-900/40 rounded-lg border border-slate-200 dark:border-slate-700 p-3">
-              <div class="flex items-center justify-between mb-1.5">
+            <div id="voProfileCard_EM" class="bg-slate-50 dark:bg-slate-900/40 rounded-lg border border-slate-200 dark:border-slate-700 p-2">
+              <div class="flex items-center justify-between mb-0.5">
                 <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">EM</span>
               </div>
-              <div class="w-full aspect-[4/3] relative">
+              <div class="w-full aspect-[4/3] relative min-h-[180px]">
                 <canvas id="chartEM" class="w-full h-full block"></canvas>
               </div>
             </div>
-            <div id="voProfileCard_CM" class="bg-slate-50 dark:bg-slate-900/40 rounded-lg border border-slate-200 dark:border-slate-700 p-3">
-              <div class="flex items-center justify-between mb-1.5">
+            <div id="voProfileCard_CM" class="bg-slate-50 dark:bg-slate-900/40 rounded-lg border border-slate-200 dark:border-slate-700 p-2">
+              <div class="flex items-center justify-between mb-0.5">
                 <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">CM</span>
               </div>
-              <div class="w-full aspect-[4/3] relative">
+              <div class="w-full aspect-[4/3] relative min-h-[180px]">
                 <canvas id="chartCM" class="w-full h-full block"></canvas>
               </div>
             </div>
           </div>
         </div>
+        <div id="customLegend" class="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-3 pt-3 border-t border-slate-200 dark:border-slate-600" style="min-height: 24px;"></div>
       </div>
     </div>
     <div class="controls hidden md:flex flex-wrap items-center gap-4 sm:gap-6 py-4 px-[2vw] sm:px-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-600 shadow-sm">
@@ -371,8 +367,8 @@
         shareToFacebook: 'Share to Facebook',
         labelLight: 'Light',
         labelDark: 'Dark',
-        titleMain: '🏫 Dutch secondary school map: academic level × science focus',
-        subtitleBefore: 'Data from DUO (excluding international schools). X = academic strength, Y = science share. Dot size = graduation count. ',
+        titleMain: '🏫 Dutch secondary school map: VWO profiles',
+        subtitleBefore: 'Data from DUO (excluding international schools). Only schools with VWO. Four profiles: NT (Science/Tech), NG (Science/Health), EM (Economics), CM (Culture). Dot size = annual candidates (5-yr weighted avg). Under current filters: ',
         subtitleAfter: ' schools shown.',
         labelSchoolSearch: 'School search',
         schoolSearchPlaceholder: 'Search by name or acronym (e.g. HWC), comma for multiple, partial match highlighted',
@@ -387,15 +383,17 @@
         excludedDesc: 'The following schools were not included in the chart because HAVO/VWO exam candidates (5-year total) are below 20.',
         axisXLinear: 'VWO share (%) — 100% most academic',
         axisYLinear: 'Science share (%)',
-        tooltipCandidates: '5-yr candidates',
+        tooltipCandidates: 'Annual candidates',
         tooltipPostcode: 'Postcode',
         algorithmTitle: 'How X and Y are calculated',
-        algorithmBody: '<p><strong>X (horizontal):</strong> VWO share = VWO passed / total exam candidates (all tracks: HAVO, VWO, VMBO) at the school, as a percentage (0–100%). Higher X means more academically oriented (more VWO).</p><p><strong>Y (vertical):</strong> Science share = science passed / total exam candidates. For HAVO/VWO schools, science = the following profiles (bèta):</p><ul class="list-disc pl-5 my-1"><li><strong>N&amp;T</strong> — Natuur &amp; Techniek (Nature &amp; Technology): maths, physics, chemistry, technical subjects.</li><li><strong>N&amp;G</strong> — Natuur &amp; Gezondheid (Nature &amp; Health): biology, chemistry, health-related subjects.</li><li><strong>N&amp;T/N&amp;G</strong> — combination profile of N&amp;T and N&amp;G.</li></ul><p>For VMBO-only schools, Y = techniek share within VMBO, and X is set to 0.</p><p>Both X and Y are <strong>weighted averages</strong> over school years 2019–2020 to 2023–2024, with recent years weighted more. Dot size = graduation count (5-year sum) at the school.</p>',
+        algorithmBody: '<p><strong>X axis – Profile index (weighted central exam averages of core subjects)</strong><br>Per school and profile, C(vak) = central exam average (1–10, cijferlijst). Formulae:</p><ul class="list-disc pl-5 my-1 text-xs"><li><strong>NT:</strong> 0.50×C(WISB) + 0.25×C(NAT) + 0.25×C(SCHK) — Wiskunde B, Natuurkunde, Scheikunde</li><li><strong>NG:</strong> 0.35×C(BIOL) + 0.25×C(SCHK) + 0.40×C(WISB) — Biologie, Scheikunde, Wiskunde B</li><li><strong>EM:</strong> 0.333×C(ECON) + 0.334×C(BECO) + 0.333×C_WIS — C_WIS = avg(Wiskunde A, Wiskunde B)</li><li><strong>CM:</strong> 0.333×C(GES) + 0.333×C_WIS + 0.333×C_TALEN — C_WIS = avg(Wiskunde C, A), C_TALEN = avg(Engels, Duits, Frans)</li></ul><p class="mt-1">Each per-year index is time-weighted over the 5 most recent school years. <em>X reflects the school&rsquo;s central exam score level—higher means students in this profile category achieve higher exam scores.</em></p><p><strong>Y axis – VWO pass share</strong><br>Numerator: VWO passed (VWO geslaagden) per year. Denominator: total exam candidates (HAVO + VWO + VMBO) per year. Per year: share<sub>k</sub> = 100 × (VWO_passed<sub>k</sub> / total<sub>k</sub>). Weighted mean: Y = Σ(w<sub>k</sub> × share<sub>k</sub>) / Σ(w<sub>k</sub>), where w<sub>k</sub> are year weights (e.g. 0.2, 0.4, 0.6, 0.8, 1.0 for 2019-2020 … 2023-2024). <em>Y reflects the share of successfully graduated VWO students at the school—higher means a stronger academic atmosphere. It does not indicate better or worse, only distinguishes campus diversity.</em></p><p><strong>Dot size – Annual candidates (5-yr weighted avg)</strong><br>Weighted average of school-wide exam candidates per year over the 5-year window, using the same year weights as X and Y.</p>',
         disclaimerTitle: 'Disclaimer',
-        disclaimerBody: 'Data from DUO Open Onderwijsdata (exam candidates and pass counts). This tool is for reference only; no warranty of accuracy or fitness for any decision. Not affiliated with DUO or the Dutch government.',
+        disclaimerBody: 'Data from DUO Open Onderwijsdata (exam candidates and pass counts). This tool is for reference only; no warranty of accuracy or fitness for any decision. Not affiliated with DUO or the Dutch government.<br><br><strong>University admission:</strong> Exam scores are not the deciding factor for WO (research university) admission. Typical priority order: 1) VWO completion; 2) Meeting subject requirements (e.g. engineering needs Wiskunde B, medicine needs biology + chemistry); 3) Non-Numerus Fixus programmes usually do not consider ranking; 4) Numerus Fixus programmes (e.g. medicine, psychology, some business) → grades &amp; selection matter.',
         contactTitle: 'Contact',
         supportHint: 'Like this tool? Buy me a coffee on Ko-fi.',
         copyrightText: '© 2025 Dewei Zhai. This project is licensed under the MIT License.',
+        voProfilesTitle: 'VWO profiles (NT / NG / EM / CM) — VWO profiel index',
+        axisYVoProfiles: 'VWO graduates / total (incl. non-VWO) %',
         titleMain_po: '🏫 Dutch primary school map: VWO-advice share × WOZ (postcode)',
         subtitleBefore_po: 'Data from DUO schooladviezen + CBS WOZ. X = VWO-advice share (%), Y = mean WOZ (×1000 €). Dot size = pupils. ',
         axisXLinear_po: 'VWO-advice share (%)',
@@ -421,8 +419,8 @@
         shareToFacebook: '分享到 Facebook',
         labelLight: '浅色',
         labelDark: '深色',
-        titleMain: '🏫 荷兰中学定位图：学术度 × 理科度',
-        subtitleBefore: '数据来自DUO（不含国际学校），X轴代表学术强度，Y轴代表理科占比，点的大小代表毕业人数。共 ',
+        titleMain: '🏫 荷兰中学定位图：VWO 分科',
+        subtitleBefore: '数据来自DUO（不含国际学校），仅包含有 VWO 的中学。四科：NT 理工、NG 理生、EM 经社、CM 文社。点大小=每年全校考生数（5年加权平均）。当前筛选条件下展示 ',
         subtitleAfter: ' 所学校。',
         labelSchoolSearch: '学校搜索',
         schoolSearchPlaceholder: '按校名或首字母缩写（如 HWC）搜索，逗号分隔多个，部分匹配高亮',
@@ -437,15 +435,17 @@
         excludedDesc: '以下学校因 HAVO/VWO 考生数过少（5 年合计 < 20）未参与坐标计算，故未出现在上图中。',
         axisXLinear: 'VWO 通过人数占比 (%) — 100% 学术性最强',
         axisYLinear: '理科占比 (%)',
-        tooltipCandidates: '5年考生',
+        tooltipCandidates: '每年考生人数',
         tooltipPostcode: '邮编',
         algorithmTitle: 'X 与 Y 的计算方式',
-        algorithmBody: '<p><strong>X（横轴）：</strong>VWO 通过人数占比 = 该校 VWO 通过人数 / 该校全部考生总数（HAVO、VWO、VMBO 等），以百分比表示（0–100%）。X 越高表示越偏学术（VWO 越多）。</p><p><strong>Y（纵轴）：</strong>理科通过人数占比 = 理科通过人数 / 该校全部考生总数。HAVO/VWO 学校的理科指以下方向（bèta）：</p><ul class="list-disc pl-5 my-1"><li><strong>N&amp;T</strong> — Natuur &amp; Techniek（自然与技术）：数学、物理、化学、技术等。</li><li><strong>N&amp;G</strong> — Natuur &amp; Gezondheid（自然与健康）：生物、化学、健康相关等。</li><li><strong>N&amp;T/N&amp;G</strong> — N&amp;T 与 N&amp;G 的组合方向。</li></ul><p>仅 VMBO 的学校 Y 为 VMBO 内 techniek 占比，X 固定为 0。</p><p>X、Y 均为 2019–2020 至 2023–2024 学年的<strong>加权平均</strong>，近年权重更大。圆点大小表示该校 5 年毕业人数。</p>',
+        algorithmBody: '<p><strong>X 轴 – 各科 profiel 指数（核心科目统考平均分加权）</strong><br>C(vak) = 该科目统考平均分（1–10，cijferlijst）。四类公式：</p><ul class="list-disc pl-5 my-1 text-xs"><li><strong>NT 理工:</strong> 0.50×C(WISB) + 0.25×C(NAT) + 0.25×C(SCHK) — 数学B、物理、化学</li><li><strong>NG 理生:</strong> 0.35×C(BIOL) + 0.25×C(SCHK) + 0.40×C(WISB) — 生物、化学、数学B</li><li><strong>EM 经社:</strong> 0.333×C(ECON) + 0.334×C(BECO) + 0.333×C_WIS — C_WIS = 数学A与B平均</li><li><strong>CM 文社:</strong> 0.333×C(GES) + 0.333×C_WIS + 0.333×C_TALEN — C_WIS = 数学C与A平均，C_TALEN = 英/德/法平均</li></ul><p class="mt-1">每年指数再在最近5学年上做时间加权。<em>X 轴反映学校毕业统考的分数高低，越高说明学生在这个类别 profile 里的考试分数越高。</em></p><p><strong>Y 轴 – VWO 通过占比</strong><br>分子：每年 VWO 通过人数。分母：每年全部考试考生（HAVO + VWO + VMBO）。每年 share<sub>k</sub> = 100 × (VWO通过<sub>k</sub> / 总考生<sub>k</sub>)。加权均值：Y = Σ(w<sub>k</sub> × share<sub>k</sub>) / Σ(w<sub>k</sub>)，w<sub>k</sub> 为学年权重（如 2019-2020→0.2 … 2023-2024→1.0）。<em>Y 轴反映成功毕业的 VWO 学生在学校里的占比，越高说明学术氛围越强。不代表优劣，仅区分校园多样性。</em></p><p><strong>圆点大小 – 每年全校考生数（5 年加权平均）</strong><br>5 学年窗口内，每年全校考试考生人数的加权平均，权重与 X、Y 轴相同。</p>',
         disclaimerTitle: '免责声明',
-        disclaimerBody: '数据来自 DUO Open Onderwijsdata（考试考生与通过人数）。本工具仅供参考，不保证准确或适用于任何决策；与 DUO 及荷兰政府无关联。',
+        disclaimerBody: '数据来自 DUO Open Onderwijsdata（考试考生与通过人数）。本工具仅供参考，不保证准确或适用于任何决策；与 DUO 及荷兰政府无关联。<br><br><strong>大学录取：</strong>分数并不是大学录取的决定性因素。对 WO 大学来说，重要性排序通常是：1）是否完成 VWO；2）是否满足专业科目要求（例如：工程类必须 Wiskunde B，医学必须生物+化学）；3）非 Numerus Fixus 专业（不限额专业）通常不看排名；4）限额专业（例如医学、心理学、部分商科）→ 成绩 &amp; 选拔表现。',
         contactTitle: '联系作者',
         supportHint: '觉得有用？请在 Ko-fi 请我喝杯咖啡。',
         copyrightText: '© 2025 翟德炜。本项目采用 MIT 许可证。',
+        voProfilesTitle: 'VWO profiles (NT / NG / EM / CM) — VWO profiel 指数',
+        axisYVoProfiles: '毕业 VWO 人数 / 全校总人数（含非 VWO）%',
         titleMain_po: '🏫 荷兰小学定位图：VWO 升学率 × 邮编 WOZ',
         subtitleBefore_po: '数据来自 DUO 毕业建议 + CBS WOZ。X = VWO 升学率(%)，Y = 邮编 WOZ 均值(千欧)，点大小 = 人数。共 ',
         axisXLinear_po: 'VWO 升学率 (%)',
@@ -471,8 +471,8 @@
         shareToFacebook: 'Delen op Facebook',
         labelLight: 'Licht',
         labelDark: 'Donker',
-        titleMain: '🏫 Nederlandse schoolkaart voortgezet onderwijs: academisch × bèta',
-        subtitleBefore: 'Data van DUO (zonder internationale scholen). X = academisch niveau, Y = bètandeel. Puntgrootte = aantal geslaagden. ',
+        titleMain: '🏫 Nederlandse schoolkaart voortgezet onderwijs: VWO-profielen',
+        subtitleBefore: 'Data van DUO (zonder internationale scholen). Alleen scholen met VWO. Vier profielen: NT, NG, EM, CM. Puntgrootte = examenkandidaten per jaar (5-jaar gewogen gem.). Onder huidige filters: ',
         subtitleAfter: ' scholen getoond.',
         labelSchoolSearch: 'Zoek school',
         schoolSearchPlaceholder: 'Zoek op naam of afkorting (bijv. HWC), komma voor meerdere, deelmatch gemarkeerd',
@@ -487,15 +487,17 @@
         excludedDesc: 'De volgende scholen zijn niet in de grafiek opgenomen omdat HAVO/VWO-examenkandidaten (5-jaar totaal) onder 20 liggen.',
         axisXLinear: 'VWO-aandeel (%) — 100% meest academisch',
         axisYLinear: 'Bètandeel (%)',
-        tooltipCandidates: '5-jaar kandidaten',
+        tooltipCandidates: 'Examenkandidaten per jaar',
         tooltipPostcode: 'Postcode',
         algorithmTitle: 'Hoe X en Y worden berekend',
-        algorithmBody: '<p><strong>X (horizontaal):</strong> VWO-aandeel = VWO geslaagden / totaal examenkandidaten (alle richtingen: HAVO, VWO, VMBO) van de school, in procent (0–100%). Hogere X = meer academisch (meer VWO).</p><p><strong>Y (verticaal):</strong> Bètandeel = bètageslaagden / totaal examenkandidaten. Voor HAVO/VWO-scholen is bèta de volgende profielen:</p><ul class="list-disc pl-5 my-1"><li><strong>N&amp;T</strong> — Natuur &amp; Techniek: wiskunde, natuurkunde, scheikunde, technische vakken.</li><li><strong>N&amp;G</strong> — Natuur &amp; Gezondheid: biologie, scheikunde, gezondheidsgerelateerde vakken.</li><li><strong>N&amp;T/N&amp;G</strong> — combinatieprofiel van N&amp;T en N&amp;G.</li></ul><p>Voor alleen VMBO-scholen is Y het techniekaandeel binnen VMBO en X = 0.</p><p>X en Y zijn <strong>gewogen gemiddelden</strong> over schooljaren 2019–2020 t/m 2023–2024, met zwaardere weging voor recente jaren. Puntgrootte = aantal geslaagden (5-jaar som) van de school.</p>',
+        algorithmBody: '<p><strong>X-as – Profielindex (gewogen centraal-examengemiddelden van kernvakken)</strong><br>C(vak) = centraal-examengemiddelde (1–10, cijferlijst). Formules:</p><ul class="list-disc pl-5 my-1 text-xs"><li><strong>NT:</strong> 0,50×C(WISB) + 0,25×C(NAT) + 0,25×C(SCHK) — Wiskunde B, Natuurkunde, Scheikunde</li><li><strong>NG:</strong> 0,35×C(BIOL) + 0,25×C(SCHK) + 0,40×C(WISB) — Biologie, Scheikunde, Wiskunde B</li><li><strong>EM:</strong> 0,333×C(ECON) + 0,334×C(BECO) + 0,333×C_WIS — C_WIS = gem(Wiskunde A, B)</li><li><strong>CM:</strong> 0,333×C(GES) + 0,333×C_WIS + 0,333×C_TALEN — C_WIS = gem(Wiskunde C, A), C_TALEN = gem(Engels, Duits, Frans)</li></ul><p class="mt-1">Elke jaargemiddelde wordt tijdgewogen over de 5 meest recente schooljaren. <em>X geeft het niveau van de centrale-examencijfers van de school weer—hoger betekent dat leerlingen in dit profiel betere examencijfers halen.</em></p><p><strong>Y-as – VWO-slaagaandeel</strong><br>Teller: VWO geslaagden per jaar. Noemer: totaal examenkandidaten (HAVO + VWO + VMBO) per jaar. Per jaar: share<sub>k</sub> = 100 × (VWO_slaag<sub>k</sub> / totaal<sub>k</sub>). Gewogen gemiddelde: Y = Σ(w<sub>k</sub> × share<sub>k</sub>) / Σ(w<sub>k</sub>), met w<sub>k</sub> jaargewichten (bijv. 0,2 … 1,0 voor 2019-2020 … 2023-2024). <em>Y geeft het aandeel succesvol afgestudeerde VWO-leerlingen op de school weer—hoger betekent een sterkere academische sfeer. Geen waardeoordeel, alleen diversiteit van schooltype.</em></p><p><strong>Puntgrootte – Examenkandidaten per jaar (5-jaar gewogen gem.)</strong><br>Gewogen gemiddelde van schoolbrede examenkandidaten per jaar over het 5-jaarsvenster, met dezelfde jaargewichten als X en Y.</p>',
         disclaimerTitle: 'Disclaimer',
-        disclaimerBody: 'Data van DUO Open Onderwijsdata (examenkandidaten en geslaagden). Dit hulpmiddel is alleen voor referentie; geen garantie op juistheid of geschiktheid voor beslissingen. Niet gelieerd aan DUO of de overheid.',
+        disclaimerBody: 'Data van DUO Open Onderwijsdata (examenkandidaten en geslaagden). Dit hulpmiddel is alleen voor referentie; geen garantie op juistheid of geschiktheid voor beslissingen. Niet gelieerd aan DUO of de overheid.<br><br><strong>Universiteitstoelating:</strong> Cijfers zijn geen doorslaggevende factor voor WO-toelating. Typische volgorde: 1) VWO afgerond; 2) Vakkenvereisten (bv. techniek: Wiskunde B, geneeskunde: biologie + scheikunde); 3) Niet-Numerus Fixus opleidingen: ranglijst speelt meestal geen rol; 4) Numerus Fixus (bv. geneeskunde, psychologie, sommige business) → cijfers &amp; selectie tellen mee.',
         contactTitle: 'Contact',
         supportHint: 'Waardevol? Trakteer me op een koffie via Ko-fi.',
         copyrightText: '© 2025 Dewei Zhai. Dit project valt onder de MIT-licentie.',
+        voProfilesTitle: 'VWO profielen (NT / NG / EM / CM) — VWO profielindex',
+        axisYVoProfiles: 'VWO geslaagden / totaal (incl. non-VWO) %',
         titleMain_po: '🏫 Nederlandse basisschoolkaart: VWO-adviesaandeel × WOZ (postcode)',
         subtitleBefore_po: 'Data van DUO schooladviezen + CBS WOZ. X = VWO-adviesaandeel (%), Y = gem. WOZ (×1000 €). Puntgrootte = leerlingen. ',
         axisXLinear_po: 'VWO-adviesaandeel (%)',
@@ -596,7 +598,7 @@
       if (algorithmTitleText) algorithmTitleText.textContent = t('algorithmTitle');
       var algorithmBody = document.getElementById('algorithmBody');
       if (algorithmBody) {
-        var algoHtml = buildAlgorithmBodyFromMeta();
+        var algoHtml = (currentMode === 'vo' && hasVoProfilesData()) ? null : buildAlgorithmBodyFromMeta();
         algorithmBody.innerHTML = algoHtml || t('algorithmBody');
       }
       var disclaimerTitleText = document.getElementById('disclaimerTitleText');
@@ -615,6 +617,16 @@
         chart.options.scales.x.title.text = xTitleFromMeta || t('axisXLinear');
         chart.options.scales.y.title.text = yTitleFromMeta || t('axisYLinear');
         chart.update();
+      }
+      if (voProfilesCharts && typeof voProfilesCharts === 'object') {
+        ['NT', 'NG', 'EM', 'CM'].forEach(function (prof) {
+          var ch = voProfilesCharts[prof];
+          if (ch && ch.options && ch.options.scales) {
+            if (ch.options.scales.x) ch.options.scales.x.title.text = getVoProfileShortLabel(prof);
+            if (ch.options.scales.y) ch.options.scales.y.title.text = t('axisYVoProfiles');
+            ch.update();
+          }
+        });
       }
       updateMobileModeSpecificUI();
     }
@@ -644,7 +656,7 @@
             gemeente: d.gemeente || '',
             postcode: (d.postcode || '').trim(),
             type: d.type || '',
-            size: d.candidates_total != null ? Number(d.candidates_total) : 0,
+            size: (d.candidates_weighted_avg != null ? Number(d.candidates_weighted_avg) : null) ?? (d.candidates_total != null ? Number(d.candidates_total) : 0),
             brin: d.BRIN || '',
             profile_id: d.profile_id || prof,
           };
@@ -759,12 +771,22 @@
       return result;
     }
     function getGemeentenInList() {
-      const pts = getPointsByTextFilter(points);
+      let pts;
+      if (currentMode === 'vo' && hasVoProfilesData()) {
+        const merged = [];
+        ['NT', 'NG', 'EM', 'CM'].forEach(function (prof) {
+          (voProfilesPoints[prof] || []).forEach(function (p) { merged.push(p); });
+        });
+        pts = getPointsByTextFilter(merged);
+      } else {
+        pts = getPointsByTextFilter(points);
+      }
       const set = new Set();
       pts.forEach(p => { if (p.gemeente) set.add(p.gemeente); });
       return Array.from(set).sort();
     }
     function renderGemeenteCheckboxes() {
+      if (currentMode === 'vo' && hasVoProfilesData()) buildVoProfilesPoints();
       const list = getGemeentenInList();
       if (list.length > 0 && selectedGemeenten.size === 0) {
         var defaultSet = new Set(DEFAULT_GEMEENTEN);
@@ -889,38 +911,74 @@
       }
     }
     function refreshChart() {
-      const filtered = getFilteredPoints(points);
-      var dss = makeDatasets(filtered);
-      var terms = getSchoolSearchTerms();
-      if (terms.length === 0) {
-        legendHighlightGemeenten = null;
+      var mainWrap = document.getElementById('mainChartWrap');
+      var legendEl = document.getElementById('customLegend');
+      var profilesWrap = document.getElementById('voProfilesWrap');
+      var isVoOnly = currentMode === 'vo';
+
+      if (isVoOnly) {
+        if (mainWrap) mainWrap.classList.add('hidden');
+        if (profilesWrap) profilesWrap.classList.remove('hidden');
+        if (legendEl) legendEl.classList.remove('hidden');
       } else {
-        legendHighlightGemeenten = new Set();
-        for (var di = 0; di < dss.length; di++) {
-          var arr = dss[di].data;
-          if (arr) for (var k = 0; k < arr.length; k++) if (arr[k] && arr[k].matched) { legendHighlightGemeenten.add(dss[di].label); break; }
-        }
+        if (mainWrap) mainWrap.classList.remove('hidden');
+        if (profilesWrap) profilesWrap.classList.add('hidden');
+        if (legendEl) legendEl.classList.remove('hidden');
       }
-      chart.data.datasets = dss;
-      document.getElementById('schoolCount').textContent = filtered.length;
-      if (filtered.length > 0) {
-        const ys = filtered.map(function(p) { return p.y; });
-        const minY = Math.min.apply(null, ys);
-        const maxY = Math.max.apply(null, ys);
-        const range = maxY - minY || 1;
-        const pad = range * 0.05;
-        chart.options.scales.y.min = Math.min(minY - pad, minY * 0.95);
-        chart.options.scales.y.max = maxY * 1.05;
-        if (chart.options.scales.y.min < -10 && (currentMode === 'vo' || currentMode === 'po')) {
-          chart.options.scales.y.min = -10;
+
+      if (isVoOnly) {
+        buildVoProfilesPoints();  // ensure profile points are built before filtering
+        var allFiltered = [];
+        ['NT', 'NG', 'EM', 'CM'].forEach(function (prof) {
+          allFiltered = allFiltered.concat(getFilteredPoints(voProfilesPoints[prof] || []));
+        });
+        var uniqueBrins = new Set();
+        allFiltered.forEach(function (p) { if (p.brin) uniqueBrins.add(p.brin); });
+        document.getElementById('schoolCount').textContent = uniqueBrins.size;
+        var gemeentenForLegend = [];
+        allFiltered.forEach(function (p) { if (p.gemeente && gemeentenForLegend.indexOf(p.gemeente) < 0) gemeentenForLegend.push(p.gemeente); });
+        gemeentenForLegend.sort();
+        var terms = getSchoolSearchTerms();
+        if (terms.length === 0) legendHighlightGemeenten = null;
+        else {
+          legendHighlightGemeenten = new Set();
+          allFiltered.forEach(function (p) {
+            if (pointMatchesSearch(p, terms) && p.gemeente) legendHighlightGemeenten.add(p.gemeente);
+          });
         }
-        chart.options.scales.y.afterBuildTicks = undefined;
-        chart.options.scales.y.ticks = { stepSize: undefined };
+        updateLegendFromGemeenten(gemeentenForLegend);
+      } else {
+        const filtered = getFilteredPoints(points);
+        var dss = makeDatasets(filtered);
+        var terms = getSchoolSearchTerms();
+        if (terms.length === 0) legendHighlightGemeenten = null;
+        else {
+          legendHighlightGemeenten = new Set();
+          for (var di = 0; di < dss.length; di++) {
+            var arr = dss[di].data;
+            if (arr) for (var k = 0; k < arr.length; k++) if (arr[k] && arr[k].matched) { legendHighlightGemeenten.add(dss[di].label); break; }
+          }
+        }
+        chart.data.datasets = dss;
+        document.getElementById('schoolCount').textContent = filtered.length;
+        if (filtered.length > 0) {
+          const ys = filtered.map(function(p) { return p.y; });
+          const minY = Math.min.apply(null, ys);
+          const maxY = Math.max.apply(null, ys);
+          const range = maxY - minY || 1;
+          const pad = range * 0.05;
+          chart.options.scales.y.min = Math.min(minY - pad, minY * 0.95);
+          chart.options.scales.y.max = maxY * 1.05;
+          if (chart.options.scales.y.min < -10 && (currentMode === 'vo' || currentMode === 'po')) {
+            chart.options.scales.y.min = -10;
+          }
+          chart.options.scales.y.afterBuildTicks = undefined;
+          chart.options.scales.y.ticks = { stepSize: undefined };
+        }
+        chart.update();
+        updateLegend();
+        requestAnimationFrame(function() { updateChartLabels(); setSampleTooltip(); });
       }
-      chart.update();
-      updateLegend();
-      requestAnimationFrame(function() { updateChartLabels(); setSampleTooltip(); });
-      // 同步刷新 VO profiel 小图（仅在 VO 模式下生效）
       refreshVoProfilesCharts();
     }
     function setChartScaleForMode() {
@@ -1081,6 +1139,20 @@
         container.appendChild(item);
       }
     }
+    function updateLegendFromGemeenten(gemeenten) {
+      var container = document.getElementById('customLegend');
+      if (!container) return;
+      container.innerHTML = '';
+      gemeenten.forEach(function (label) {
+        var useColor = legendHighlightGemeenten === null || legendHighlightGemeenten.has(label);
+        var boxColor = useColor ? gemeenteToColor(label) : 'rgba(160,160,160,0.6)';
+        var textCls = useColor ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500';
+        var item = document.createElement('span');
+        item.className = 'inline-flex items-center gap-1.5 text-sm';
+        item.innerHTML = '<span class="inline-block w-4 h-3 rounded border border-slate-300 dark:border-slate-500" style="background:' + boxColor + ';"></span><span class="' + textCls + '">' + escapeHtml(label) + '</span>';
+        container.appendChild(item);
+      });
+    }
     function acronymFromName(naam) {
       if (!naam || !String(naam).trim()) return '';
       return String(naam).trim().split(/\s+/).map(w => (w[0] || '').toUpperCase()).join('');
@@ -1223,7 +1295,7 @@
         },
         scales: {
           x: {
-            title: { display: true, text: 'VWO share (%)' },
+            title: { display: true, text: t('axisYVoProfiles') },
             min: -5,
             max: 105,
             grace: '0%',
@@ -1266,10 +1338,19 @@
     // ------------------------------------------------------------------
     // VO profiel 小图：4× Chart 实例（NT/NG/EM/CM）
     // ------------------------------------------------------------------
+    var VO_PROFILE_SHORT_LABELS = {
+      zh: { NT: '理工（Natuur & Techniek）', NG: '理生（Natuur & Gezondheid）', EM: '经社（Economie & Maatschappij）', CM: '文社（Cultuur & Maatschappij）' },
+      en: { NT: 'Natuur & Techniek', NG: 'Natuur & Gezondheid', EM: 'Economie & Maatschappij', CM: 'Cultuur & Maatschappij' },
+      nl: { NT: 'Natuur & Techniek', NG: 'Natuur & Gezondheid', EM: 'Economie & Maatschappij', CM: 'Cultuur & Maatschappij' }
+    };
+    var VO_PROFILE_X_SUFFIX = { zh: '核心科目平均分', en: 'Core subjects avg.', nl: 'Gem. kernvakken' };
+    function getVoProfileShortLabel(prof) {
+      var lang = VO_PROFILE_SHORT_LABELS[currentLang] || VO_PROFILE_SHORT_LABELS.en;
+      var suffix = VO_PROFILE_X_SUFFIX[currentLang] || VO_PROFILE_X_SUFFIX.en;
+      var name = lang[prof] || prof;
+      return name + '\n' + suffix;
+    }
     function initVoProfilesCharts() {
-      if (!hasVoProfilesData()) {
-        return;
-      }
       buildVoProfilesPoints();
       var wrap = document.getElementById('voProfilesWrap');
       if (!wrap) return;
@@ -1287,33 +1368,10 @@
         }
 
         var xMin = 4;
-        var xMax = 10;
-        var xMetricLabel = 'Index ' + prof;
-        if (metaVOProfiles && metaVOProfiles.profiles && metaVOProfiles.profiles[prof]) {
-          var profCfg = metaVOProfiles.profiles[prof];
-          if (Array.isArray(profCfg.domain)) {
-            xMin = Number(profCfg.domain[0]);
-            xMax = Number(profCfg.domain[1]);
-          }
-          if (profCfg.metric_id) {
-            var mProf = resolveMetricFromProfilesMeta(profCfg.metric_id);
-            if (mProf) {
-              xMetricLabel = mProf.label || mProf.short || xMetricLabel;
-            }
-          }
-        }
-        var yMin = 0;
-        var yMax = 100;
-        if (metaVOProfiles && metaVOProfiles.axes && metaVOProfiles.axes.y && Array.isArray(metaVOProfiles.axes.y.domain)) {
-          yMin = Number(metaVOProfiles.axes.y.domain[0]);
-          yMax = Number(metaVOProfiles.axes.y.domain[1]);
-        }
-
-        // 小图视觉策略：
-        // - X 轴统一从 0 开始，避免在 [4,10] 范围内被“放大差异”；
-        // - Y 轴从 -10 开始，防止接近 0 的点被下边界裁剪，同时与大图保持一致。
-        xMin = 0;
-        yMin = -10;
+        var xMax = 8;
+        var yMin = -10;
+        var yMax = 110;
+        var xMetricLabel = getVoProfileShortLabel(prof);
 
         voProfilesCharts[prof] = new Chart(canvas, {
           type: 'scatter',
@@ -1321,6 +1379,8 @@
           options: {
             responsive: true,
             maintainAspectRatio: true,
+            aspectRatio: 4 / 3,
+            layout: { padding: 0 },
             plugins: {
               legend: { display: false },
               tooltip: {
@@ -1361,7 +1421,7 @@
                 ticks: { stepSize: 1 },
               },
               y: {
-                title: { display: true, text: 'VWO share (%)' },
+                title: { display: true, text: t('axisYVoProfiles') },
                 min: yMin,
                 max: yMax,
                 ticks: { stepSize: 10 },
@@ -1375,14 +1435,13 @@
     function refreshVoProfilesCharts() {
       var wrap = document.getElementById('voProfilesWrap');
       if (!wrap) return;
-      if (currentMode !== 'vo' || !hasVoProfilesData()) {
+      if (currentMode !== 'vo') {
         wrap.classList.add('hidden');
         return;
       }
       if (!voProfilesCharts || Object.keys(voProfilesCharts).length === 0) {
         initVoProfilesCharts();
       }
-      wrap.classList.remove('hidden');
       var searchTerms = getSchoolSearchTerms();
       ['NT', 'NG', 'EM', 'CM'].forEach(function (prof) {
         var chartProf = voProfilesCharts[prof];
