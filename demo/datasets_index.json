@@ -9,6 +9,10 @@
     "po": {
       "data_path": "demo_po_points.json",
       "meta_path": "demo_po_meta.json"
+    },
+    "vo_profiles": {
+      "data_path": "demo_vo_profiles.json",
+      "meta_path": "demo_vo_profiles_meta.json"
     }
   }
 }

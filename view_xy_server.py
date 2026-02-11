@@ -70,11 +70,17 @@ def _get_vo_paths():
     if not os.path.exists(excluded_path) and os.path.exists(EXCLUDED_PATH):
         excluded_path = EXCLUDED_PATH
 
+    profiles_points_paths = d.get("profiles_points_paths") or None
+    profiles_meta_path = d.get("profiles_meta_path") or None
+
     return {
         "csv_path": csv_path,
         "excluded_path": excluded_path,
         "points_path": d.get("points_path") or None,
         "meta_path": d.get("meta_path") or None,
+        # VO profiel 相关输出：在 run_report_vo.json 中存在时才会被前端使用
+        "profiles_points_paths": profiles_points_paths,
+        "profiles_meta_path": profiles_meta_path,
     }
 
 
@@ -143,6 +149,34 @@ def load_data_vo():
                 }
             )
     return rows
+
+
+def load_data_vo_profiles():
+    """
+    从 VO profiel points JSON 加载 4 组 profiel 点数据。
+
+    返回形状：
+        {"NT": [...], "NG": [...], "EM": [...], "CM": [...]}
+    若某个 profiel 没有数据或文件缺失，则对应值为 []。
+    """
+    paths = _get_vo_paths()
+    mapping = paths.get("profiles_points_paths") or {}
+    out = {"NT": [], "NG": [], "EM": [], "CM": []}
+    if not isinstance(mapping, dict):
+        return out
+    for prof in ("NT", "NG", "EM", "CM"):
+        rel = mapping.get(prof)
+        if not rel:
+            continue
+        json_path = os.path.join(BASE, rel)
+        if not os.path.exists(json_path):
+            continue
+        try:
+            with open(json_path, "r", encoding="utf-8") as f:
+                out[prof] = json.load(f)
+        except Exception:
+            out[prof] = []
+    return out
 
 
 def load_data_po():
@@ -249,21 +283,58 @@ def load_demo_data():
             }
         )
 
-    # demo 模式下暂不提供排除列表，保持为空
-    return data_vo, [], data_po, [], vo_meta, po_meta
+    # demo 模式下：若 datasets_index.json 提供了 vo_profiles，则加载之；否则退回空结构
+    vo_profiles = {"NT": [], "NG": [], "EM": [], "CM": []}
+    vo_profiles_meta: dict = {}
+    try:
+        idx = _load_demo_index()
+        ds_profiles = (idx.get("datasets") or {}).get("vo_profiles")
+        if ds_profiles:
+            data_path = os.path.join(DEMO_DIR, ds_profiles["data_path"])
+            meta_path = os.path.join(DEMO_DIR, ds_profiles["meta_path"])
+            with open(data_path, "r", encoding="utf-8") as f:
+                raw_profiles = json.load(f)
+            if isinstance(raw_profiles, dict):
+                # 直接按 {NT: [...], NG: [...], ...} 结构传给前端
+                vo_profiles = {
+                    "NT": list(raw_profiles.get("NT") or []),
+                    "NG": list(raw_profiles.get("NG") or []),
+                    "EM": list(raw_profiles.get("EM") or []),
+                    "CM": list(raw_profiles.get("CM") or []),
+                }
+            with open(meta_path, "r", encoding="utf-8") as f:
+                vo_profiles_meta = json.load(f)
+    except Exception:
+        vo_profiles = {"NT": [], "NG": [], "EM": [], "CM": []}
+        vo_profiles_meta = {}
+    return data_vo, [], data_po, [], vo_meta, po_meta, vo_profiles, vo_profiles_meta
 
 
-def build_html(html_path, data_vo, excluded_vo, data_po, excluded_po, meta_vo=None, meta_po=None):
+def build_html(
+    html_path,
+    data_vo,
+    excluded_vo,
+    data_po,
+    excluded_po,
+    meta_vo=None,
+    meta_po=None,
+    data_vo_profiles=None,
+    meta_vo_profiles=None,
+):
     excluded_vo = excluded_vo if excluded_vo is not None else []
     excluded_po = excluded_po if excluded_po is not None else []
     meta_vo = meta_vo if meta_vo is not None else {}
     meta_po = meta_po if meta_po is not None else {}
+    data_vo_profiles = data_vo_profiles if data_vo_profiles is not None else {"NT": [], "NG": [], "EM": [], "CM": []}
+    meta_vo_profiles = meta_vo_profiles if meta_vo_profiles is not None else {}
     data_vo_js = json.dumps(data_vo, ensure_ascii=False)
     data_po_js = json.dumps(data_po, ensure_ascii=False)
     excluded_vo_js = json.dumps(excluded_vo, ensure_ascii=False)
     excluded_po_js = json.dumps(excluded_po, ensure_ascii=False)
     meta_vo_js = json.dumps(meta_vo, ensure_ascii=False)
     meta_po_js = json.dumps(meta_po, ensure_ascii=False)
+    data_vo_profiles_js = json.dumps(data_vo_profiles, ensure_ascii=False)
+    meta_vo_profiles_js = json.dumps(meta_vo_profiles, ensure_ascii=False)
     print(f"[view_xy_server] 使用 HTML 模板: {html_path}", file=sys.stderr)
     with open(html_path, "r", encoding="utf-8") as f:
         html = f.read()
@@ -273,6 +344,8 @@ def build_html(html_path, data_vo, excluded_vo, data_po, excluded_po, meta_vo=No
     html = html.replace("__INJECT_EXCLUDED_PO__", excluded_po_js)
     html = html.replace("__INJECT_META_VO__", meta_vo_js)
     html = html.replace("__INJECT_META_PO__", meta_po_js)
+    html = html.replace("__INJECT_DATA_VO_PROFILES__", data_vo_profiles_js)
+    html = html.replace("__INJECT_META_VO_PROFILES__", meta_vo_profiles_js)
     return html
 
 
@@ -294,7 +367,16 @@ def main():
 
     if args.demo:
         try:
-            data_vo, excluded_vo, data_po, excluded_po, meta_vo, meta_po = load_demo_data()
+            (
+                data_vo,
+                excluded_vo,
+                data_po,
+                excluded_po,
+                meta_vo,
+                meta_po,
+                data_vo_profiles,
+                meta_vo_profiles,
+            ) = load_demo_data()
         except Exception as e:  # pragma: no cover - 简单错误提示即可
             print(f"加载 demo 数据失败: {e}", file=sys.stderr)
             return 1
@@ -308,10 +390,54 @@ def main():
         excluded_vo = load_excluded(_get_vo_paths()["excluded_path"])
         data_po = load_data_po()
         excluded_po = load_excluded(_get_po_paths()["excluded_path"])
+        # 在非 demo 模式下，尝试从 run_report 中加载 VO/PO/meta 与 VO profiel meta。
         meta_vo = {}
         meta_po = {}
+        data_vo_profiles = load_data_vo_profiles()
+        # VO meta 路径相对于 BASE
+        meta_vo_rel = vo_paths.get("meta_path")
+        if meta_vo_rel:
+            meta_vo_path = meta_vo_rel if os.path.isabs(meta_vo_rel) else os.path.join(BASE, meta_vo_rel)
+            if os.path.exists(meta_vo_path):
+                try:
+                    with open(meta_vo_path, "r", encoding="utf-8") as f:
+                        meta_vo = json.load(f)
+                except Exception:
+                    meta_vo = {}
+        po_paths = _get_po_paths()
+        meta_po_rel = po_paths.get("meta_path")
+        if meta_po_rel:
+            meta_po_path = meta_po_rel if os.path.isabs(meta_po_rel) else os.path.join(BASE, meta_po_rel)
+            if os.path.exists(meta_po_path):
+                try:
+                    with open(meta_po_path, "r", encoding="utf-8") as f:
+                        meta_po = json.load(f)
+                except Exception:
+                    meta_po = {}
+        meta_vo_profiles = {}
+        profiles_meta_rel = vo_paths.get("profiles_meta_path")
+        if profiles_meta_rel:
+            profiles_meta_path = (
+                profiles_meta_rel if os.path.isabs(profiles_meta_rel) else os.path.join(BASE, profiles_meta_rel)
+            )
+            if os.path.exists(profiles_meta_path):
+                try:
+                    with open(profiles_meta_path, "r", encoding="utf-8") as f:
+                        meta_vo_profiles = json.load(f)
+                except Exception:
+                    meta_vo_profiles = {}
 
-    html = build_html(HTML_PATH, data_vo, excluded_vo, data_po, excluded_po, meta_vo, meta_po)
+    html = build_html(
+        HTML_PATH,
+        data_vo,
+        excluded_vo,
+        data_po,
+        excluded_po,
+        meta_vo,
+        meta_po,
+        data_vo_profiles=data_vo_profiles,
+        meta_vo_profiles=meta_vo_profiles,
+    )
 
     if args.static:
         out_dir = os.path.dirname(PUBLIC_INDEX)

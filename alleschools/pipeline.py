@@ -16,11 +16,27 @@ from typing import Any, Dict, List, Optional
 
 from alleschools import config as config_mod
 from alleschools import schema_validator as sv
-from alleschools.compute import compute_po_xy, compute_vo_xy
+from alleschools.compute import (
+    compute_po_xy,
+    compute_vo_xy,
+    compute_vwo_mean_latest_year,
+    compute_vwo_profile_indices,
+)
 from alleschools.exporters import csv_exporter, geojson_exporter, json_exporter, long_table_exporter
-from alleschools.exporters.meta_builder import SCHEMA_VERSION, build_po_meta, build_vo_meta
+from alleschools.exporters.meta_builder import (
+    SCHEMA_VERSION,
+    build_po_meta,
+    build_vo_meta,
+    build_vo_profiles_meta,
+)
 from alleschools.exporters.points_exporter import export_po_points, export_vo_points
-from alleschools.loaders import cbs_loader, duo_loader, vo_loader
+from alleschools.loaders import (
+    cbs_loader,
+    duo_loader,
+    vo_loader,
+    load_vwo_exam_cijferlijst_scores,
+    load_vwo_central_exam_scores,
+)
 from alleschools.logging_utils import setup_logger
 from alleschools.quality import run_po_quality, run_vo_quality
 
@@ -427,6 +443,7 @@ def run_vo_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
     weights_cfg: Dict[str, Any] = dict(vo_cfg.get("weights") or {})
     year_cols: List[Any] = list(weights_cfg.get("year_cols") or [])
     min_havo_vwo_total = int(thresholds.get("min_havo_vwo_total") or 20)
+    min_vwo_subjects_per_year = int(thresholds.get("min_vwo_subjects_per_year") or 3)
 
     logger = setup_logger(name="alleschools.vo")
     logger.info("Starting VO pipeline")
@@ -490,6 +507,39 @@ def run_vo_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
         outliers=outliers_cfg_vo or None,
     )
 
+    # ------------------------------------------------------------------
+    # VWO profiel 指数（NT/NG/EM/CM）—— 基于 VWO 统考的四个 X 轴
+    # ------------------------------------------------------------------
+    # 设计取舍记录：
+    # - 我们保留现有 VO 宽表 X/Y（学术度 × 理科度）作为主图不变，
+    #   另行导出 4 组「profiel 指数」点集给前端使用，避免破坏已有视图。
+    # - profiel 指数完全遵循 backlog 3.5：按指定科目的 VWO 统考平均分组合，
+    #   不再使用此前的「所有 VWO 科目 cijferlijst 中位数/平均数」方案。
+    # - 时间加权采用最近 5 学年，权重 w_0..w_4 = 5,4,3,2,1，其中 w_0 对应最新学年。
+    vwo_exam_files = {
+        "2020-2021": "examenkandidaten-vwo-en-examencijfers-2020-2021.csv",
+        "2021-2022": "examenkandidaten-vwo-en-examencijfers-2021-2022.csv",
+        "2022-2023": "examenkandidaten-vwo-en-examencijfers-2022-2023.csv",
+        "2023-2024": "examenkandidaten-vwo-en-examencijfers-2023-2024.csv",
+        "2024-2025": "examenkandidaten-vwo-en-examencijfers-2024-2025.csv",
+    }
+    year_order = sorted(vwo_exam_files.keys())  # 升序："2020-2021" ... "2024-2025"
+    # 最近学年权重最高：2024-2025 -> 5, 2023-2024 -> 4, ...
+    year_weights: Dict[str, float] = {}
+    weights_desc = [1.0, 2.0, 3.0, 4.0, 5.0]
+    # Python 3.9 中内置 zip 不支持 strict 参数，这里依赖 year_order 与 weights_desc 长度一致的事实。
+    for label, w in zip(year_order, weights_desc):
+        year_weights[label] = w
+
+    vwo_central = load_vwo_central_exam_scores(str(raw_root), vwo_exam_files)
+    profile_indices: Dict[str, Dict[str, float]] = {}
+    if vwo_central:
+        profile_indices = compute_vwo_profile_indices(
+            vwo_central,
+            year_order=year_order,
+            year_weights=year_weights,
+        )
+
     # 隐私抑制：根据 privacy.min_group_size 过滤过小样本（VO 使用 candidates_total）。
     privacy_global_vo: Dict[str, Any] = dict(config.get("privacy") or {})
     privacy_vo_cfg: Dict[str, Any] = dict(vo_cfg.get("privacy") or {})
@@ -528,6 +578,66 @@ def run_vo_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
     long_rel: Optional[str] = None
     points_rel: Optional[str] = None
     meta_rel: Optional[str] = None
+
+    # ------------------------------------------------------------------
+    # VO profiel 指数导出（CSV + points JSON + meta）
+    # ------------------------------------------------------------------
+    profiles_csv_rel: Dict[str, Optional[str]] = {"NT": None, "NG": None, "EM": None, "CM": None}
+    profiles_points_rel: Dict[str, Optional[str]] = {"NT": None, "NG": None, "EM": None, "CM": None}
+    profiles_meta_rel: Optional[str] = None
+
+    if profile_indices:
+        # 为每个 profiel 组装点列表：与主 VO 宽表行 join，以 BRIN 对齐。
+        profile_rows: Dict[str, list[Dict[str, Any]]] = {"NT": [], "NG": [], "EM": [], "CM": []}
+        for row in rows_out:
+            brin = row.get("BRIN")
+            if not brin:
+                continue
+            brin_str = str(brin)
+            naam = row.get("vestigingsnaam")
+            gemeente = row.get("gemeente")
+            postcode = (row.get("postcode") or "").strip()
+            school_type = row.get("type")
+            # backlog 约定：现有 VO 主图的 X 轴（VWO 占比）作为 profiel 图的 Y 轴。
+            y_vwo_share = row.get("X_linear")
+            candidates_total = row.get("candidates_total")
+
+            for prof in ("NT", "NG", "EM", "CM"):
+                prof_map = profile_indices.get(prof) or {}
+                x_prof = prof_map.get(brin_str)
+                if x_prof is None:
+                    continue
+                profile_rows[prof].append(
+                    {
+                        "BRIN": brin_str,
+                        "vestigingsnaam": naam,
+                        "naam": naam,
+                        "gemeente": gemeente,
+                        "postcode": postcode,
+                        "type": school_type,
+                        "profile_id": prof,
+                        "X_profile": float(x_prof),
+                        "Y_vwo_share": float(y_vwo_share) if y_vwo_share is not None else None,
+                        "candidates_total": int(candidates_total or 0),
+                    }
+                )
+
+        # 写出 4 个 CSV + 4 个 points JSON（相对路径固定在主 VO CSV 的目录下）
+        for prof in ("NT", "NG", "EM", "CM"):
+            rows_prof = profile_rows.get(prof) or []
+            if not rows_prof:
+                continue
+            csv_rel_prof = str(out_dir_rel / f"schools_profiles_{prof.lower()}.csv")
+            points_rel_prof = str(out_dir_rel / f"schools_profiles_{prof.lower()}.json")
+            csv_path_prof = data_root / csv_rel_prof
+            points_path_prof = data_root / points_rel_prof
+
+            csv_exporter.export_vo_profiles_csv(rows_prof, csv_path_prof)
+            json_exporter.export_json(rows_prof, points_path_prof)
+
+            profiles_csv_rel[prof] = csv_rel_prof
+            profiles_points_rel[prof] = points_rel_prof
+
 
     if output_cfg.get("export_geojson", True):
         geo_rel = str(geo_rel_default)
@@ -601,6 +711,10 @@ def run_vo_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
                 "points_path": points_rel if points_rel is not None else None,
                 "meta_path": None,
                 "schema_version": SCHEMA_VERSION if write_meta_json_flag else None,
+                # VO profiel 导出产物：在有数据时填充具体路径（相对于 data_root）
+                "profiles_csv_paths": None,
+                "profiles_points_paths": None,
+                "profiles_meta_path": None,
             }
         },
         "summary": {"status": "success", "warnings": [], "errors": []},
@@ -633,6 +747,29 @@ def run_vo_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
             outliers=outliers_cfg_vo or None,
         )
         json_exporter.write_meta_json(meta_dict_vo, meta_path)
+
+    # VO profiel meta：仅在存在至少一个 profiel CSV 时写出
+    profiles_meta_path = None
+    if any(profiles_csv_rel.values()):
+        profiles_meta_rel = str(out_dir_rel / "schools_profiles_meta.json")
+        profiles_meta_path = data_root / profiles_meta_rel
+        # 构建 profile_id -> Path 与行数映射
+        data_files_map: Dict[str, Path] = {}
+        row_counts_map: Dict[str, int] = {}
+        for prof, rel in profiles_csv_rel.items():
+            if not rel:
+                continue
+            data_files_map[prof] = Path(rel)
+            # 这里不重新读取 CSV，只依据导出时的列表长度；与 profiles_csv_rel 的 key 对应。
+            # profile_rows 在上文中已按 profiel 聚合。
+            # 为避免在此作用域重复构造，保守起见设置为 -1，表示“未知行数但存在文件”。
+            row_counts_map[prof] = -1
+        meta_profiles = build_vo_profiles_meta(
+            data_files=data_files_map,
+            row_counts=row_counts_map,
+            y_domain=[0.0, 100.0],
+        )
+        json_exporter.write_meta_json(meta_profiles, profiles_meta_path)
 
     # 可选：在流水线末尾对导出的 points/meta/GeoJSON/长表进行 schema 校验，
     # 并将错误（若有）写入 run_report.summary.errors。
@@ -710,6 +847,18 @@ def run_vo_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
 
     if meta_rel is not None:
         run_report["outputs"]["vo"]["meta_path"] = meta_rel
+    if profiles_meta_path is not None:
+        rel_profiles_meta = str(profiles_meta_path.relative_to(data_root))
+        run_report["outputs"]["vo"]["profiles_meta_path"] = rel_profiles_meta
+    # 仅当存在至少一个 profiles points/CSV 时记录对应映射（保持与其他路径一样使用相对路径）
+    if any(profiles_points_rel.values()):
+        run_report["outputs"]["vo"]["profiles_points_paths"] = {
+            prof: rel for prof, rel in profiles_points_rel.items() if rel
+        }
+    if any(profiles_csv_rel.values()):
+        run_report["outputs"]["vo"]["profiles_csv_paths"] = {
+            prof: rel for prof, rel in profiles_csv_rel.items() if rel
+        }
 
     report_path = data_root / "run_report_vo.json"
     json_exporter.export_json([run_report], report_path)

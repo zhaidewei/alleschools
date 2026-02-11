@@ -66,11 +66,53 @@
       <h1 id="titleMain" class="text-xl font-semibold text-slate-800 dark:text-slate-100 tracking-tight"><a href="/" class="text-slate-800 dark:text-slate-100 hover:text-slate-600 dark:hover:text-slate-300">🏫 Dutch secondary school map</a>: academic level × science focus</h1>
       <p id="subtitleMain" class="mt-1 text-sm text-slate-500 dark:text-slate-400">Data from DUO (excluding international schools). X = academic strength, Y = science share. Dot size = graduation count. <strong id="schoolCount" class="font-medium text-slate-700 dark:text-slate-300">0</strong> schools shown.</p>
       <div class="mt-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-600 shadow-sm p-[2vw] sm:p-6">
-        <div class="w-full aspect-[4/3] min-h-[55vh] sm:min-h-[420px] relative">
+        <!-- 主图：VO/PO 共用 -->
+        <div id="mainChartWrap" class="w-full aspect-[4/3] min-h-[55vh] sm:min-h-[420px] relative">
           <canvas id="chart" class="w-full h-full block"></canvas>
           <div id="chartLabels" class="absolute inset-0 pointer-events-none overflow-hidden" style="left:0;top:0;right:0;bottom:0;"></div>
         </div>
         <div id="customLegend" class="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-3 pt-3 border-t border-slate-200 dark:border-slate-600" style="min-height: 24px;"></div>
+
+        <!-- VO 模式下的 4× profiel 图（NT/NG/EM/CM），在有数据时显示 -->
+        <div id="voProfilesWrap" class="mt-6 hidden">
+          <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">
+            VWO profiles (NT / NG / EM / CM)
+          </h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div id="voProfileCard_NT" class="bg-slate-50 dark:bg-slate-900/40 rounded-lg border border-slate-200 dark:border-slate-700 p-3">
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">NT</span>
+              </div>
+              <div class="w-full aspect-[4/3] relative">
+                <canvas id="chartNT" class="w-full h-full block"></canvas>
+              </div>
+            </div>
+            <div id="voProfileCard_NG" class="bg-slate-50 dark:bg-slate-900/40 rounded-lg border border-slate-200 dark:border-slate-700 p-3">
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">NG</span>
+              </div>
+              <div class="w-full aspect-[4/3] relative">
+                <canvas id="chartNG" class="w-full h-full block"></canvas>
+              </div>
+            </div>
+            <div id="voProfileCard_EM" class="bg-slate-50 dark:bg-slate-900/40 rounded-lg border border-slate-200 dark:border-slate-700 p-3">
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">EM</span>
+              </div>
+              <div class="w-full aspect-[4/3] relative">
+                <canvas id="chartEM" class="w-full h-full block"></canvas>
+              </div>
+            </div>
+            <div id="voProfileCard_CM" class="bg-slate-50 dark:bg-slate-900/40 rounded-lg border border-slate-200 dark:border-slate-700 p-3">
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">CM</span>
+              </div>
+              <div class="w-full aspect-[4/3] relative">
+                <canvas id="chartCM" class="w-full h-full block"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="controls hidden md:flex flex-wrap items-center gap-4 sm:gap-6 py-4 px-[2vw] sm:px-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-600 shadow-sm">
@@ -170,6 +212,9 @@
     // 非 demo 模式下，这里是 {}，后续前端可以渐进式接入。
     const metaVO = __INJECT_META_VO__;
     const metaPO = __INJECT_META_PO__;
+    // VO profiel: 4 组 profiel 指数点集 + 专用 meta（暂未在前端渲染，仅先注入数据）
+    const dataVOProfiles = __INJECT_DATA_VO_PROFILES__;
+    const metaVOProfiles = __INJECT_META_VO_PROFILES__;
     let currentMode = localStorage.getItem('schools-mode') || 'vo';
     let data = currentMode === 'vo' ? dataVO : dataPO;
     let excluded = currentMode === 'vo' ? excludedVO : excludedPO;
@@ -210,6 +255,44 @@
       var metricId = axesCfg.metric_id;
       var metric = resolveMetricFromMeta(metricId);
       return metric && metric.label ? metric.label : null;
+    }
+
+    function getAxisDomainFromMeta(axisKey) {
+      if (!meta || !meta.axes) return null;
+      var axesCfg = meta.axes[axisKey];
+      if (!axesCfg || !Array.isArray(axesCfg.domain) || axesCfg.domain.length !== 2) return null;
+      var a = Number(axesCfg.domain[0]);
+      var b = Number(axesCfg.domain[1]);
+      if (!isFinite(a) || !isFinite(b)) return null;
+      return [a, b];
+    }
+
+    function resolveMetricFromProfilesMeta(metricId) {
+      if (!metaVOProfiles || !metricId || !metaVOProfiles.i18n || typeof metaVOProfiles.i18n !== 'object') return null;
+      var tried = new Set();
+      var order = [];
+      if (currentLang && metaVOProfiles.i18n[currentLang]) {
+        order.push(currentLang);
+        tried.add(currentLang);
+      }
+      if (metaVOProfiles.i18n.en && !tried.has('en')) {
+        order.push('en');
+        tried.add('en');
+      }
+      Object.keys(metaVOProfiles.i18n).forEach(function (code) {
+        if (!tried.has(code)) {
+          order.push(code);
+          tried.add(code);
+        }
+      });
+      for (var i = 0; i < order.length; i++) {
+        var code = order[i];
+        var loc = metaVOProfiles.i18n[code];
+        if (!loc || !loc.metrics) continue;
+        var metric = loc.metrics[metricId];
+        if (metric) return metric;
+      }
+      return null;
     }
 
     function buildAlgorithmBodyFromMeta() {
@@ -536,6 +619,38 @@
       updateMobileModeSpecificUI();
     }
     let points = data.map(d => ({ x: d.X_linear, y: d.Y_linear, label: d.naam, type: d.type, gemeente: d.gemeente, postcode: d.postcode || '', size: d.size, brin: d.BRIN }));
+    // VO profiel 点集（后端注入），在 VO 模式下用于 4 张小图
+    let voProfilesPoints = {};
+    let voProfilesCharts = {};
+
+    function hasVoProfilesData() {
+      if (!dataVOProfiles || typeof dataVOProfiles !== 'object') return false;
+      return ['NT', 'NG', 'EM', 'CM'].some(function (prof) {
+        const arr = dataVOProfiles[prof];
+        return Array.isArray(arr) && arr.length > 0;
+      });
+    }
+
+    function buildVoProfilesPoints() {
+      voProfilesPoints = {};
+      if (!dataVOProfiles || typeof dataVOProfiles !== 'object') return;
+      ['NT', 'NG', 'EM', 'CM'].forEach(function (prof) {
+        const src = dataVOProfiles[prof] || [];
+        voProfilesPoints[prof] = src.map(function (d) {
+          return {
+            x: Number(d.X_profile),
+            y: Number(d.Y_vwo_share),
+            label: (d.naam || d.vestigingsnaam || ''),
+            gemeente: d.gemeente || '',
+            postcode: (d.postcode || '').trim(),
+            type: d.type || '',
+            size: d.candidates_total != null ? Number(d.candidates_total) : 0,
+            brin: d.BRIN || '',
+            profile_id: d.profile_id || prof,
+          };
+        });
+      });
+    }
 
     let selectedGemeenten = new Set();
     var DEFAULT_GEMEENTEN = ["'S-GRAVENHAGE", 'AMSTERDAM', 'UTRECHT', 'ROTTERDAM'];
@@ -796,34 +911,78 @@
         const pad = range * 0.05;
         chart.options.scales.y.min = Math.min(minY - pad, minY * 0.95);
         chart.options.scales.y.max = maxY * 1.05;
-        if (chart.options.scales.y.min < 0 && (currentMode === 'vo' || currentMode === 'po')) chart.options.scales.y.min = 0;
+        if (chart.options.scales.y.min < -10 && (currentMode === 'vo' || currentMode === 'po')) {
+          chart.options.scales.y.min = -10;
+        }
         chart.options.scales.y.afterBuildTicks = undefined;
         chart.options.scales.y.ticks = { stepSize: undefined };
       }
       chart.update();
       updateLegend();
       requestAnimationFrame(function() { updateChartLabels(); setSampleTooltip(); });
+      // 同步刷新 VO profiel 小图（仅在 VO 模式下生效）
+      refreshVoProfilesCharts();
     }
     function setChartScaleForMode() {
       var xTitleFromMeta = getAxisTitleFromMeta('x');
       var yTitleFromMeta = getAxisTitleFromMeta('y');
       chart.options.scales.x.title.text = xTitleFromMeta || t('axisXLinear');
       chart.options.scales.y.title.text = yTitleFromMeta || t('axisYLinear');
-      if (currentMode === 'po') {
+
+      var xDomainFromMeta = getAxisDomainFromMeta('x');
+      var yDomainFromMeta = getAxisDomainFromMeta('y');
+
+      if (xDomainFromMeta) {
+        var xMin = xDomainFromMeta[0];
+        var xMax = xDomainFromMeta[1];
+        chart.options.scales.x.min = xMin;
+        chart.options.scales.x.max = xMax;
+        var xRange = xMax - xMin;
+        var xStep = xRange <= 20 ? 1 : 10;
+        chart.options.scales.x.afterBuildTicks = function(axis) {
+          var ticks = [];
+          for (var v = xMin; v <= xMax + 1e-6; v += xStep) {
+            ticks.push({ value: v });
+          }
+          axis.ticks = ticks;
+        };
+        chart.options.scales.x.ticks = { stepSize: xStep };
+      } else if (currentMode === 'po') {
         chart.options.scales.x.min = -5; chart.options.scales.x.max = 105;
         chart.options.scales.x.afterBuildTicks = function(axis) { axis.ticks = [0,10,20,30,40,50,60,70,80,90,100].map(function(v){ return { value: v }; }); };
         chart.options.scales.x.ticks = { stepSize: 10 };
-        chart.options.scales.y.min = -50; chart.options.scales.y.max = 1050;
-        chart.options.scales.y.afterBuildTicks = function(axis) { axis.ticks = [0,200,400,600,800,1000].map(function(v){ return { value: v }; }); };
-        chart.options.scales.y.ticks = { stepSize: 200 };
       } else {
         chart.options.scales.x.min = -5; chart.options.scales.x.max = 105;
         chart.options.scales.x.afterBuildTicks = function(axis) { axis.ticks = [0,10,20,30,40,50,60,70,80,90,100].map(function(v){ return { value: v }; }); };
         chart.options.scales.x.ticks = { stepSize: 10 };
-        chart.options.scales.y.min = -5; chart.options.scales.y.max = 105;
+      }
+
+      if (yDomainFromMeta) {
+        var yMin = yDomainFromMeta[0];
+        var yMax = yDomainFromMeta[1];
+        // 大图 Y 轴：无论 meta 是否从 0 开始，都统一从 -10 开始，避免底部点被截断。
+        chart.options.scales.y.min = -10;
+        chart.options.scales.y.max = yMax;
+        var yRange = yMax - yMin;
+        var yStep = yRange <= 20 ? 1 : 10;
+        chart.options.scales.y.afterBuildTicks = function(axis) {
+          var ticks = [];
+          for (var v = yMin; v <= yMax + 1e-6; v += yStep) {
+            ticks.push({ value: v });
+          }
+          axis.ticks = ticks;
+        };
+        chart.options.scales.y.ticks = { stepSize: yStep };
+      } else if (currentMode === 'po') {
+        chart.options.scales.y.min = -10; chart.options.scales.y.max = 1050;
+        chart.options.scales.y.afterBuildTicks = function(axis) { axis.ticks = [0,200,400,600,800,1000].map(function(v){ return { value: v }; }); };
+        chart.options.scales.y.ticks = { stepSize: 200 };
+      } else {
+        chart.options.scales.y.min = -10; chart.options.scales.y.max = 105;
         chart.options.scales.y.afterBuildTicks = function(axis) { axis.ticks = [0,10,20,30,40,50,60,70,80,90,100].map(function(v){ return { value: v }; }); };
         chart.options.scales.y.ticks = { stepSize: 10 };
       }
+
       chart.update();
     }
     function updateNavButtons() {
@@ -848,6 +1007,7 @@
       selectedGemeenten = new Set();
       renderGemeenteCheckboxes();
       refreshChart();
+      refreshVoProfilesCharts();
       updateNavButtons();
       updateMobileModeSpecificUI();
       updateMobileSboButton();
@@ -1102,6 +1262,188 @@
       canvas.addEventListener('mousemove', maybeRestoreLabels);
       canvas.addEventListener('mouseleave', maybeRestoreLabels);
     })();
+
+    // ------------------------------------------------------------------
+    // VO profiel 小图：4× Chart 实例（NT/NG/EM/CM）
+    // ------------------------------------------------------------------
+    function initVoProfilesCharts() {
+      if (!hasVoProfilesData()) {
+        return;
+      }
+      buildVoProfilesPoints();
+      var wrap = document.getElementById('voProfilesWrap');
+      if (!wrap) return;
+      ['NT', 'NG', 'EM', 'CM'].forEach(function (prof) {
+        var canvasId = 'chart' + prof;
+        var cardId = 'voProfileCard_' + prof;
+        var canvas = document.getElementById(canvasId);
+        var card = document.getElementById(cardId);
+        if (!canvas || !card) {
+          return;
+        }
+        var pts = voProfilesPoints[prof] || [];
+        if (!pts.length) {
+          card.classList.add('opacity-40');
+        }
+
+        var xMin = 4;
+        var xMax = 10;
+        var xMetricLabel = 'Index ' + prof;
+        if (metaVOProfiles && metaVOProfiles.profiles && metaVOProfiles.profiles[prof]) {
+          var profCfg = metaVOProfiles.profiles[prof];
+          if (Array.isArray(profCfg.domain)) {
+            xMin = Number(profCfg.domain[0]);
+            xMax = Number(profCfg.domain[1]);
+          }
+          if (profCfg.metric_id) {
+            var mProf = resolveMetricFromProfilesMeta(profCfg.metric_id);
+            if (mProf) {
+              xMetricLabel = mProf.label || mProf.short || xMetricLabel;
+            }
+          }
+        }
+        var yMin = 0;
+        var yMax = 100;
+        if (metaVOProfiles && metaVOProfiles.axes && metaVOProfiles.axes.y && Array.isArray(metaVOProfiles.axes.y.domain)) {
+          yMin = Number(metaVOProfiles.axes.y.domain[0]);
+          yMax = Number(metaVOProfiles.axes.y.domain[1]);
+        }
+
+        // 小图视觉策略：
+        // - X 轴统一从 0 开始，避免在 [4,10] 范围内被“放大差异”；
+        // - Y 轴从 -10 开始，防止接近 0 的点被下边界裁剪，同时与大图保持一致。
+        xMin = 0;
+        yMin = -10;
+
+        voProfilesCharts[prof] = new Chart(canvas, {
+          type: 'scatter',
+          data: { datasets: [] },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function (ctx) {
+                    var p = ctx.raw || {};
+                    var name = p.naam || '';
+                    var lines = [];
+                    if (p.gemeente) {
+                      lines.push(p.gemeente + ' · ' + name);
+                    } else {
+                      lines.push(name);
+                    }
+                    if (p.postcode) {
+                      lines.push((t('tooltipPostcode') || 'Postcode') + ': ' + p.postcode);
+                    }
+                    var sizeLabel = t('tooltipCandidates') || 'Candidates';
+                    lines.push(
+                      '(' +
+                      p.x.toFixed(2) +
+                      ', ' +
+                      p.y.toFixed(2) +
+                      ') ' +
+                      sizeLabel +
+                      ': ' +
+                      (p.size != null && p.size > 0 ? p.size : '—')
+                    );
+                    return lines;
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                title: { display: true, text: xMetricLabel },
+                min: xMin,
+                max: xMax,
+                ticks: { stepSize: 1 },
+              },
+              y: {
+                title: { display: true, text: 'VWO share (%)' },
+                min: yMin,
+                max: yMax,
+                ticks: { stepSize: 10 },
+              }
+            }
+          }
+        });
+      });
+    }
+
+    function refreshVoProfilesCharts() {
+      var wrap = document.getElementById('voProfilesWrap');
+      if (!wrap) return;
+      if (currentMode !== 'vo' || !hasVoProfilesData()) {
+        wrap.classList.add('hidden');
+        return;
+      }
+      if (!voProfilesCharts || Object.keys(voProfilesCharts).length === 0) {
+        initVoProfilesCharts();
+      }
+      wrap.classList.remove('hidden');
+      var searchTerms = getSchoolSearchTerms();
+      ['NT', 'NG', 'EM', 'CM'].forEach(function (prof) {
+        var chartProf = voProfilesCharts[prof];
+        var card = document.getElementById('voProfileCard_' + prof);
+        var ptsAll = voProfilesPoints[prof] || [];
+        if (!chartProf || !card) return;
+        var filteredBase = getFilteredPoints(ptsAll);
+        if (!filteredBase.length) {
+          card.classList.add('opacity-40');
+          chartProf.data.datasets = [];
+          chartProf.update();
+          return;
+        }
+        card.classList.remove('opacity-40');
+        var radiusFn = sizeToRadius(filteredBase);
+        var byGemeente = {};
+        filteredBase.forEach(function (p) {
+          var g = p.gemeente || '(未知)';
+          if (!byGemeente[g]) byGemeente[g] = [];
+          var matched = pointMatchesSearch(p, searchTerms);
+          var nameHighlights = getNameHighlights(p.label, searchTerms);
+          byGemeente[g].push({
+            x: p.x,
+            y: p.y,
+            naam: p.label,
+            gemeente: p.gemeente,
+            postcode: p.postcode || '',
+            size: p.size,
+            profile_id: p.profile_id,
+            r: radiusFn(p.size),
+            matched: matched,
+            nameHighlights: nameHighlights,
+          });
+        });
+        var gemeenten = Object.keys(byGemeente).sort();
+        chartProf.data.datasets = gemeenten.map(function (g) {
+          var bgColor = gemeenteToColor(g);
+          return {
+            label: g,
+            data: byGemeente[g],
+            pointRadius: function (ctx) {
+              var r = ctx.raw && ctx.raw.r != null ? ctx.raw.r : 6;
+              var chartW = (ctx.chart && ctx.chart.width) || 320;
+              var scale = Math.min(1, chartW / 320);
+              var baseR = Math.max(1, Math.round(r * scale));
+              return ctx.raw && ctx.raw.matched ? Math.max(baseR, baseR * 1.4 + 2) : baseR;
+            },
+            backgroundColor: function (ctx) {
+              if (ctx.raw && ctx.raw.matched) return bgColor;
+              return 'rgba(180,180,180,0.28)';
+            },
+            borderColor: function (ctx) {
+              if (ctx.raw && ctx.raw.matched) return bgColor;
+              return 'rgba(120,120,120,0.45)';
+            },
+            borderWidth: 1
+          };
+        });
+        chartProf.update();
+      });
+    }
 
     function scheduleUpdateChartLabels() {
       requestAnimationFrame(function() {

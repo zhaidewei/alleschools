@@ -1,0 +1,169 @@
+{
+  "version": "1.0.0",
+  "layer": "vo_profiles",
+  "sources": {
+    "duo": "VWO central exam results (per subject, 5-year window)"
+  },
+  "axes": {
+    "x": {
+      "field": "X_profile",
+      "scale": "linear",
+      "domain": [4, 10]
+    },
+    "y": {
+      "field": "Y_vwo_share",
+      "scale": "linear",
+      "domain": [0, 100],
+      "metric_id": "vo_vwo_share"
+    },
+    "size": {
+      "field": "size",
+      "metric_id": "vo_candidates_total"
+    }
+  },
+  "fields": {
+    "id": { "kind": "id" },
+    "brin": { "kind": "id" },
+    "name": { "kind": "dimension", "searchable": true },
+    "municipality": { "kind": "dimension", "searchable": true },
+    "postcode": { "kind": "dimension" },
+    "pc4": { "kind": "dimension" },
+    "school_type": { "kind": "dimension", "searchable": true },
+    "profile_id": { "kind": "dimension" },
+    "X_profile": { "kind": "metric" },
+    "Y_vwo_share": { "kind": "metric" },
+    "size": { "kind": "metric" }
+  },
+  "profiles": {
+    "NT": {
+      "metric_id": "vo_nt_index",
+      "domain": [4, 10]
+    },
+    "NG": {
+      "metric_id": "vo_ng_index",
+      "domain": [4, 10]
+    },
+    "EM": {
+      "metric_id": "vo_em_index",
+      "domain": [4, 10]
+    },
+    "CM": {
+      "metric_id": "vo_cm_index",
+      "domain": [4, 10]
+    }
+  },
+  "i18n": {
+    "en": {
+      "metrics": {
+        "vo_nt_index": {
+          "label": "VWO profile index – Nature & Technology",
+          "short": "Index N&T",
+          "description": "For each school/year: 0.50 × C(WISB) + 0.25 × C(NAT) + 0.25 × C(SCHK) using VWO central exam averages, then time-weighted over 5 schoolyears."
+        },
+        "vo_ng_index": {
+          "label": "VWO profile index – Nature & Health",
+          "short": "Index N&G",
+          "description": "0.35 × C(BIOL) + 0.25 × C(SCHK) + 0.40 × C(WISB), aggregated as a 5-year weighted average."
+        },
+        "vo_em_index": {
+          "label": "VWO profile index – Economics & Society",
+          "short": "Index E&M",
+          "description": "0.333 × C(ECON) + 0.334 × C(BECO) + 0.333 × C_WIS^EM, where C_WIS^EM is based on Wiskunde A/B if present."
+        },
+        "vo_cm_index": {
+          "label": "VWO profile index – Culture & Society",
+          "short": "Index C&M",
+          "description": "0.333 × C(GES) + 0.333 × C_WIS^CM + 0.333 × C_TALEN, with C_WIS^CM from Wiskunde C/A and C_TALEN the mean of English/German/French."
+        },
+        "vo_vwo_share": {
+          "label": "VWO share of passes",
+          "short": "VWO share %",
+          "description": "VWO passes / all exam candidates (HAVO, VWO, VMBO) over multiple years, as a percentage."
+        },
+        "vo_candidates_total": {
+          "label": "Total exam candidates",
+          "short": "Candidates (5 yr)",
+          "description": "Total number of exam candidates in the 5-year window."
+        }
+      }
+    },
+    "nl": {
+      "metrics": {
+        "vo_nt_index": {
+          "label": "VWO-profielindex Natuur & Techniek",
+          "short": "Index N&T",
+          "description": "0,50 × C(WISB) + 0,25 × C(NAT) + 0,25 × C(SCHK) op basis van VWO centrale examens, daarna 5-jaars gewogen gemiddelde."
+        },
+        "vo_ng_index": {
+          "label": "VWO-profielindex Natuur & Gezondheid",
+          "short": "Index N&G",
+          "description": "0,35 × C(BIOL) + 0,25 × C(SCHK) + 0,40 × C(WISB), gewogen over de laatste 5 schooljaren."
+        },
+        "vo_em_index": {
+          "label": "VWO-profielindex Economie & Maatschappij",
+          "short": "Index E&M",
+          "description": "0,333 × C(ECON) + 0,334 × C(BECO) + 0,333 × C_WIS^EM, waarbij C_WIS^EM is gebaseerd op Wiskunde A/B indien aanwezig."
+        },
+        "vo_cm_index": {
+          "label": "VWO-profielindex Cultuur & Maatschappij",
+          "short": "Index C&M",
+          "description": "0,333 × C(GES) + 0,333 × C_WIS^CM + 0,333 × C_TALEN, met C_WIS^CM uit Wiskunde C/A en C_TALEN het gemiddelde van Engels/Duits/Frans."
+        },
+        "vo_vwo_share": {
+          "label": "VWO-aandeel geslaagden",
+          "short": "VWO-aandeel %",
+          "description": "VWO geslaagden / alle examenkandidaten (HAVO, VWO, VMBO) over meerdere jaren, in procenten."
+        },
+        "vo_candidates_total": {
+          "label": "Totaal aantal examenkandidaten",
+          "short": "Kandidaten (5 jr)",
+          "description": "Totaal aantal examenkandidaten in hetzelfde 5-jaarsvenster."
+        }
+      }
+    },
+    "zh": {
+      "metrics": {
+        "vo_nt_index": {
+          "label": "VWO 理工 profiel 指数（N&T）",
+          "short": "N&T 指数",
+          "description": "0.50×C(WISB)+0.25×C(NAT)+0.25×C(SCHK)，基于 VWO 统考平均分，在最近 5 学年按时间加权聚合。"
+        },
+        "vo_ng_index": {
+          "label": "VWO 理生 profiel 指数（N&G）",
+          "short": "N&G 指数",
+          "description": "0.35×C(BIOL)+0.25×C(SCHK)+0.40×C(WISB)，在 5 个学年上按时间加权聚合。"
+        },
+        "vo_em_index": {
+          "label": "VWO 经社 profiel 指数（E&M）",
+          "short": "E&M 指数",
+          "description": "0.333×C(ECON)+0.334×C(BECO)+0.333×C_WIS^EM，其中 C_WIS^EM 由 Wiskunde A/B（若存在）构成。"
+        },
+        "vo_cm_index": {
+          "label": "VWO 文社 profiel 指数（C&M）",
+          "short": "C&M 指数",
+          "description": "0.333×C(GES)+0.333×C_WIS^CM+0.333×C_TALEN，C_WIS^CM 来自 Wiskunde C/A，C_TALEN 为英/德/法平均。"
+        },
+        "vo_vwo_share": {
+          "label": "VWO 通过人数占比",
+          "short": "VWO 占比 %",
+          "description": "VWO 通过人数 / 全部考试考生人数（含 HAVO/VWO/VMBO），按学年加权后的百分比。"
+        },
+        "vo_candidates_total": {
+          "label": "考试考生总数",
+          "short": "考生数（5 年）",
+          "description": "同一 5 学年窗口内的全部考试考生总数。"
+        }
+      }
+    }
+  },
+  "summary": {
+    "profiles": {
+      "NT": { "data_file": "demo_vo_profiles.json", "row_count": 2 },
+      "NG": { "data_file": "demo_vo_profiles.json", "row_count": 2 },
+      "EM": { "data_file": "demo_vo_profiles.json", "row_count": 2 },
+      "CM": { "data_file": "demo_vo_profiles.json", "row_count": 2 }
+    },
+    "y_domain": [0, 100]
+  }
+}
+

@@ -84,6 +84,36 @@ def fetch_vo_vestigingen(data_root: Path) -> Path:
     return out_path
 
 
+def fetch_vo_vwo_exam_scores(data_root: Path) -> Dict[str, Path]:
+    """
+    下载 DUO「examenkandidaten vwo en examencijfers」CSV 到 data_root。
+
+    返回映射: schooljaar_label -> 实际写入文件路径。
+
+    说明：
+    - 当前只覆盖 backlog 中提到的最近 5 个学年；
+    - 文件名保持与 DUO 官网一致，便于后续比对。
+    """
+    base_url = "https://duo.nl/open_onderwijsdata/images"
+    # schooljaar_label -> DUO 文件名
+    files: Dict[str, str] = {
+        "2020-2021": "examenkandidaten-vwo-en-examencijfers-2020-2021.csv",
+        "2021-2022": "examenkandidaten-vwo-en-examencijfers-2021-2022.csv",
+        "2022-2023": "examenkandidaten-vwo-en-examencijfers-2022-2023.csv",
+        "2023-2024": "examenkandidaten-vwo-en-examencijfers-2023-2024.csv",
+        "2024-2025": "examenkandidaten-vwo-en-examencijfers-2024-2025.csv",
+    }
+    data_root.mkdir(parents=True, exist_ok=True)
+    out: Dict[str, Path] = {}
+    for schooljaar, filename in files.items():
+        url = f"{base_url}/{filename}"
+        out_path = data_root / filename
+        print(f"[fetch] VO VWO exam scores: {url} -> {out_path}")
+        urllib.request.urlretrieve(url, out_path)
+        out[schooljaar] = out_path
+    return out
+
+
 def _schooladviezen_duo_filename(start: str, end: str) -> str:
     """复制 fetch_duo_schooladviezen 中对 DUO 文件名的约定。"""
     if start in {"2019", "2020"}:
@@ -196,9 +226,10 @@ def run_fetch_from_cli_args(cfg: Dict[str, Any], *, vo: bool, po: bool, cbs_woz:
     """根据 CLI 解析结果执行 fetch 步骤。"""
     raw_root = _get_raw_root(cfg)
     if vo:
-        # VO fetch 同时需要考试数据和 vestigingen 映射
+        # VO fetch 同时需要考试数据、vestigingen 映射，以及 VWO 科目成绩明细
         fetch_vo_exams(raw_root)
         fetch_vo_vestigingen(raw_root)
+        fetch_vo_vwo_exam_scores(raw_root)
     if po:
         fetch_po_schooladviezen(raw_root)
     if cbs_woz:
@@ -225,6 +256,7 @@ def run_etl_from_cli_args(cfg: Dict[str, Any], *, vo: bool, po: bool) -> bool:
 __all__ = [
     "fetch_vo_exams",
     "fetch_vo_vestigingen",
+    "fetch_vo_vwo_exam_scores",
     "fetch_po_schooladviezen",
     "fetch_cbs_woz",
     "_get_data_root",

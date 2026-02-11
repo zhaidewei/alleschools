@@ -44,6 +44,19 @@ VO_META_FIELDNAMES: Sequence[str] = [
 ]
 
 
+VO_PROFILES_FIELDNAMES: Sequence[str] = [
+    "BRIN",
+    "vestigingsnaam",
+    "gemeente",
+    "postcode",
+    "type",
+    "profile_id",
+    "X_profile",
+    "Y_vwo_share",
+    "candidates_total",
+]
+
+
 def export_po_csv(
     rows: Iterable[Mapping[str, object]],
     path: Path,
@@ -79,12 +92,33 @@ def export_vo_csv(
         writer.writerows(rows)
 
 
+def export_vo_profiles_csv(
+    rows: Iterable[Mapping[str, object]],
+    path: Path,
+) -> None:
+    """
+    将 VO profiel 指数结果写出为 CSV。
+
+    字段包含：
+        BRIN, vestigingsnaam, gemeente, postcode, type,
+        profile_id (NT/NG/EM/CM), X_profile, Y_vwo_share, candidates_total
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fieldnames = list(VO_PROFILES_FIELDNAMES)
+    with path.open("w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
+        writer.writeheader()
+        writer.writerows(rows)
+
+
 __all__ = [
     "PO_FIELDNAMES",
     "PO_META_FIELDNAMES",
     "VO_FIELDNAMES",
     "VO_META_FIELDNAMES",
+    "VO_PROFILES_FIELDNAMES",
     "export_po_csv",
     "export_vo_csv",
+    "export_vo_profiles_csv",
 ]
 
