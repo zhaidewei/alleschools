@@ -6,15 +6,15 @@
   },
   "axes": {
     "x": {
-      "field": "X_profile",
-      "scale": "linear",
-      "domain": [4, 10]
-    },
-    "y": {
       "field": "Y_vwo_share",
       "scale": "linear",
       "domain": [0, 100],
       "metric_id": "vo_vwo_share"
+    },
+    "y": {
+      "field": "X_profile",
+      "scale": "linear",
+      "domain": [4, 10]
     },
     "size": {
       "field": "size",

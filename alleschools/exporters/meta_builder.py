@@ -299,19 +299,19 @@ def build_vo_profiles_meta(
         "sources": {
             "duo": "VWO central exam results (per subject, 5-year window)",
         },
-        # 这里的 axes 是「通用」定义：X_profile / Y_vwo_share / size，
-        # 具体某个 profiel 使用哪个 metric_id 由 profiles 字段指定。
+        # 这里的 axes 是「通用」定义：X = VWO 占比，Y = profile 考试分数
+        # X 轴：学校 VWO 学生占比（0-100%）；Y 轴：当前 profile 下统考平均分（4-10）
         "axes": {
             "x": {
-                "field": "X_profile",
-                "scale": "linear",
-                "domain": [4, 10],
-            },
-            "y": {
                 "field": "Y_vwo_share",
                 "scale": "linear",
                 "domain": y_dom,
                 "metric_id": "vo_vwo_share",
+            },
+            "y": {
+                "field": "X_profile",
+                "scale": "linear",
+                "domain": [4, 10],
             },
             "size": {
                 "field": "size",

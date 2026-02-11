@@ -597,7 +597,6 @@ def run_vo_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
             naam = row.get("vestigingsnaam")
             gemeente = row.get("gemeente")
             postcode = (row.get("postcode") or "").strip()
-            school_type = row.get("type")
             # backlog 约定：现有 VO 主图的 X 轴（VWO 占比）作为 profiel 图的 Y 轴。
             y_vwo_share = row.get("X_linear")
             candidates_total = row.get("candidates_total")
@@ -608,6 +607,7 @@ def run_vo_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
                 x_prof = prof_map.get(brin_str)
                 if x_prof is None:
                     continue
+                # 进入 profile 的学校必有 VWO 统考数据，统一标为 HAVO/VWO（避免主表 type=VMBO 的误标）
                 profile_rows[prof].append(
                     {
                         "BRIN": brin_str,
@@ -615,7 +615,7 @@ def run_vo_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
                         "naam": naam,
                         "gemeente": gemeente,
                         "postcode": postcode,
-                        "type": school_type,
+                        "type": "HAVO/VWO",
                         "profile_id": prof,
                         "X_profile": float(x_prof),
                         "Y_vwo_share": float(y_vwo_share) if y_vwo_share is not None else None,

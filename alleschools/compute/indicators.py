@@ -265,10 +265,12 @@ def compute_vo_xy(
             type_label = "HAVO/VWO"
         elif sum(vmbo[y]["total"] for y in year_labels) > 0:
             sum_w = 0.0
+            sum_w_x = 0.0
             sum_w_y = 0.0
             for i, year in enumerate(year_labels):
                 w = weights[i]
                 t = vmbo[year]["total"]
+                t_all = all_kand[year]
                 if t <= 0:
                     continue
                 years_used_vo.append(year)
@@ -276,7 +278,11 @@ def compute_vo_xy(
                 y_year = 100.0 * tech / t
                 sum_w += w
                 sum_w_y += w * y_year
-            x_linear = 0.0
+                # VWO 占比：scholengemeenschap 可能同时有 VMBO 和少量 VWO，按 vwo/total 计算
+                if t_all > 0:
+                    vwo_g = hw[year]["vwo"]
+                    sum_w_x += w * (100.0 * vwo_g / t_all)
+            x_linear = sum_w_x / sum_w if sum_w > 0 else 0.0
             y_linear = sum_w_y / sum_w if sum_w > 0 else 0.0
             type_label = "VMBO"
         else:
