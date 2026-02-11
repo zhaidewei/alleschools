@@ -765,6 +765,7 @@
       if (gemeenteParam != null) {
         var filterEl = document.getElementById('gemeenteFilter');
         if (filterEl) filterEl.value = gemeenteParam;
+        if (currentMode === 'vo' && hasVoProfilesData()) buildVoProfilesPoints();
         // 文本过滤条件先作用于可选城市集合
         var listFromFilter = getGemeentenInList();
         selectedGemeenten = new Set(listFromFilter);
@@ -772,6 +773,7 @@
       // 兼容 UI_DESIGN 中 city= 参数，用于精确还原勾选的城市集合
       var cityParam = params.get('city');
       if (cityParam != null && cityParam.trim() !== '') {
+        if (currentMode === 'vo' && hasVoProfilesData()) buildVoProfilesPoints();
         var rawCities = cityParam.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
         var targetSet = new Set(rawCities.map(function(s) { return s.toUpperCase(); }));
         var allList = getGemeentenInList();
