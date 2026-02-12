@@ -366,7 +366,7 @@ def build_vo_profiles_meta(
                     "vo_em_index": {
                         "label": "VWO-profielindex Economie & Maatschappij",
                         "short": "Index E&M",
-                        "description": "0,333 × C(ECON) + 0,334 × C(BECO) + 0,333 × C_WIS^EM, waarbij C_WIS^EM het gemiddelde is van Wiskunde A/B (of de enige aanwezige).",
+                        "description": "(1/3) × C(ECON) + (1/3) × C(GES) + (1/3) × C_WIS^EM, waarbij C_WIS^EM het gemiddelde is van Wiskunde A/B (of de enige aanwezige).",
                     },
                     "vo_cm_index": {
                         "label": "VWO-profielindex Cultuur & Maatschappij",
@@ -400,7 +400,7 @@ def build_vo_profiles_meta(
                     "vo_em_index": {
                         "label": "VWO profile index – Economics & Society",
                         "short": "Index E&M",
-                        "description": "0.333 × C(ECON) + 0.334 × C(BECO) + 0.333 × C_WIS^EM, where C_WIS^EM is based on Wiskunde A/B if present.",
+                        "description": "(1/3) × C(ECON) + (1/3) × C(GES) + (1/3) × C_WIS^EM, where C_WIS^EM is based on Wiskunde A/B if present.",
                     },
                     "vo_cm_index": {
                         "label": "VWO profile index – Culture & Society",
@@ -434,7 +434,7 @@ def build_vo_profiles_meta(
                     "vo_em_index": {
                         "label": "VWO 经社 profiel 指数（Economie & Maatschappij）",
                         "short": "E&M 指数",
-                        "description": "0.333×C(ECON) + 0.334×C(BECO) + 0.333×C_WIS^EM，其中 C_WIS^EM 由 A/B 数学科目（若存在）构成。",
+                        "description": "(1/3)×C(ECON) + (1/3)×C(GES) + (1/3)×C_WIS^EM，其中 C_WIS^EM 由数学 A/B（若存在）平均构成。",
                     },
                     "vo_cm_index": {
                         "label": "VWO 文社 profiel 指数（Cultuur & Maatschappij）",

@@ -73,15 +73,15 @@ def _compute_x_ng(subj: Mapping[str, float]) -> float | None:
 def _compute_x_em(subj: Mapping[str, float]) -> float | None:
     """
     EM:
-        X_EM = 0.333 * C(Economie) + 0.334 * C(Bedrijfseconomie) + 0.333 * C_WIS^EM
+        X_EM = (1/3) * C(Economie) + (1/3) * C(Geschiedenis) + (1/3) * C_WIS^EM
     where:
         C_WIS^EM = avg(C(Wiskunde A), C(Wiskunde B)) if both exist;
         if only one of A/B exists, use that one;
         if both missing, no EM point.
     """
     c_econ = _get(subj, SUBJ_ECON)
-    c_beco = _get(subj, SUBJ_BECO)
-    if c_econ is None or c_beco is None:
+    c_ges = _get(subj, SUBJ_GES)
+    if c_econ is None or c_ges is None:
         return None
 
     c_wisa = _get(subj, SUBJ_WISA)
@@ -95,7 +95,7 @@ def _compute_x_em(subj: Mapping[str, float]) -> float | None:
     else:
         return None
 
-    return 0.333 * c_econ + 0.334 * c_beco + 0.333 * c_wis
+    return (1.0 / 3.0) * (c_econ + c_ges + c_wis)
 
 
 def _compute_x_cm(subj: Mapping[str, float]) -> float | None:
