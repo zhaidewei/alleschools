@@ -41,7 +41,7 @@ def build_po_meta(
             "y": {
                 "field": "y_linear",
                 "scale": "linear",
-                "domain": [0, 800],
+                "domain": [0, 1400],
                 "metric_id": "po_woz_avg_pc4",
             },
             "size": {

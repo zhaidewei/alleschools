@@ -11,7 +11,7 @@
   <script src="assets/html2canvas.min.js"></script>
   <script src="view_xy_logic.js"></script>
   <script>document.documentElement.classList.toggle('dark', localStorage.getItem('theme')==='dark');</script>
-  <style>.chartjs-tooltip { max-width: min(320px, 90vw); overflow-wrap: break-word; word-break: break-word; transform-origin: bottom center; z-index: 40; } #chartLabels { z-index: 10; } #shareWrap.open #shareDropdown, #langWrap.open #langDropdown { opacity: 1; visibility: visible; } details summary { list-style: none; } details summary::-webkit-details-marker { display: none; } .input-wrap { position: relative; } .input-hint { position: absolute; left: 0; right: 0; top: 100%; margin-top: 4px; padding: 8px 10px; font-size: 0.75rem; line-height: 1.35; color: var(--hint-text, #475569); background: var(--hint-bg, #f1f5f9); border: 1px solid var(--hint-border, #e2e8f0); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); z-index: 30; opacity: 0; visibility: hidden; transition: opacity 0.15s, visibility 0.15s; pointer-events: none; max-width: min(100%, 420px); } .input-wrap.show-hint .input-hint, .input-wrap:hover .input-hint { opacity: 1; visibility: visible; } .dark .input-hint { --hint-text: #94a3b8; --hint-bg: #334155; --hint-border: #475569; }</style>
+  <style>.chartjs-tooltip { max-width: min(320px, 90vw); overflow-wrap: break-word; word-break: break-word; transform-origin: bottom center; z-index: 40; } #chartLabels { z-index: 10; } #accessibleResultsList { max-height: 32rem; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; } #shareWrap.open #shareDropdown, #langWrap.open #langDropdown { opacity: 1; visibility: visible; } details summary { list-style: none; } details summary::-webkit-details-marker { display: none; } .input-wrap { position: relative; } .input-hint { position: absolute; left: 0; right: 0; top: 100%; margin-top: 4px; padding: 8px 10px; font-size: 0.75rem; line-height: 1.35; color: var(--hint-text, #475569); background: var(--hint-bg, #f1f5f9); border: 1px solid var(--hint-border, #e2e8f0); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); z-index: 30; opacity: 0; visibility: hidden; transition: opacity 0.15s, visibility 0.15s; pointer-events: none; max-width: min(100%, 420px); } .input-wrap.show-hint .input-hint, .input-wrap:hover .input-hint { opacity: 1; visibility: visible; } .dark .input-hint { --hint-text: #94a3b8; --hint-bg: #334155; --hint-border: #475569; }</style>
 </head>
 <body class="min-h-screen font-sans antialiased">
   <header class="border-b border-[#ddd5c7] bg-[#f7f3eb]/95 dark:border-[#335047] dark:bg-[#0d1f1b]/95">
@@ -51,9 +51,14 @@
   <div id="wrap" class="v2-shell py-8 sm:py-12">
     <section class="max-w-3xl pb-8 sm:pb-10">
       <p id="heroEyebrow" class="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-terracotta dark:text-[#e08260]">Explore Dutch schools</p>
-      <h1 id="heroTitle" class="font-display text-4xl font-bold leading-[1.08] tracking-tight text-forest dark:text-[#f4efe4] sm:text-6xl">Find schools. Understand the data.</h1>
-      <p id="heroBody" class="mt-4 max-w-2xl text-base leading-7 text-[#65716b] dark:text-[#afbbb4] sm:text-lg">Search schools and places, then explore how schools compare across transparent indicators.</p>
-      <p id="heroCaveat" class="mt-2 text-sm text-[#65716b] dark:text-[#afbbb4]">A starting point for exploration — never a ranking or final judgement.</p>
+      <h1 id="heroTitle" class="font-display text-4xl font-bold leading-[1.08] tracking-tight text-forest dark:text-[#f4efe4] sm:text-6xl">People say Dutch schools are much the same. Does the data agree?</h1>
+      <p id="heroBody" class="mt-4 max-w-2xl text-base leading-7 text-[#65716b] dark:text-[#afbbb4] sm:text-lg">Compare school advice, exam performance and community context.</p>
+      <p id="heroCaveat" class="mt-2 text-sm text-[#65716b] dark:text-[#afbbb4]">The data offers clues. The choice remains yours.</p>
+      <p id="datasetOverview" class="mt-4 text-sm font-medium text-forest dark:text-[#dce8e2]" aria-live="polite"></p>
+      <aside class="mt-5 max-w-2xl rounded-2xl border border-[#ddd5c7] bg-[#fffaf1] px-4 py-3 dark:border-[#335047] dark:bg-[#142923]">
+        <p id="insightTitle" class="text-xs font-bold uppercase tracking-[0.14em] text-terracotta dark:text-[#e08260]">Did you know?</p>
+        <p id="insightBody" class="mt-1 text-sm leading-6 text-[#65716b] dark:text-[#afbbb4]"></p>
+      </aside>
     </section>
     <section class="v2-explorer" aria-labelledby="explorerTitle">
     <div id="chartWrap" class="mb-8 min-w-0">
@@ -98,7 +103,7 @@
       <section id="accessibleResults" class="mt-4" aria-labelledby="accessibleResultsTitle">
         <h3 id="accessibleResultsTitle" class="font-display text-lg font-bold text-forest dark:text-[#f4efe4]">Matching schools</h3>
         <p id="chartTextSummary" class="mt-1 text-xs text-[#65716b] dark:text-[#afbbb4]"></p>
-        <ul id="accessibleResultsList" class="mt-3 grid gap-2 sm:grid-cols-2"></ul>
+        <ul id="accessibleResultsList" class="mt-3 grid max-h-[32rem] gap-2 overflow-y-auto overscroll-contain pr-1 sm:grid-cols-2" tabindex="0"></ul>
       </section>
       <p id="comparisonStatus" class="sr-only" aria-live="polite"></p>
     </div>
@@ -238,9 +243,13 @@
         navData: 'About the data',
         navContact: 'Contact',
         heroEyebrow: 'Explore Dutch schools',
-        heroTitle: 'Find schools. Understand the data.',
-        heroBody: 'Choose a province, select municipalities, then search within those schools.',
-        heroCaveat: 'A starting point for exploration — never a ranking or final judgement.',
+        heroTitle: 'People say Dutch schools are much the same. Does the data agree?',
+        heroBody: 'Compare school advice, exam performance and community context.',
+        heroCaveat: 'The data offers clues. The choice remains yours.',
+        insightTitle: 'Did you know?',
+        insightBody: 'School performance and student background often move together. Results alone cannot show how much comes from the school, peers or family circumstances.',
+        insightBody_po: 'School advice and nearby home values often move together. That does not prove causation: family background, school choice, peers and neighbourhood resources may influence both.',
+        datasetOverview: '{schools} schools · {years} school years ({range}) · {postcodes} postcodes · {municipalities} municipalities',
         explorerTitle: 'School explorer',
         filterTitle: 'Refine results',
         filterHint: 'Choose one or more municipalities.',
@@ -336,9 +345,13 @@
         navData: '关于数据',
         navContact: '联系',
         heroEyebrow: '探索荷兰学校',
-        heroTitle: '找到学校，读懂数据。',
-        heroBody: '先选择省份和市镇，再在范围内搜索学校。',
-        heroCaveat: '这是探索的起点，不提供排名，也不替你做最终判断。',
+        heroTitle: '都说荷兰学校差不多。数据同意吗？',
+        heroBody: '比较学校的升学建议、考试表现与社区环境。',
+        heroCaveat: '数据提供线索，选择仍由你决定。',
+        insightTitle: '你知道吗？',
+        insightBody: '学校表现与学生背景经常同时变化。仅凭结果无法区分学校、同伴和家庭环境各自带来的影响。',
+        insightBody_po: '学校升学建议与周边房价经常同向变化。这不代表因果关系：家庭背景、择校、同伴构成和社区资源都可能同时影响两者。',
+        datasetOverview: '{schools} 所学校 · {years} 个学年（{range}）· {postcodes} 个邮编 · {municipalities} 个市镇',
         explorerTitle: '学校探索器',
         filterTitle: '细化结果',
         filterHint: '选择一个或多个市镇。',
@@ -434,9 +447,13 @@
         navData: 'Over de data',
         navContact: 'Contact',
         heroEyebrow: 'Ontdek Nederlandse scholen',
-        heroTitle: 'Vind scholen. Begrijp de data.',
-        heroBody: 'Kies een provincie en gemeenten en zoek daarna binnen die scholen.',
-        heroCaveat: 'Een startpunt voor verkenning — zonder ranglijst of eindoordeel.',
+        heroTitle: 'Men zegt dat Nederlandse scholen veel op elkaar lijken. Zeggen de gegevens dat ook?',
+        heroBody: 'Vergelijk schooladviezen, examenprestaties en de context van de buurt.',
+        heroCaveat: 'De gegevens geven aanwijzingen. De keuze blijft aan jou.',
+        insightTitle: 'Wist je dat?',
+        insightBody: 'Schoolprestaties en de achtergrond van leerlingen bewegen vaak samen. Resultaten alleen laten niet zien welk deel samenhangt met school, medeleerlingen of gezin.',
+        insightBody_po: 'Schooladviezen en woningwaarden in de buurt bewegen vaak samen. Dat bewijst geen oorzakelijk verband: gezinsachtergrond, schoolkeuze, medeleerlingen en buurtvoorzieningen kunnen beide beïnvloeden.',
+        datasetOverview: '{schools} scholen · {years} schooljaren ({range}) · {postcodes} postcodes · {municipalities} gemeenten',
         explorerTitle: 'Scholenverkenner',
         filterTitle: 'Verfijn resultaten',
         filterHint: 'Kies één of meer gemeenten.',
@@ -571,7 +588,7 @@
       if (navPO) navPO.textContent = t('navPO');
       var methodologyLink = document.getElementById('navMethodology');
       if (methodologyLink) methodologyLink.href = 'methodology.html?lang=' + encodeURIComponent(currentLang);
-      ['navMethodology', 'navContact', 'heroEyebrow', 'heroTitle', 'heroBody', 'heroCaveat', 'explorerTitle', 'filterTitle', 'filterHint', 'labelProvince'].forEach(function(id) {
+      ['navMethodology', 'navContact', 'heroEyebrow', 'heroTitle', 'heroBody', 'heroCaveat', 'insightTitle', 'insightBody', 'explorerTitle', 'filterTitle', 'filterHint', 'labelProvince'].forEach(function(id) {
         var element = document.getElementById(id);
         if (element) element.textContent = t(id);
       });
@@ -661,6 +678,7 @@
         chart.options.scales.y.title.text = yTitleFromMeta || t('axisYLinear');
         chart.update();
       }
+      updateDatasetOverview();
       updateMobileModeSpecificUI();
     }
     let points = data.map(d => ({ x: d.X_linear, y: d.Y_linear, label: d.naam, type: d.type, gemeente: d.gemeente, provincie: d.provincie || d.province || '', postcode: d.postcode || '', size: d.size, brin: d.BRIN, vestigingId: d.vestiging_id || d.vestigingId || d.vestigingsnummer || d.id, layer: currentMode }));
@@ -707,6 +725,45 @@
           };
         });
       });
+    }
+
+    function updateDatasetOverview() {
+      var element = document.getElementById('datasetOverview');
+      if (!element) return;
+      if (currentMode === 'vo' && hasVoProfilesData() && !(voProfilesPoints[currentProfile.toUpperCase()] || []).length) buildVoProfilesPoints();
+      var source = currentMode === 'vo' && hasVoProfilesData()
+        ? (voProfilesPoints[currentProfile.toUpperCase()] || [])
+        : points;
+      var schoolIds = new Set();
+      var postcodes = new Set();
+      var municipalities = new Set();
+      source.forEach(function(point) {
+        var id = VIEW_XY.getStableSchoolId(point, currentMode) || [point.label, point.postcode, point.gemeente].join('|');
+        if (id) schoolIds.add(id);
+        var postcode = String(point.postcode || '').replace(/\s+/g, '').toUpperCase();
+        if (postcode) postcodes.add(postcode);
+        var municipality = String(point.gemeente || '').trim();
+        if (municipality) municipalities.add(municipality);
+      });
+      var years = new Set();
+      var layerData = yearlyComparison && yearlyComparison[currentMode] || {};
+      Object.keys(layerData).forEach(function(schoolId) {
+        Object.keys(layerData[schoolId] || {}).forEach(function(year) { if (year) years.add(year); });
+      });
+      var sortedYears = Array.from(years).sort();
+      var firstYear = sortedYears.length ? String(sortedYears[0]).match(/\d{4}/) : null;
+      var lastYearMatches = sortedYears.length ? String(sortedYears[sortedYears.length - 1]).match(/\d{4}/g) : null;
+      var range = firstYear && lastYearMatches
+        ? firstYear[0] + '–' + lastYearMatches[lastYearMatches.length - 1]
+        : (sortedYears.length ? sortedYears[0] + '–' + sortedYears[sortedYears.length - 1] : '—');
+      var locale = currentLang === 'zh' ? 'zh-CN' : currentLang;
+      var format = function(value) { return Number(value).toLocaleString(locale); };
+      element.textContent = t('datasetOverview')
+        .replace('{schools}', format(schoolIds.size))
+        .replace('{years}', format(years.size))
+        .replace('{range}', range)
+        .replace('{postcodes}', format(postcodes.size))
+        .replace('{municipalities}', format(municipalities.size));
     }
 
     var VO_PROFILE_Y_SUFFIX = { zh: '核心科目平均分', en: 'Core subjects avg.', nl: 'Gem. kernvakken' };
@@ -855,6 +912,7 @@
       selectAllAvailableSchools();
       renderSchoolCheckboxes();
       updateProfileTabs();
+      updateDatasetOverview();
       refreshChart();
       if (syncUrl !== false) {
         syncCanonicalUrl();
@@ -1375,11 +1433,17 @@
       if (yDomainFromMeta) {
         var yMin = yDomainFromMeta[0];
         var yMax = yDomainFromMeta[1];
+        if (currentMode === 'po') {
+          var highestWoz = points.reduce(function(maximum, point) {
+            return Number.isFinite(Number(point.y)) ? Math.max(maximum, Number(point.y)) : maximum;
+          }, 0);
+          yMax = Math.max(yMax, Math.ceil((highestWoz + 40) / 200) * 200);
+        }
         // 大图 Y 轴：无论 meta 是否从 0 开始，都统一从 -10 开始，避免底部点被截断。
         chart.options.scales.y.min = -10;
         chart.options.scales.y.max = yMax;
         var yRange = yMax - yMin;
-        var yStep = yRange <= 20 ? 1 : 10;
+        var yStep = currentMode === 'po' ? 200 : (yRange <= 20 ? 1 : 10);
         chart.options.scales.y.afterBuildTicks = function(axis) {
           var ticks = [];
           for (var v = yMin; v <= yMax + 1e-6; v += yStep) {
@@ -1453,7 +1517,7 @@
       [
         { key: 'legendBase', fill: 'rgba(101,113,107,0.38)', border: 'rgba(101,113,107,0.72)' },
         { key: 'legendMatch', fill: '#c65f3b', border: '#9f4428' },
-        { key: 'legendSelected', fill: 'rgba(101,113,107,0.38)', border: '#173f35' }
+        { key: 'legendSelected', fill: '#e2ad45', border: '#6f4810' }
       ].forEach(function(state) {
         var item = document.createElement('span');
         item.className = 'inline-flex items-center gap-1.5 text-sm';
@@ -1510,7 +1574,7 @@
       points.forEach(p => {
         const g = p.gemeente || '(未知)';
         if (!byGemeente[g]) byGemeente[g] = [];
-        const matched = pointMatchesSearch(p, searchTerms);
+        const matched = searchTerms.length > 0 && pointMatchesSearch(p, searchTerms);
         const nameHighlights = getNameHighlights(p.label, searchTerms);
         byGemeente[g].push({
           x: p.x, y: p.y, naam: p.label, type: p.type, postcode: p.postcode || '',
@@ -1533,14 +1597,16 @@
             const chartW = (ctx.chart && ctx.chart.width) || 800;
             const scale = Math.min(1, chartW / 800);
             const baseR = Math.max(1, Math.round(r * scale));
+            if (getComparisonIndex(ctx.raw) >= 0) return Math.max(baseR + 3, 8);
             return ctx.raw.matched ? Math.max(baseR, baseR * 1.4 + 2) : baseR;
           },
           backgroundColor: function(ctx) {
+            if (getComparisonIndex(ctx.raw) >= 0) return '#e2ad45';
             if (ctx.raw.matched) return '#c65f3b';
             return 'rgba(101,113,107,0.38)';
           },
           borderColor: function(ctx) {
-            if (getComparisonIndex(ctx.raw) >= 0) return '#173f35';
+            if (getComparisonIndex(ctx.raw) >= 0) return '#6f4810';
             if (ctx.raw.matched) return '#9f4428';
             return 'rgba(101,113,107,0.72)';
           },
