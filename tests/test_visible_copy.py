@@ -43,6 +43,25 @@ def test_methodology_is_a_dedicated_page() -> None:
     assert 'data-lang="nl"' in methodology
     assert 'id="vo"' in methodology
     assert 'id="po"' in methodology
+    assert "学校升学建议与周边房价经常同向变化" in methodology
+    assert 'id="insightTitle"' not in home
+    assert 'id="insightBody"' not in home
+
+
+def test_explorer_flow_is_visually_ordered() -> None:
+    home = (PROJECT_ROOT / "view_xy.html").read_text(encoding="utf-8")
+    css = (PROJECT_ROOT / "assets" / "tailwind-input.css").read_text(encoding="utf-8")
+    assert '"mode chart" "school-search chart" "filters chart"' in css
+    assert 'class="flow-arrow ' not in home
+    assert "学校探索器" not in home
+    assert "🏫" not in home
+    assert "选择小学或中学" in home
+    assert "搜索学校" in home
+    assert "筛选范围" in home
+    assert 'class="site-header sticky top-0 z-40' in home
+    assert 'class="hero-panel ' in home
+    assert 'grid-template-columns: repeat(2, minmax(0, 1fr))' in css
+    assert '#mainChartWrap { height: min(68vh, 35rem); min-height: 27rem; aspect-ratio: auto; }' in css
 
 
 def test_primary_navigation_is_consistent_on_both_pages() -> None:

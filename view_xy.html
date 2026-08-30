@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>🏫 Dutch secondary school map: academic level × science focus</title>
+  <title>Dutch secondary school map: academic level × science focus</title>
   <link rel="icon" href="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ctext%20y%3D%22.9em%22%20font-size%3D%2290%22%3E%F0%9F%8E%AB%3C%2Ftext%3E%3C%2Fsvg%3E">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
   <link rel="stylesheet" href="assets/site.css">
@@ -14,7 +14,7 @@
   <style>.chartjs-tooltip { max-width: min(320px, 90vw); overflow-wrap: break-word; word-break: break-word; transform-origin: bottom center; z-index: 40; } #chartLabels { z-index: 10; } #accessibleResultsList { max-height: 32rem; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; } #shareWrap.open #shareDropdown, #langWrap.open #langDropdown { opacity: 1; visibility: visible; } details summary { list-style: none; } details summary::-webkit-details-marker { display: none; } .input-wrap { position: relative; } .input-hint { position: absolute; left: 0; right: 0; top: 100%; margin-top: 4px; padding: 8px 10px; font-size: 0.75rem; line-height: 1.35; color: var(--hint-text, #475569); background: var(--hint-bg, #f1f5f9); border: 1px solid var(--hint-border, #e2e8f0); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); z-index: 30; opacity: 0; visibility: hidden; transition: opacity 0.15s, visibility 0.15s; pointer-events: none; max-width: min(100%, 420px); } .input-wrap.show-hint .input-hint, .input-wrap:hover .input-hint { opacity: 1; visibility: visible; } .dark .input-hint { --hint-text: #94a3b8; --hint-bg: #334155; --hint-border: #475569; }</style>
 </head>
 <body class="min-h-screen font-sans antialiased">
-  <header class="border-b border-[#ddd5c7] bg-[#f7f3eb]/95 dark:border-[#335047] dark:bg-[#0d1f1b]/95">
+  <header class="site-header sticky top-0 z-40 border-b border-[#ddd5c7] bg-[#f7f3eb]/95 shadow-sm backdrop-blur-md dark:border-[#335047] dark:bg-[#0d1f1b]/95">
     <div class="v2-shell flex min-h-[68px] flex-wrap items-center justify-between gap-x-4">
       <a id="brandHome" href="/" class="font-display text-2xl font-bold tracking-tight text-forest no-underline dark:text-[#f4efe4]">Alle<span class="text-terracotta dark:text-[#e08260]">Schools</span></a>
       <nav class="order-3 flex w-full items-center gap-4 overflow-x-auto border-t border-[#ddd5c7] py-2 text-sm dark:border-[#335047] sm:order-none sm:w-auto sm:border-0 sm:py-0" aria-label="Primary navigation">
@@ -50,25 +50,23 @@
     </div>
   </header>
   <div id="wrap" class="v2-shell py-8 sm:py-12">
-    <section class="max-w-3xl pb-8 sm:pb-10">
-      <p id="heroEyebrow" class="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-terracotta dark:text-[#e08260]">Explore Dutch schools</p>
-      <h1 id="heroTitle" class="font-display text-4xl font-bold leading-[1.08] tracking-tight text-forest dark:text-[#f4efe4] sm:text-6xl">People say Dutch schools are much the same. Does the data agree?</h1>
-      <p id="heroBody" class="mt-4 max-w-2xl text-base leading-7 text-[#65716b] dark:text-[#afbbb4] sm:text-lg">Compare school advice, exam performance and community context.</p>
+    <section class="hero-panel max-w-3xl pb-10 pt-3 sm:pb-14">
+      <h1 id="heroTitle" class="font-display text-4xl font-bold leading-[1.08] tracking-tight text-forest dark:text-[#f4efe4] sm:text-5xl">Are Dutch schools really the same?</h1>
+      <p id="heroBody" class="mt-4 max-w-2xl text-base leading-7 text-[#65716b] dark:text-[#afbbb4] sm:text-lg">Compare school outcomes and neighbourhood context across the Netherlands.</p>
       <p id="datasetOverview" class="mt-4 text-sm font-medium text-forest dark:text-[#dce8e2]" aria-live="polite"></p>
-      <aside class="mt-5 max-w-2xl rounded-2xl border border-[#ddd5c7] bg-[#fffaf1] px-4 py-3 dark:border-[#335047] dark:bg-[#142923]">
-        <p id="insightTitle" class="text-xs font-bold uppercase tracking-[0.14em] text-terracotta dark:text-[#e08260]">Did you know?</p>
-        <p id="insightBody" class="mt-1 text-sm leading-6 text-[#65716b] dark:text-[#afbbb4]"></p>
-      </aside>
     </section>
-    <section class="v2-explorer" aria-labelledby="explorerTitle">
-    <div id="chartWrap" class="mb-8 min-w-0">
-      <div class="v2-chart-heading mb-3">
-      <div class="min-w-0"><p id="explorerTitle" class="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-terracotta dark:text-[#e08260]">School explorer</p>
-      <h2 id="titleMain" class="font-display text-2xl font-bold text-forest dark:text-[#f4efe4] tracking-tight">Dutch secondary school map: academic level × science focus</h2></div>
+    <section class="v2-explorer" aria-label="School explorer">
+    <div class="mode-panel flex flex-col items-center gap-4 px-5 py-6 text-center md:px-6 md:py-7">
+      <h2 id="schoolLevelLabel" class="flow-step-title">School level</h2>
       <div class="flex items-center gap-1 rounded-xl border border-[#ddd5c7] bg-[#eee8dc] p-1 dark:border-[#335047] dark:bg-[#1c342d]" role="tablist" aria-label="School level">
         <button type="button" id="navVO" class="navSchoolType school-type-tab" data-mode="vo" role="tab" aria-selected="true">Secondary</button>
         <button type="button" id="navPO" class="navSchoolType school-type-tab" data-mode="po" role="tab" aria-selected="false">Primary</button>
-      </div></div>
+      </div>
+    </div>
+    <div id="chartWrap" class="mb-8 min-w-0">
+      <div class="v2-chart-heading mb-3">
+      <div class="min-w-0"><h2 id="titleMain" class="font-display text-2xl font-bold text-forest dark:text-[#f4efe4] tracking-tight">Dutch secondary school map: academic level × science focus</h2></div>
+      </div>
       <p id="subtitleMain" class="mt-1 text-sm text-slate-500 dark:text-slate-400">Data from DUO (excluding international schools). X = VWO share, Y = science share. Dot size = exam candidates (5-yr total). <strong id="schoolCount" class="font-medium text-slate-700 dark:text-slate-300">0</strong> schools shown.</p>
       <div id="profileTabs" class="mt-4 flex max-w-full gap-1 overflow-x-auto pb-1" role="tablist" aria-label="VWO profile">
         <button type="button" class="profile-tab" data-profile="nt" role="tab" aria-selected="true">Nature &amp; Technology (NT)</button>
@@ -107,20 +105,22 @@
       </section>
       <p id="comparisonStatus" class="sr-only" aria-live="polite"></p>
     </div>
-    <div class="school-search-panel v2-surface rounded-2xl p-4 shadow-sm md:p-5">
+    <div class="school-search-panel px-5 py-6 md:px-6">
+      <h2 id="searchStepTitle" class="flow-step-title mb-4">Search schools</h2>
       <div id="schoolSearchWrap" class="input-wrap min-w-0">
-        <label id="labelSchoolSearch" for="schoolSearch" class="mb-1.5 block text-xs font-semibold text-[#65716b] dark:text-[#afbbb4]">🔍 Search schools</label>
+        <label id="labelSchoolSearch" for="schoolSearch" class="sr-only">Search schools</label>
         <input type="text" id="schoolSearch" placeholder="School name, abbreviation, postcode or BRIN" class="v2-input" title="">
         <div id="schoolSearchHint" class="input-hint" role="tooltip" aria-live="polite"></div>
       </div>
     </div>
-    <div class="controls v2-surface grid grid-cols-1 gap-3 rounded-2xl p-4 shadow-sm md:grid-cols-3 md:p-5">
+    <div class="controls grid grid-cols-1 gap-4 px-5 py-6 md:px-6">
+      <h2 id="filterStepTitle" class="flow-step-title">Refine results</h2>
       <div class="min-w-0">
-        <label id="labelProvince" for="provinceFilter" class="mb-1.5 block text-xs font-semibold text-[#65716b] dark:text-[#afbbb4]">Province</label>
+        <label id="labelProvince" for="provinceFilter" class="mb-1.5 block text-sm font-semibold text-[#65716b] dark:text-[#afbbb4]">Province</label>
         <select id="provinceFilter" class="v2-input"><option value="all">All provinces</option></select>
       </div>
       <div class="relative min-w-0">
-        <label id="labelGemeente" for="cityFilterTrigger" class="mb-1.5 block text-xs font-semibold text-[#65716b] dark:text-[#afbbb4]">Municipalities</label>
+        <label id="labelGemeente" for="cityFilterTrigger" class="mb-1.5 block text-sm font-semibold text-[#65716b] dark:text-[#afbbb4]">Municipalities</label>
         <button type="button" id="cityFilterTrigger" class="v2-input flex items-center justify-between text-left" aria-haspopup="true" aria-controls="cityFilterMenu" aria-expanded="false">
           <span id="cityFilterTriggerValue">Cities (0)</span><span aria-hidden="true">›</span>
         </button>
@@ -133,7 +133,7 @@
         </div>
       </div>
       <div class="relative min-w-0">
-        <label id="labelSchoolDisplay" for="schoolFilterTrigger" class="mb-1.5 block text-xs font-semibold text-[#65716b] dark:text-[#afbbb4]">Schools shown</label>
+        <label id="labelSchoolDisplay" for="schoolFilterTrigger" class="mb-1.5 block text-sm font-semibold text-[#65716b] dark:text-[#afbbb4]">Schools shown</label>
         <button type="button" id="schoolFilterTrigger" class="v2-input flex items-center justify-between text-left" aria-haspopup="true" aria-controls="schoolFilterMenu" aria-expanded="false">
           <span id="schoolFilterTriggerValue">Schools (0)</span><span aria-hidden="true">›</span>
         </button>
@@ -145,7 +145,7 @@
           <div id="schoolCheckboxes" class="max-h-56 overflow-y-auto flex flex-col gap-2"></div>
         </div>
       </div>
-      <div id="showVMBOWrap" class="flex flex-wrap items-center gap-4 md:col-span-3">
+      <div id="showVMBOWrap" class="flex flex-wrap items-center gap-4">
         <label class="inline-flex items-center gap-2 cursor-pointer text-sm text-slate-600 dark:text-slate-400">
           <input type="checkbox" id="showVMBO" class="rounded border-slate-300 text-slate-600 focus:ring-slate-400">
           <span id="labelShowVMBO">Include VMBO-only schools</span>
@@ -230,14 +230,12 @@
         navMethodology: 'Data & methodology',
         navHome: 'Home',
         navSupport: '☕ Support',
-        heroEyebrow: 'Explore Dutch schools',
-        heroTitle: 'People say Dutch schools are much the same. Does the data agree?',
-        heroBody: 'Compare school advice, exam performance and community context.',
-        insightTitle: 'Did you know?',
-        insightBody: 'School performance and student background often move together. Results alone cannot show how much comes from the school, peers or family circumstances.',
-        insightBody_po: 'School advice and nearby home values often move together. That does not prove causation: family background, school choice, peers and neighbourhood resources may influence both.',
-        datasetOverview: '{schools} schools · {years} school years ({range}) · {postcodes} postcodes · {municipalities} municipalities',
-        explorerTitle: 'School explorer',
+        heroTitle: 'Are Dutch schools really the same?',
+        heroBody: 'Compare school outcomes and neighbourhood context across the Netherlands.',
+        datasetOverview: '{schools} schools · {range} · {municipalities} municipalities',
+        schoolLevelLabel: 'School level',
+        searchStepTitle: 'Search schools',
+        filterStepTitle: 'Refine results',
         filterTitle: 'Refine results',
         filterHint: 'Choose one or more municipalities.',
         labelProvince: 'Province',
@@ -296,7 +294,7 @@
         shareToFacebook: 'Share to Facebook',
         labelLight: 'Light',
         labelDark: 'Dark',
-        titleMain: '🏫 Dutch VWO schools map',
+        titleMain: 'Dutch VWO schools map',
         subtitleBefore: 'Data from DUO (excluding international schools). Only schools with VWO. Under current filters: ',
         subtitleAfter: ' schools shown.',
         labelSchoolSearch: '🔍 Search schools',
@@ -320,7 +318,7 @@
         voProfilesTitle: 'VWO profiles (NT / NG / EM / CM) — VWO profiel index',
         axisXVoProfiles: 'VWO share (%)',
         axisYVoProfiles: 'VWO graduates / total (incl. non-VWO) %',
-        titleMain_po: '🏫 Dutch primary school map: VWO-advice share × WOZ (postcode)',
+        titleMain_po: 'Dutch primary school map: VWO-advice share × WOZ (postcode)',
         subtitleBefore_po: 'Data from DUO schooladviezen + CBS WOZ. X = VWO-advice share (%), Y = mean WOZ (×1000 €). Dot size = pupils. ',
         axisXLinear_po: 'VWO-advice share (%)',
         axisYLinear_po: 'Mean WOZ (×1000 €)',
@@ -335,14 +333,12 @@
         navMethodology: '数据与方法',
         navHome: '主页',
         navSupport: '☕ 打赏',
-        heroEyebrow: '探索荷兰学校',
-        heroTitle: '都说荷兰学校差不多。数据同意吗？',
-        heroBody: '比较学校的升学建议、考试表现与社区环境。',
-        insightTitle: '你知道吗？',
-        insightBody: '学校表现与学生背景经常同时变化。仅凭结果无法区分学校、同伴和家庭环境各自带来的影响。',
-        insightBody_po: '学校升学建议与周边房价经常同向变化。这不代表因果关系：家庭背景、择校、同伴构成和社区资源都可能同时影响两者。',
-        datasetOverview: '{schools} 所学校 · {years} 个学年（{range}）· {postcodes} 个邮编 · {municipalities} 个市镇',
-        explorerTitle: '学校探索器',
+        heroTitle: '荷兰的学校真的都一样吗？',
+        heroBody: '用升学、成绩与社区数据比较不同学校。',
+        datasetOverview: '{schools} 所学校 · {range} · {municipalities} 个市镇',
+        schoolLevelLabel: '选择小学或中学',
+        searchStepTitle: '搜索学校',
+        filterStepTitle: '筛选范围',
         filterTitle: '细化结果',
         filterHint: '选择一个或多个市镇。',
         labelProvince: '省份',
@@ -401,7 +397,7 @@
         shareToFacebook: '分享到 Facebook',
         labelLight: '浅色',
         labelDark: '深色',
-        titleMain: '🏫 荷兰 VWO 中学定位图',
+        titleMain: '荷兰 VWO 中学定位图',
         subtitleBefore: '数据来自DUO（不含国际学校），仅包含有 VWO 的中学。当前筛选条件下展示 ',
         subtitleAfter: ' 所学校。',
         labelSchoolSearch: '🔍 搜索学校',
@@ -425,7 +421,7 @@
         voProfilesTitle: 'VWO profiles (NT / NG / EM / CM) — VWO profiel 指数',
         axisXVoProfiles: 'VWO 占比 (%)',
         axisYVoProfiles: '毕业 VWO 人数 / 全校总人数（含非 VWO）%',
-        titleMain_po: '🏫 荷兰小学定位图：VWO 升学率 × 邮编 WOZ',
+        titleMain_po: '荷兰小学定位图：VWO 升学率 × 邮编 WOZ',
         subtitleBefore_po: '数据来自 DUO 毕业建议 + CBS WOZ。X = VWO 升学率(%)，Y = 邮编 WOZ 均值(千欧)，点大小 = 人数。共 ',
         axisXLinear_po: 'VWO 升学率 (%)',
         axisYLinear_po: 'WOZ 均值 (千欧)',
@@ -440,14 +436,12 @@
         navMethodology: 'Data & methode',
         navHome: 'Home',
         navSupport: '☕ Steunen',
-        heroEyebrow: 'Ontdek Nederlandse scholen',
-        heroTitle: 'Men zegt dat Nederlandse scholen veel op elkaar lijken. Zeggen de gegevens dat ook?',
-        heroBody: 'Vergelijk schooladviezen, examenprestaties en de context van de buurt.',
-        insightTitle: 'Wist je dat?',
-        insightBody: 'Schoolprestaties en de achtergrond van leerlingen bewegen vaak samen. Resultaten alleen laten niet zien welk deel samenhangt met school, medeleerlingen of gezin.',
-        insightBody_po: 'Schooladviezen en woningwaarden in de buurt bewegen vaak samen. Dat bewijst geen oorzakelijk verband: gezinsachtergrond, schoolkeuze, medeleerlingen en buurtvoorzieningen kunnen beide beïnvloeden.',
-        datasetOverview: '{schools} scholen · {years} schooljaren ({range}) · {postcodes} postcodes · {municipalities} gemeenten',
-        explorerTitle: 'Scholenverkenner',
+        heroTitle: 'Zijn Nederlandse scholen echt allemaal hetzelfde?',
+        heroBody: 'Vergelijk schoolresultaten en buurtcontext in heel Nederland.',
+        datasetOverview: '{schools} scholen · {range} · {municipalities} gemeenten',
+        schoolLevelLabel: 'Kies het onderwijsniveau',
+        searchStepTitle: 'Zoek scholen',
+        filterStepTitle: 'Verfijn de resultaten',
         filterTitle: 'Verfijn resultaten',
         filterHint: 'Kies één of meer gemeenten.',
         labelProvince: 'Provincie',
@@ -506,7 +500,7 @@
         shareToFacebook: 'Delen op Facebook',
         labelLight: 'Licht',
         labelDark: 'Donker',
-        titleMain: '🏫 Nederlandse VWO-scholenkaart',
+        titleMain: 'Nederlandse VWO-scholenkaart',
         subtitleBefore: 'Data van DUO (zonder internationale scholen). Alleen scholen met VWO. Onder huidige filters: ',
         subtitleAfter: ' scholen getoond.',
         labelSchoolSearch: '🔍 Zoek scholen',
@@ -530,7 +524,7 @@
         voProfilesTitle: 'VWO profielen (NT / NG / EM / CM) — VWO profielindex',
         axisXVoProfiles: 'VWO-aandeel (%)',
         axisYVoProfiles: 'VWO geslaagden / totaal (incl. non-VWO) %',
-        titleMain_po: '🏫 Nederlandse basisschoolkaart: VWO-adviesaandeel × WOZ (postcode)',
+        titleMain_po: 'Nederlandse basisschoolkaart: VWO-adviesaandeel × WOZ (postcode)',
         subtitleBefore_po: 'Data van DUO schooladviezen + CBS WOZ. X = VWO-adviesaandeel (%), Y = gem. WOZ (×1000 €). Puntgrootte = leerlingen. ',
         axisXLinear_po: 'VWO-adviesaandeel (%)',
         axisYLinear_po: 'Gem. WOZ (×1000 €)',
@@ -590,7 +584,7 @@
       if (brandHome) brandHome.href = homeUrl;
       var navHome = document.getElementById('navHome');
       if (navHome) navHome.href = homeUrl;
-      ['navHome', 'navMethodology', 'navSupport', 'heroEyebrow', 'heroTitle', 'heroBody', 'insightTitle', 'insightBody', 'explorerTitle', 'filterTitle', 'filterHint', 'labelProvince'].forEach(function(id) {
+      ['navHome', 'navMethodology', 'navSupport', 'heroTitle', 'heroBody', 'schoolLevelLabel', 'searchStepTitle', 'filterStepTitle', 'filterTitle', 'filterHint', 'labelProvince'].forEach(function(id) {
         var element = document.getElementById(id);
         if (element) element.textContent = t(id);
       });
@@ -1631,8 +1625,7 @@
       plugins: [comparisonNumberPlugin],
       options: {
         responsive: true,
-        maintainAspectRatio: true,
-        aspectRatio: 4/3,
+        maintainAspectRatio: false,
         onClick: function(event, elements, activeChart) {
           if (!elements || !elements.length) return;
           var hit = elements[0];
