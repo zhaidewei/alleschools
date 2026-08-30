@@ -154,6 +154,7 @@ def compute_po_xy(
         sum_w_y_weights = 0.0
         years_used: List[str] = []
         n_years_with_woz = 0
+        n_years_with_exact_woz = 0
 
         for start, end, woz_year, w in years_cfg:
             key = (start, end)
@@ -188,6 +189,8 @@ def compute_po_xy(
                     sum_w_y += w * woz_val
                     sum_w_y_weights += w
                     n_years_with_woz += 1
+                    if (pc4, woz_year) in woz:
+                        n_years_with_exact_woz += 1
 
         x_linear = sum_w_x / sum_w if sum_w > 0 else 0.0
         y_linear = sum_w_y / sum_w_y_weights if sum_w_y_weights > 0 else 0.0
@@ -198,7 +201,16 @@ def compute_po_xy(
 
         postcode = (data.get("postcode") or "").strip()
         years_covered_str = ",".join(years_used) if years_used else ""
-        has_full_woz = bool(pc4 and len(years_used) > 0 and n_years_with_woz == len(years_used))
+        has_full_woz = bool(
+            pc4
+            and len(years_used) > 0
+            and n_years_with_exact_woz == len(years_used)
+        )
+        quality_flags: List[str] = []
+        if n_years_with_woz > n_years_with_exact_woz:
+            quality_flags.append("woz_imputed")
+        if n_years_with_woz < len(years_used):
+            quality_flags.append("woz_missing")
 
         row: Dict[str, Any] = {
             "BRIN": brin,
@@ -212,7 +224,7 @@ def compute_po_xy(
         }
         row["years_covered"] = years_covered_str
         row["has_full_woz"] = has_full_woz
-        row["data_quality_flags"] = ""
+        row["data_quality_flags"] = ",".join(quality_flags)
         rows_out.append(row)
 
     if outliers:

@@ -16,14 +16,20 @@ def build_po_meta(
     row_count: int,
     columns: Sequence[str],
     outliers: Dict[str, Any] | None = None,
+    cbs_woz_years: Sequence[int] | None = None,
 ) -> Dict[str, Any]:
     """为 PO points 数据构建 meta JSON。"""
+    actual_woz_years = sorted({int(year) for year in (cbs_woz_years or [])})
+    if actual_woz_years:
+        cbs_source = f"WOZ per PC4 {actual_woz_years[0]}–{actual_woz_years[-1]}"
+    else:
+        cbs_source = "WOZ per PC4"
     meta: Dict[str, Any] = {
         "version": SCHEMA_VERSION,
         "layer": "po",
         "source": {
             "duo": "Schooladviezen 2019–2025",
-            "cbs": "WOZ per PC4 2019–2024",
+            "cbs": cbs_source,
         },
         "axes": {
             "x": {
@@ -142,6 +148,7 @@ def build_po_meta(
             "data_file": data_file.name,
             "row_count": row_count,
             "columns": list(columns),
+            "cbs_woz_years": actual_woz_years,
         },
     }
     if outliers:

@@ -207,6 +207,10 @@ def fetch_cbs_woz(data_root: Path) -> Path:
                 zf.extract(gpkg_names[0], tmpdir)
                 gpkg_path = os.path.join(tmpdir, gpkg_names[0])
             rows = cbs_woz.extract_woz_from_gpkg(gpkg_path, year)
+            if not rows:
+                raise RuntimeError(
+                    f"CBS WOZ archive contains no valid values for {year}: {zip_name}"
+                )
             all_rows.extend(rows)
             print(f"[fetch]   {year}: {len(rows)} valid WOZ rows")
 

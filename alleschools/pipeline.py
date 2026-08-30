@@ -323,6 +323,7 @@ def run_po_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
             row_count=len(rows_out),
             columns=fieldnames,
             outliers=outliers_cfg or None,
+            cbs_woz_years=woz_years,
         )
         json_exporter.write_meta_json(meta_dict, meta_path)
 

@@ -5,10 +5,8 @@
 Zip 内为 Geopackage，用 sqlite3 读取表 postcode + gemiddelde_woz_waarde_woning。
 
 年份说明（维护时参考）：
-- 2024：当前 v1 中 WOZ 为 CBS 待发布编码(-99995)，脚本会下载但有效条数为 0；
-  等 CBS 发布 2024 的 v2（或更新 zip）且含 WOZ 后，再跑脚本即可；若 zip 名变更需改 YEARS_ZIP。
-- 2025：peildatum 1 januari 2025 的邮编数据尚未发布，通常会在 2026 年放出，
-  届时可将 2025 加入 YEARS_ZIP。
+- 2024 v2 与 2025 v1 于 2026 年发布，均包含有效 WOZ；
+- 2025 文件曾因邮编映射与 WOZ 单位问题修订，这里使用 2026-08-18 后的官方文件；
 - 查最新发布与 zip 名：https://www.cbs.nl/nl-nl/dossier/nederland-regionaal/geografische-data/gegevens-per-postcode
 """
 
@@ -21,10 +19,13 @@ BASE_URL = "https://download.cbs.nl/postcode"
 
 # 年份 -> zip 文件名（不含路径）。详见本文件顶部 docstring 中「年份说明」
 YEARS_ZIP = {
-    2024: "2025-cbs_pc4_2024_v1.zip",
+    2025: "2026-cbs_pc4_2025_v1.zip",
+    2024: "2026-cbs_pc4_2024_v2.zip",
     2023: "2025-cbs_pc4_2023_v2.zip",
     2022: "2025-cbs_pc4_2022_vol.zip",
     2021: "2024-cbs_pc4_2021_vol.zip",
+    2020: "2026-cbs_pc4_2020_vol.zip",
+    2019: "2026-cbs_pc4_2019_vol.zip",
 }
 
 # CBS 保密/待发布编码，不写入最终 CSV

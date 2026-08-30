@@ -36,6 +36,29 @@ def test_compute_po_xy_includes_meta_columns():
     assert r["has_full_woz"] is True
 
 
+def test_compute_po_xy_marks_nearest_year_as_imputed_not_full():
+    schools = {
+        "00AA": {
+            "naam": "Test",
+            "gemeente": "G",
+            "postcode": "1234AB",
+            "pc4": "1234",
+            "soort_po": "Bo",
+            "years": {("2019", "2020"): {"total": 50, "vwo_equiv": 10}},
+        },
+    }
+    rows, _ = compute_po_xy(
+        schools,
+        {("1234", 2021): 200.0},
+        [2021],
+        school_years=[["2019", "2020", 2019, 1.0]],
+        min_pupils_total=10,
+    )
+    assert rows[0]["Y_linear"] == 200.0
+    assert rows[0]["has_full_woz"] is False
+    assert rows[0]["data_quality_flags"] == "woz_imputed"
+
+
 def test_export_po_csv_respects_include_meta_columns(tmp_path: Path):
     """export_po_csv(include_meta_columns=False) 只写基础列；True 时写基础+meta 列。"""
     row = {
@@ -74,6 +97,17 @@ def test_build_po_meta_structure_matches_schema():
     assert meta["axes"]["size"]["field"] == "size"
     assert "nl" in meta["i18n"]
     assert "po_vwo_advice_share" in meta["i18n"]["nl"]["metrics"]
+
+
+def test_build_po_meta_reports_actual_woz_years():
+    meta = build_po_meta(
+        Path("schools_xy_coords_po.json"),
+        row_count=1,
+        columns=["id"],
+        cbs_woz_years=[2025, 2023, 2024],
+    )
+    assert meta["source"]["cbs"] == "WOZ per PC4 2023–2025"
+    assert meta["summary"]["cbs_woz_years"] == [2023, 2024, 2025]
 
 
 def test_run_po_pipeline_writes_meta_json_and_stats(pipeline_data_root):
