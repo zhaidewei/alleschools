@@ -5,6 +5,7 @@
 """
 import argparse
 import csv
+import glob
 import json
 import os
 import shutil
@@ -24,6 +25,111 @@ PUBLIC_INDEX = os.path.join(BASE, "public", "index.html")
 DEMO_DIR = os.path.join(BASE, "demo")
 DEMO_INDEX = os.path.join(DEMO_DIR, "datasets_index.json")
 PORT = 8082
+
+
+def _load_school_provinces():
+    """从本地 DUO 原始文件构建学校/市镇到省份的映射。"""
+    by_brin = {}
+    by_gemeente = {}
+    paths = [os.path.join(BASE, "raw_data", "duo_vestigingen_vo.csv")]
+    paths.extend(sorted(glob.glob(os.path.join(BASE, "raw_data", "duo_schooladviezen_*.csv"))))
+    for path in paths:
+        if not os.path.exists(path):
+            continue
+        for enc in ("utf-8-sig", "latin-1", "cp1252"):
+            try:
+                with open(path, "r", encoding=enc, newline="") as f:
+                    for row in csv.DictReader(f, delimiter=";", quotechar='"'):
+                        province = (row.get("PROVINCIE") or "").strip().strip('"')
+                        gemeente = (row.get("GEMEENTENAAM") or "").strip().strip('"')
+                        inst = (row.get("INSTELLINGSCODE") or row.get("BRIN_NUMMER") or "").strip().strip('"')
+                        vest = (row.get("VESTIGINGSCODE") or row.get("VESTIGINGSNUMMER") or "").strip().strip('"')
+                        brin = (inst + vest).replace(" ", "")
+                        if province and gemeente:
+                            by_gemeente[gemeente.upper()] = province
+                        if province and brin:
+                            by_brin[brin] = province
+                break
+            except UnicodeDecodeError:
+                continue
+    return by_brin, by_gemeente
+
+
+def load_yearly_comparison_data():
+    """从原始 DUO/CBS 数据生成真实逐年比较值，供前端钉住学校后绘图。"""
+    try:
+        from alleschools.compute.indicators import get_woz_for_year
+        from alleschools.compute.vwo_profiles import compute_vwo_profile_indices_by_year
+        from alleschools.config import build_effective_config
+        from alleschools.loaders.cbs_loader import load_woz_pc4_year
+        from alleschools.loaders.duo_loader import load_schooladviezen_po
+        from alleschools.loaders.vo_loader import load_exam_schools
+        from alleschools.loaders.vwo_exam_loader import load_vwo_central_exam_scores
+
+        config = build_effective_config()
+        raw_dir = os.path.join(BASE, "raw_data")
+
+        vo_cfg = config["vo"]
+        year_cols = vo_cfg["weights"]["year_cols"]
+        vo_input = vo_cfg["input"]
+        vo_schools = load_exam_schools(
+            raw_dir,
+            vo_input["exams_all_csv"],
+            vo_input["exams_small_csv"],
+            year_cols,
+        )
+        profile_files = {}
+        for path in sorted(glob.glob(os.path.join(raw_dir, "examenkandidaten-vwo-en-examencijfers-*.csv"))):
+            year = os.path.basename(path).removeprefix("examenkandidaten-vwo-en-examencijfers-").removesuffix(".csv")
+            profile_files[year] = os.path.basename(path)
+        central_scores = load_vwo_central_exam_scores(raw_dir, profile_files)
+        profile_by_year = compute_vwo_profile_indices_by_year(central_scores)
+        vo_out = {}
+        for brin, school in vo_schools.items():
+            yearly = {}
+            years = sorted({str(item[2]) for item in year_cols} | set(profile_by_year.get(brin, {})))
+            for year in years:
+                total = school["all_kand"].get(year, 0)
+                values = profile_by_year.get(brin, {}).get(year, {})
+                if total <= 0 and not values:
+                    continue
+                row = {"sample": total, "profiles": values}
+                if total > 0:
+                    row["x"] = round(100.0 * school["havo_vwo"][year]["vwo"] / total, 2)
+                yearly[year] = row
+            if yearly:
+                vo_out[brin] = yearly
+
+        po_cfg = config["po"]
+        school_year_cfg = po_cfg["weights"]["school_years"]
+        schoolyears = [(str(item[0]), str(item[1])) for item in school_year_cfg]
+        po_schools = load_schooladviezen_po(
+            raw_dir,
+            schoolyears,
+            po_cfg["input"]["duo_schooladviezen_pattern"],
+        )
+        woz, woz_years = load_woz_pc4_year(os.path.join(raw_dir, po_cfg["input"]["cbs_woz_csv"]))
+        po_out = {}
+        for brin, school in po_schools.items():
+            yearly = {}
+            for start, end, woz_year, _weight in school_year_cfg:
+                values = school["years"].get((str(start), str(end)))
+                if not values or values["total"] <= 0:
+                    continue
+                row = {
+                    "x": round(100.0 * values["vwo_equiv"] / values["total"], 2),
+                    "sample": values["total"],
+                }
+                woz_value = get_woz_for_year(woz, woz_years, school.get("pc4") or "", int(woz_year))
+                if woz_value is not None:
+                    row["y"] = round(float(woz_value), 2)
+                yearly[f"{start}-{end}"] = row
+            if yearly:
+                po_out[brin] = yearly
+        return {"vo": vo_out, "po": po_out}
+    except Exception as exc:
+        print(f"[view_xy_server] 逐年比较数据加载失败: {exc}", file=sys.stderr)
+        return {"vo": {}, "po": {}}
 
 
 def _json_for_inline_script(value):
@@ -142,6 +248,7 @@ def load_data_vo():
     paths = _get_vo_paths()
     csv_path = paths["csv_path"]
     rows = []
+    province_by_brin, province_by_gemeente = _load_school_provinces()
     with open(csv_path, "r", encoding="utf-8") as f:
         for r in csv.DictReader(f):
             size_raw = r.get("candidates_total") or r.get("HAVO_geslaagd_total") or 0
@@ -149,11 +256,14 @@ def load_data_vo():
                 size = int(size_raw)
             except (ValueError, TypeError):
                 size = 0
+            brin = r["BRIN"]
+            gemeente = r["gemeente"]
             rows.append(
                 {
-                    "BRIN": r["BRIN"],
+                    "BRIN": brin,
                     "naam": r["vestigingsnaam"],
-                    "gemeente": r["gemeente"],
+                    "gemeente": gemeente,
+                    "provincie": r.get("provincie") or province_by_brin.get(brin) or province_by_gemeente.get(gemeente.upper(), ""),
                     "postcode": (r.get("postcode") or "").strip(),
                     "type": r["type"],
                     "X_linear": float(r["X_linear"]),
@@ -199,6 +309,7 @@ def load_data_po():
     if not os.path.exists(csv_path):
         return []
     rows = []
+    province_by_brin, province_by_gemeente = _load_school_provinces()
     with open(csv_path, "r", encoding="utf-8") as f:
         for r in csv.DictReader(f):
             size_raw = r.get("pupils_total") or 0
@@ -206,11 +317,14 @@ def load_data_po():
                 size = int(size_raw)
             except (ValueError, TypeError):
                 size = 0
+            brin = r["BRIN"]
+            gemeente = r["gemeente"]
             rows.append(
                 {
-                    "BRIN": r["BRIN"],
+                    "BRIN": brin,
                     "naam": r["vestigingsnaam"],
-                    "gemeente": r["gemeente"],
+                    "gemeente": gemeente,
+                    "provincie": r.get("provincie") or province_by_brin.get(brin) or province_by_gemeente.get(gemeente.upper(), ""),
                     "postcode": (r.get("postcode") or "").strip(),
                     "type": r["type"],
                     "X_linear": float(r["X_linear"]),
@@ -266,6 +380,7 @@ def load_demo_data():
                 "BRIN": p.get("brin") or p.get("id"),
                 "naam": p.get("name", ""),
                 "gemeente": p.get("municipality", ""),
+                "provincie": p.get("province", ""),
                 "postcode": (p.get("postcode") or "").strip(),
                 "type": p.get("school_type", ""),
                 "X_linear": float(p.get("x_linear", 0.0)),
@@ -288,6 +403,7 @@ def load_demo_data():
                 "BRIN": p.get("brin") or p.get("id"),
                 "naam": p.get("name", ""),
                 "gemeente": p.get("municipality", ""),
+                "provincie": p.get("province", ""),
                 "postcode": (p.get("postcode") or "").strip(),
                 "type": p.get("school_type", ""),
                 "X_linear": float(p.get("x_linear", 0.0)),
@@ -333,6 +449,7 @@ def build_html(
     meta_po=None,
     data_vo_profiles=None,
     meta_vo_profiles=None,
+    yearly_comparison=None,
 ):
     excluded_vo = excluded_vo if excluded_vo is not None else []
     excluded_po = excluded_po if excluded_po is not None else []
@@ -340,6 +457,7 @@ def build_html(
     meta_po = meta_po if meta_po is not None else {}
     data_vo_profiles = data_vo_profiles if data_vo_profiles is not None else {"NT": [], "NG": [], "EM": [], "CM": []}
     meta_vo_profiles = meta_vo_profiles if meta_vo_profiles is not None else {}
+    yearly_comparison = yearly_comparison if yearly_comparison is not None else {"vo": {}, "po": {}}
     data_vo_js = _json_for_inline_script(data_vo)
     data_po_js = _json_for_inline_script(data_po)
     excluded_vo_js = _json_for_inline_script(excluded_vo)
@@ -348,6 +466,7 @@ def build_html(
     meta_po_js = _json_for_inline_script(meta_po)
     data_vo_profiles_js = _json_for_inline_script(data_vo_profiles)
     meta_vo_profiles_js = _json_for_inline_script(meta_vo_profiles)
+    yearly_comparison_js = _json_for_inline_script(yearly_comparison)
     print(f"[view_xy_server] 使用 HTML 模板: {html_path}", file=sys.stderr)
     with open(html_path, "r", encoding="utf-8") as f:
         html = f.read()
@@ -359,6 +478,7 @@ def build_html(
     html = html.replace("__INJECT_META_PO__", meta_po_js)
     html = html.replace("__INJECT_DATA_VO_PROFILES__", data_vo_profiles_js)
     html = html.replace("__INJECT_META_VO_PROFILES__", meta_vo_profiles_js)
+    html = html.replace("__INJECT_YEARLY_COMPARISON__", yearly_comparison_js)
     return html
 
 
@@ -393,6 +513,7 @@ def main():
         except Exception as e:  # pragma: no cover - 简单错误提示即可
             print(f"加载 demo 数据失败: {e}", file=sys.stderr)
             return 1
+        yearly_comparison = {"vo": {}, "po": {}}
     else:
         vo_paths = _get_vo_paths()
         vo_csv = vo_paths["csv_path"]
@@ -439,6 +560,7 @@ def main():
                         meta_vo_profiles = json.load(f)
                 except Exception:
                     meta_vo_profiles = {}
+        yearly_comparison = load_yearly_comparison_data()
 
     html = build_html(
         HTML_PATH,
@@ -450,6 +572,7 @@ def main():
         meta_po,
         data_vo_profiles=data_vo_profiles,
         meta_vo_profiles=meta_vo_profiles,
+        yearly_comparison=yearly_comparison,
     )
 
     out_dir = os.path.dirname(PUBLIC_INDEX)
@@ -459,6 +582,9 @@ def main():
     logic_source = os.path.join(BASE, "view_xy_logic.js")
     if os.path.exists(logic_source):
         shutil.copy2(logic_source, os.path.join(out_dir, "view_xy_logic.js"))
+    methodology_source = os.path.join(BASE, "methodology.html")
+    if os.path.exists(methodology_source):
+        shutil.copy2(methodology_source, os.path.join(out_dir, "methodology.html"))
     assets_source = os.path.join(BASE, "assets")
     if os.path.isdir(assets_source):
         shutil.copytree(assets_source, os.path.join(out_dir, "assets"), dirs_exist_ok=True)

@@ -223,5 +223,30 @@ def compute_vwo_profile_indices(
     return profiles
 
 
-__all__ = ["compute_vwo_profile_indices"]
+def compute_vwo_profile_indices_by_year(
+    schools: Mapping[str, SchoolYearCentralExamScores],
+) -> Dict[str, Dict[str, Dict[ProfileId, float]]]:
+    """返回学校逐学年的四类 VWO profile 指标，不做跨年加权。"""
+    out: Dict[str, Dict[str, Dict[ProfileId, float]]] = {}
+    calculators = {
+        "NT": _compute_x_nt,
+        "NG": _compute_x_ng,
+        "EM": _compute_x_em,
+        "CM": _compute_x_cm,
+    }
+    for brin, school in schools.items():
+        school_years: Dict[str, Dict[ProfileId, float]] = {}
+        for year_label, subjects in school.years.items():
+            values: Dict[ProfileId, float] = {}
+            for profile, calculator in calculators.items():
+                value = calculator(subjects)
+                if value is not None:
+                    values[profile] = round(float(value), 2)
+            if values:
+                school_years[year_label] = values
+        if school_years:
+            out[brin] = school_years
+    return out
 
+
+__all__ = ["compute_vwo_profile_indices", "compute_vwo_profile_indices_by_year"]

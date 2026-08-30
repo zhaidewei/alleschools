@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AlleSchools · 数据与方法</title>
+  <link rel="stylesheet" href="assets/site.css">
+  <style>
+    .method-copy h2 { margin-top: 2rem; font-family: Iowan Old Style, Palatino Linotype, Book Antiqua, Georgia, serif; font-size: 1.5rem; font-weight: 700; color: var(--ink); }
+    .method-copy h3 { margin-top: 1.25rem; font-size: 1rem; font-weight: 700; color: var(--ink); }
+    .method-copy p, .method-copy li { margin-top: .65rem; line-height: 1.75; color: var(--muted); }
+    .method-copy ul { margin: .5rem 0 0 1.25rem; list-style: disc; }
+    .method-copy code { border-radius: .35rem; padding: .1rem .35rem; background: var(--surface-muted); color: var(--ink); }
+    .formula { margin-top: .75rem; overflow-x: auto; border: 1px solid var(--line); border-radius: .75rem; padding: 1rem; background: var(--surface); color: var(--ink); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  </style>
+</head>
+<body class="min-h-screen antialiased">
+  <header class="border-b" style="border-color:var(--line);background:var(--surface)">
+    <div class="v2-shell flex items-center justify-between gap-4 py-4">
+      <a id="backLink" href="./?lang=zh" class="font-semibold text-forest dark:text-[#f4efe4] no-underline">← AlleSchools</a>
+      <nav class="flex gap-3 text-sm" aria-label="Language">
+        <a href="?lang=zh" data-lang-link="zh" class="v2-nav-link">中文</a>
+        <a href="?lang=nl" data-lang-link="nl" class="v2-nav-link">NL</a>
+        <a href="?lang=en" data-lang-link="en" class="v2-nav-link">EN</a>
+      </nav>
+    </div>
+  </header>
+  <main class="v2-shell py-8 sm:py-12">
+    <article class="method-copy mx-auto max-w-3xl" data-lang="zh">
+      <p class="text-xs font-bold uppercase tracking-[0.16em] text-terracotta">数据与方法</p>
+      <h1 class="mt-2 font-display text-4xl font-bold tracking-tight text-forest sm:text-6xl">数据从哪里来，图表如何计算？</h1>
+      <p class="mt-4 text-lg">中学和小学使用不同的数据与计算口径。下面分开说明；所有指标用于探索，不构成学校排名或最终判断。</p>
+      <nav class="mt-6 flex flex-wrap gap-2" aria-label="页面章节"><a href="#vo" class="profile-tab">中学 VO</a><a href="#po" class="profile-tab">小学 PO</a></nav>
+      <section id="vo"><h2>中学（VO）</h2>
+      <h3>使用什么数据</h3><p>DUO Open Onderwijsdata 的学校与分校信息、各学年考试考生与通过人数，以及 VWO 各科中央考试平均分。国际学校不在当前数据范围内。</p>
+      <h3>X：VWO 毕业生占全部考生的比例</h3>
+      <p>每个学年先计算 VWO 通过人数占全校考试考生的百分比，再按时间权重合并。越近的学年权重越高。</p>
+      <div class="formula">X = Σ(wᵧ × 100 × VWO通过ᵧ ÷ 全部考生ᵧ) ÷ Σwᵧ</div>
+      <p>X 描述毕业生构成，不衡量教学质量，也不能直接推断大学录取概率。</p>
+      <h3>Y：所选 VWO profiel 的核心科目统考指数</h3>
+      <ul>
+        <li><strong>NT：</strong>0.50×数学 B + 0.25×物理 + 0.25×化学</li>
+        <li><strong>NG：</strong>0.35×生物 + 0.25×化学 + 0.40×数学 B</li>
+        <li><strong>EM：</strong>经济、历史、数学 A/B 各占三分之一</li>
+        <li><strong>CM：</strong>历史、数学 C/A、英语/德语/法语各占三分之一</li>
+      </ul>
+      <p>科目输入是 DUO 中央考试平均分（1–10）。某学年缺少一个必要科目时，该 profiel 的该学年不参与计算；其余有效学年仍按时间权重合并。</p>
+      <h3>圆点大小</h3>
+      <p>近五学年全校考试考生人数的加权平均。它表达样本规模，不表达学校优劣。</p>
+      <h3>中学数据的局限</h3><p>考试结果受课程组合、学生群体和样本量影响；profile 指数缺少必要科目时不会强行填零。VWO 占比和考试分数都不能单独代表学校整体质量。</p></section>
+      <section id="po"><h2>小学（PO）</h2>
+      <h3>使用什么数据</h3><p>DUO Open Onderwijsdata 的小学升学建议与学校信息，以及 CBS 按四位邮编（PC4）发布的住宅平均 WOZ。</p>
+      <h3>X：VWO 等价升学建议占比</h3>
+      <div class="formula">X = 100 × (VWO + 0.5×HAVO/VWO + 0.1×HAVO) ÷ 建议总人数</div>
+      <p>这是一个透明的探索指标：混合建议按固定系数换算。它描述升学建议构成，不代表最终入学结果。</p>
+      <h3>Y：学校 PC4 邮编的平均 WOZ</h3>
+      <p>使用 CBS 按四位邮编发布的住宅平均 WOZ，单位为千欧元，并按对应学年权重合并。当前下载覆盖 2019–2025；当前计算窗口使用 2019–2024。</p>
+      <p>优先使用精确年份。某个 PC4 的精确年份缺失时，系统使用该邮编最近可用年份，并标记 <code>woz_imputed</code>；只有所有参与学年均为精确匹配时，<code>has_full_woz</code> 才为真。</p>
+      <h3>圆点大小</h3><p>计算窗口内收到升学建议的学生总数。</p>
+      <h3>小学数据的局限</h3><p>样本低于配置阈值的学校会被排除；被压制或缺失的 CBS 数据不会被当作真实零值。WOZ 是邮编区域特征，不是学生家庭的个人资产。</p></section>
+      <h2>如何使用</h2><p>图表适合提出问题和缩小范围。最终判断应结合学校官网、教育检查报告、课程与支持条件，以及实地了解。AlleSchools 与 DUO、CBS 或荷兰政府没有隶属关系。</p>
+    </article>
+
+    <article class="method-copy mx-auto hidden max-w-3xl" data-lang="en">
+      <p class="text-xs font-bold uppercase tracking-[0.16em] text-terracotta">Data & methodology</p><h1 class="mt-2 font-display text-4xl font-bold tracking-tight text-forest sm:text-6xl">Where does the data come from, and how is the chart calculated?</h1>
+      <p class="mt-4 text-lg">Secondary and primary schools use different sources and definitions. Both are explained separately; the indicators do not form a ranking.</p>
+      <nav class="mt-6 flex flex-wrap gap-2" aria-label="Page sections"><a href="#vo-en" class="profile-tab">Secondary VO</a><a href="#po-en" class="profile-tab">Primary PO</a></nav>
+      <section id="vo-en"><h2>Secondary schools (VO)</h2><h3>Data used</h3><p>DUO school and branch records, annual exam candidate and pass counts, and VWO central-exam subject averages. International schools are outside the current scope.</p><h3>X: VWO graduates as a share of all exam candidates</h3><div class="formula">X = Σ(wᵧ × 100 × VWO passedᵧ ÷ all candidatesᵧ) ÷ Σwᵧ</div><p>Recent school years receive more weight. X describes graduate composition, not overall teaching quality or admission probability.</p>
+      <h3>Y: central-exam index for the selected VWO profile</h3><ul><li><strong>NT:</strong> 0.50×Mathematics B + 0.25×Physics + 0.25×Chemistry</li><li><strong>NG:</strong> 0.35×Biology + 0.25×Chemistry + 0.40×Mathematics B</li><li><strong>EM:</strong> equal weights for Economics, History and Mathematics A/B</li><li><strong>CM:</strong> equal weights for History, Mathematics C/A and English/German/French</li></ul><p>A school-year profile is omitted when a required subject is missing. Valid years are combined with time weights.</p><h3>Dot size</h3><p>Weighted average annual exam candidates over the five-year window; it represents sample size.</p><h3>VO limitations</h3><p>Results depend on subject choice, population and sample size. A missing required profile subject is omitted, not forced to zero. No single indicator measures overall school quality.</p></section>
+      <section id="po-en"><h2>Primary schools (PO)</h2><h3>Data used</h3><p>DUO primary-school advice and school records, plus CBS mean residential WOZ by four-digit postcode (PC4).</p><h3>X: VWO-equivalent advice share</h3><div class="formula">X = 100 × (VWO + 0.5×HAVO/VWO + 0.1×HAVO) ÷ all advised pupils</div><p>This transparent exploratory conversion describes advice composition, not final enrolment.</p>
+      <h3>Y: mean WOZ for the school’s PC4 postcode</h3><p>CBS residential WOZ values are expressed in thousands of euros. Downloads currently cover 2019–2025; the current calculation window uses 2019–2024.</p><p>Exact-year values are preferred. A missing PC4-year uses its nearest available year and receives <code>woz_imputed</code>. <code>has_full_woz</code> is true only when every contributing year is exact.</p><h3>Dot size</h3><p>Total pupils receiving school advice in the calculation window.</p>
+      <h3>PO limitations</h3><p>Recent years receive more weight. Schools below sample thresholds are excluded; suppressed or missing CBS values are not real zeros. WOZ describes an area, not an individual family.</p></section><h2>How to use this</h2><p>Use the chart to ask questions and narrow a search, then combine it with official inspection reports, school information and visits. AlleSchools is not affiliated with DUO, CBS or the Dutch government.</p>
+    </article>
+
+    <article class="method-copy mx-auto hidden max-w-3xl" data-lang="nl">
+      <p class="text-xs font-bold uppercase tracking-[0.16em] text-terracotta">Data & methode</p><h1 class="mt-2 font-display text-4xl font-bold tracking-tight text-forest sm:text-6xl">Waar komen de gegevens vandaan en hoe wordt de kaart berekend?</h1>
+      <p class="mt-4 text-lg">Voortgezet en primair onderwijs gebruiken verschillende bronnen en definities. Beide worden apart uitgelegd; de indicatoren vormen geen ranglijst.</p>
+      <nav class="mt-6 flex flex-wrap gap-2" aria-label="Pagina-onderdelen"><a href="#vo-nl" class="profile-tab">Voortgezet VO</a><a href="#po-nl" class="profile-tab">Primair PO</a></nav>
+      <section id="vo-nl"><h2>Voortgezet onderwijs (VO)</h2><h3>Gebruikte data</h3><p>DUO-gegevens over scholen en vestigingen, jaarlijkse examenkandidaten en geslaagden, en VWO-gemiddelden van centrale examens per vak. Internationale scholen vallen buiten de huidige scope.</p><h3>X: VWO-geslaagden als aandeel van alle examenkandidaten</h3><div class="formula">X = Σ(wᵧ × 100 × VWO-geslaagdᵧ ÷ alle kandidatenᵧ) ÷ Σwᵧ</div><p>Recente schooljaren wegen zwaarder. X beschrijft de samenstelling van geslaagden, niet de totale onderwijskwaliteit of toelatingskans.</p>
+      <h3>Y: centraal-examenindex voor het gekozen VWO-profiel</h3><ul><li><strong>NT:</strong> 0,50×Wiskunde B + 0,25×Natuurkunde + 0,25×Scheikunde</li><li><strong>NG:</strong> 0,35×Biologie + 0,25×Scheikunde + 0,40×Wiskunde B</li><li><strong>EM:</strong> gelijke weging voor Economie, Geschiedenis en Wiskunde A/B</li><li><strong>CM:</strong> gelijke weging voor Geschiedenis, Wiskunde C/A en Engels/Duits/Frans</li></ul><p>Een schooljaar vervalt voor een profiel wanneer een verplicht vak ontbreekt. Geldige jaren worden tijdgewogen samengevoegd.</p><h3>Puntgrootte</h3><p>Gewogen gemiddeld aantal examenkandidaten per jaar in het vijfjaarsvenster; dit toont de steekproefomvang.</p><h3>Beperkingen VO</h3><p>Uitkomsten hangen af van vakkeuze, populatie en steekproefomvang. Een ontbrekend vereist profielvak wordt weggelaten en niet op nul gezet. Geen enkele indicator meet de totale schoolkwaliteit.</p></section>
+      <section id="po-nl"><h2>Primair onderwijs (PO)</h2><h3>Gebruikte data</h3><p>DUO-schooladviezen en schoolgegevens, plus de gemiddelde WOZ van woningen per viercijferige postcode (PC4) van het CBS.</p><h3>X: VWO-equivalent adviesaandeel</h3><div class="formula">X = 100 × (VWO + 0,5×HAVO/VWO + 0,1×HAVO) ÷ alle geadviseerde leerlingen</div><p>Deze transparante omzetting beschrijft de adviessamenstelling, niet de uiteindelijke instroom.</p>
+      <h3>Y: gemiddelde WOZ van de PC4 van de school</h3><p>CBS-waarden zijn in duizenden euro’s. De downloads omvatten 2019–2025; het huidige rekenvenster gebruikt 2019–2024.</p><p>Een exact jaar heeft voorrang. Bij een ontbrekende PC4-jaarcombinatie wordt het dichtstbijzijnde beschikbare jaar gebruikt en <code>woz_imputed</code> gezet. <code>has_full_woz</code> is alleen waar als elk gebruikt jaar exact is.</p><h3>Puntgrootte</h3><p>Totaal aantal leerlingen met een schooladvies in het rekenvenster.</p>
+      <h3>Beperkingen PO</h3><p>Recente jaren wegen zwaarder. Scholen onder de steekproefdrempel worden uitgesloten; onderdrukte of ontbrekende CBS-waarden zijn geen echte nul. WOZ beschrijft een gebied, niet een individueel gezin.</p></section><h2>Gebruik</h2><p>Gebruik de kaart om vragen te stellen en combineer haar met inspectierapporten, schoolinformatie en bezoeken. AlleSchools is niet verbonden aan DUO, CBS of de Nederlandse overheid.</p>
+    </article>
+  </main>
+  <script>
+    (function () {
+      var lang = new URLSearchParams(location.search).get('lang');
+      if (!['zh', 'en', 'nl'].includes(lang)) lang = localStorage.getItem('schools-lang') || 'en';
+      if (!['zh', 'en', 'nl'].includes(lang)) lang = 'en';
+      document.documentElement.lang = lang === 'zh' ? 'zh-CN' : lang;
+      document.documentElement.classList.toggle('dark', localStorage.getItem('schools-theme') === 'dark');
+      document.querySelectorAll('[data-lang]').forEach(function (el) { el.classList.toggle('hidden', el.getAttribute('data-lang') !== lang); });
+      document.querySelectorAll('[data-lang-link]').forEach(function (el) { if (el.getAttribute('data-lang-link') === lang) { el.style.color = 'var(--ink)'; el.style.fontWeight = '700'; } });
+      document.getElementById('backLink').href = './?lang=' + encodeURIComponent(lang);
+      document.title = lang === 'zh' ? 'AlleSchools · 数据与方法' : (lang === 'nl' ? 'AlleSchools · Data & methode' : 'AlleSchools · Data & methodology');
+    }());
+  </script>
+</body>
+</html>

@@ -88,12 +88,12 @@ def _brin_key_from_row(row: Mapping[str, str]) -> str:
     inst = (row.get(COL_INSTELLINGSCODE) or "").strip().strip('"')
     vest = (row.get(COL_VESTIGINGSCODE) or "").strip().strip('"')
     if inst and vest:
-        return (inst + vest).replace(" ", "")
+        return (inst + vest.zfill(2)).replace(" ", "")
     # 回退到 BRIN NUMMER + VESTIGINGSNUMMER
     brin = (row.get(COL_BRIN_NUMMER) or "").strip().strip('"')
     vestnr = (row.get(COL_VESTIGINGSNUMMER) or "").strip().strip('"')
     if brin and vestnr:
-        return (brin + vestnr).replace(" ", "")
+        return (brin + vestnr.zfill(2)).replace(" ", "")
     return vest
 
 
@@ -291,4 +291,3 @@ __all__ = [
     "load_vwo_exam_cijferlijst_scores",
     "load_vwo_central_exam_scores",
 ]
-

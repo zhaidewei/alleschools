@@ -18,8 +18,7 @@
     <div class="v2-shell flex min-h-[68px] items-center justify-between gap-4">
       <a href="/" class="font-display text-2xl font-bold tracking-tight text-forest no-underline dark:text-[#f4efe4]">Alle<span class="text-terracotta dark:text-[#e08260]">Schools</span></a>
       <nav class="hidden items-center gap-6 md:flex" aria-label="Primary navigation">
-        <a id="navMethodology" href="#algorithmSection" class="v2-nav-link">Methodology</a>
-        <a id="navData" href="#disclaimerSection" class="v2-nav-link">About the data</a>
+        <a id="navMethodology" href="methodology.html?lang=en" class="v2-nav-link">Data &amp; methodology</a>
         <a id="navContact" href="#contactSection" class="v2-nav-link">Contact</a>
       </nav>
       <div class="flex items-center gap-2">
@@ -56,26 +55,14 @@
       <p id="heroBody" class="mt-4 max-w-2xl text-base leading-7 text-[#65716b] dark:text-[#afbbb4] sm:text-lg">Search schools and places, then explore how schools compare across transparent indicators.</p>
       <p id="heroCaveat" class="mt-2 text-sm text-[#65716b] dark:text-[#afbbb4]">A starting point for exploration — never a ranking or final judgement.</p>
     </section>
-    <div id="mobileControls" class="hidden">
-      <div class="flex flex-col gap-1">
-        <label id="labelMobileSchoolSearch" for="mobileSchoolSearch" class="text-xs font-medium text-slate-600 dark:text-slate-400">School search</label>
-        <input type="text" id="mobileSchoolSearch" placeholder="Name or acronym" class="w-full rounded-lg border border-slate-300 dark:border-slate-500 px-3 py-1.5 text-sm text-slate-800 dark:text-slate-200 dark:bg-slate-800 placeholder-slate-400 dark:placeholder-slate-500 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" title="">
-      </div>
-      <div class="flex items-center justify-between gap-3">
-        <button type="button" id="mobileSboToggle" class="hidden items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 bg-white/80 dark:bg-slate-800/80" aria-pressed="false">
-          <span class="inline-block w-2 h-2 rounded-full bg-emerald-500/80"></span>
-          <span id="mobileSboLabel">Sbo</span>
-        </button>
-      </div>
-    </div>
     <section class="v2-explorer" aria-labelledby="explorerTitle">
     <div id="chartWrap" class="mb-8 min-w-0">
-      <div class="mb-3 flex flex-wrap items-end justify-between gap-3">
-      <div><p id="explorerTitle" class="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-terracotta dark:text-[#e08260]">School explorer</p>
+      <div class="v2-chart-heading mb-3">
+      <div class="min-w-0"><p id="explorerTitle" class="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-terracotta dark:text-[#e08260]">School explorer</p>
       <h2 id="titleMain" class="font-display text-2xl font-bold text-forest dark:text-[#f4efe4] tracking-tight">Dutch secondary school map: academic level × science focus</h2></div>
-      <div class="flex items-center gap-1 rounded-xl border border-[#ddd5c7] bg-[#eee8dc] p-1 dark:border-[#335047] dark:bg-[#1c342d]">
-        <button type="button" id="navVO" class="navSchoolType px-3 py-1.5 text-sm font-semibold rounded-lg border-0 bg-white dark:bg-[#335047] text-forest dark:text-white shadow-sm" data-mode="vo">Secondary</button>
-        <button type="button" id="navPO" class="navSchoolType px-3 py-1.5 text-sm font-semibold rounded-lg border-0 bg-transparent text-[#65716b] dark:text-[#afbbb4] hover:bg-white/60 dark:hover:bg-[#335047]" data-mode="po">Primary</button>
+      <div class="flex items-center gap-1 rounded-xl border border-[#ddd5c7] bg-[#eee8dc] p-1 dark:border-[#335047] dark:bg-[#1c342d]" role="tablist" aria-label="School level">
+        <button type="button" id="navVO" class="navSchoolType school-type-tab" data-mode="vo" role="tab" aria-selected="true">Secondary</button>
+        <button type="button" id="navPO" class="navSchoolType school-type-tab" data-mode="po" role="tab" aria-selected="false">Primary</button>
       </div></div>
       <p id="subtitleMain" class="mt-1 text-sm text-slate-500 dark:text-slate-400">Data from DUO (excluding international schools). X = VWO share, Y = science share. Dot size = exam candidates (5-yr total). <strong id="schoolCount" class="font-medium text-slate-700 dark:text-slate-300">0</strong> schools shown.</p>
       <div id="profileTabs" class="mt-4 flex max-w-full gap-1 overflow-x-auto pb-1" role="tablist" aria-label="VWO profile">
@@ -93,93 +80,75 @@
         <div id="customLegend" class="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-3 pt-3 border-t border-slate-200 dark:border-slate-600" style="min-height: 24px;"></div>
       </div>
       <div id="noResults" class="v2-surface mt-4 hidden rounded-2xl p-5 text-sm text-[#65716b] dark:text-[#afbbb4]" role="status"></div>
+      <section id="comparisonSection" class="v2-surface mt-4 hidden rounded-2xl p-4 sm:p-5" aria-labelledby="comparisonTitle">
+        <div class="flex items-center justify-between gap-4">
+          <div><h3 id="comparisonTitle" class="font-display text-xl font-bold text-forest dark:text-[#f4efe4]">Pinned schools and yearly comparison</h3><p id="comparisonHint" class="mt-1 text-xs text-[#65716b] dark:text-[#afbbb4]">Pin up to four schools. Pinned schools remain visible while you explore.</p></div>
+          <button type="button" id="comparisonClear" class="text-sm font-semibold text-terracotta dark:text-[#e08260]">Clear all</button>
+        </div>
+        <div id="comparisonList" class="mt-4 grid gap-3 sm:grid-cols-2"></div>
+        <div class="mt-5 border-t border-[#ddd5c7] pt-4 dark:border-[#335047]">
+          <div class="mb-3 flex flex-wrap items-end justify-between gap-3">
+            <div><h4 id="comparisonChartTitle" class="font-semibold text-forest dark:text-[#f4efe4]">Year-by-year data</h4><p id="comparisonChartHint" class="mt-1 text-xs text-[#65716b] dark:text-[#afbbb4]">Missing annual values are left blank.</p></div>
+            <label class="text-xs font-semibold text-[#65716b] dark:text-[#afbbb4]"><span id="comparisonMetricLabel">Metric</span><select id="comparisonMetric" class="v2-input mt-1 min-w-[10rem]"><option value="x">X</option><option value="y">Y</option></select></label>
+          </div>
+          <div class="relative min-h-[420px]"><canvas id="comparisonChart" role="img" aria-label="Year-by-year school comparison bar chart"></canvas></div>
+          <p id="comparisonNoYearly" class="mt-3 hidden text-sm text-[#65716b] dark:text-[#afbbb4]">No yearly data is available for these schools.</p>
+        </div>
+      </section>
       <section id="accessibleResults" class="mt-4" aria-labelledby="accessibleResultsTitle">
         <h3 id="accessibleResultsTitle" class="font-display text-lg font-bold text-forest dark:text-[#f4efe4]">Matching schools</h3>
         <p id="chartTextSummary" class="mt-1 text-xs text-[#65716b] dark:text-[#afbbb4]"></p>
         <ul id="accessibleResultsList" class="mt-3 grid gap-2 sm:grid-cols-2"></ul>
       </section>
-      <section id="comparisonSection" class="v2-surface mt-4 hidden rounded-2xl p-4 sm:p-5" aria-labelledby="comparisonTitle">
-        <div class="flex items-center justify-between gap-4">
-          <div><h3 id="comparisonTitle" class="font-display text-xl font-bold text-forest dark:text-[#f4efe4]">Compare schools</h3><p id="comparisonHint" class="mt-1 text-xs text-[#65716b] dark:text-[#afbbb4]">Up to four schools. No score or ranking.</p></div>
-          <button type="button" id="comparisonClear" class="text-sm font-semibold text-terracotta dark:text-[#e08260]">Clear all</button>
-        </div>
-        <div id="comparisonList" class="mt-4 grid gap-3 sm:grid-cols-2"></div>
-      </section>
       <p id="comparisonStatus" class="sr-only" aria-live="polite"></p>
     </div>
-    <div class="controls v2-surface grid grid-cols-1 gap-3 rounded-2xl p-4 shadow-sm md:grid-cols-2 md:p-5">
+    <div class="school-search-panel v2-surface rounded-2xl p-4 shadow-sm md:p-5">
       <div id="schoolSearchWrap" class="input-wrap min-w-0">
-        <label id="labelSchoolSearch" for="schoolSearch" class="mb-1.5 block text-xs font-semibold text-[#65716b] dark:text-[#afbbb4]">School, BRIN or postcode</label>
+        <label id="labelSchoolSearch" for="schoolSearch" class="mb-1.5 block text-xs font-semibold text-[#65716b] dark:text-[#afbbb4]">Search school name, BRIN or postcode</label>
         <input type="text" id="schoolSearch" placeholder="Name, BRIN or postcode" class="v2-input" title="">
         <div id="schoolSearchHint" class="input-hint" role="tooltip" aria-live="polite"></div>
       </div>
-      <div id="gemeenteFilterWrap" class="input-wrap min-w-0">
-        <label id="labelGemeente" for="gemeenteFilter" class="mb-1.5 block text-xs font-semibold text-[#65716b] dark:text-[#afbbb4]">Place</label>
-        <input type="text" id="gemeenteFilter" placeholder="Municipality or place" class="v2-input" title="">
-        <div id="gemeenteFilterHint" class="input-hint" role="tooltip" aria-live="polite"></div>
+    </div>
+    <div class="controls v2-surface grid grid-cols-1 gap-3 rounded-2xl p-4 shadow-sm md:grid-cols-3 md:p-5">
+      <div class="min-w-0">
+        <label id="labelProvince" for="provinceFilter" class="mb-1.5 block text-xs font-semibold text-[#65716b] dark:text-[#afbbb4]">Province</label>
+        <select id="provinceFilter" class="v2-input"><option value="all">All provinces</option></select>
       </div>
-      <div id="showVMBOWrap" class="flex flex-wrap items-center gap-4 md:col-span-2">
+      <div class="relative min-w-0">
+        <label id="labelGemeente" for="cityFilterTrigger" class="mb-1.5 block text-xs font-semibold text-[#65716b] dark:text-[#afbbb4]">Municipalities</label>
+        <button type="button" id="cityFilterTrigger" class="v2-input flex items-center justify-between text-left" aria-haspopup="true" aria-controls="cityFilterMenu" aria-expanded="false">
+          <span id="cityFilterTriggerValue">Cities (0)</span><span aria-hidden="true">›</span>
+        </button>
+        <div id="cityFilterMenu" class="absolute left-0 right-0 top-full z-30 mt-1 hidden rounded-xl border border-[#ddd5c7] bg-[#fffdf8] p-3 shadow-xl dark:border-[#335047] dark:bg-[#142923]">
+          <div class="mb-3 flex flex-wrap items-center gap-4">
+            <label class="inline-flex items-center gap-2 cursor-pointer text-sm font-medium"><input type="checkbox" id="selectAll"><span id="labelSelectAll">Select all</span></label>
+            <label class="inline-flex items-center gap-2 cursor-pointer text-sm font-medium"><input type="checkbox" id="deselectAll"><span id="labelDeselectAll">Deselect all</span></label>
+          </div>
+          <div id="gemeenteCheckboxes" class="max-h-56 overflow-y-auto flex flex-col gap-3"></div>
+        </div>
+      </div>
+      <div class="relative min-w-0">
+        <label id="labelSchoolDisplay" for="schoolFilterTrigger" class="mb-1.5 block text-xs font-semibold text-[#65716b] dark:text-[#afbbb4]">Schools shown</label>
+        <button type="button" id="schoolFilterTrigger" class="v2-input flex items-center justify-between text-left" aria-haspopup="true" aria-controls="schoolFilterMenu" aria-expanded="false">
+          <span id="schoolFilterTriggerValue">Schools (0)</span><span aria-hidden="true">›</span>
+        </button>
+        <div id="schoolFilterMenu" class="absolute left-0 right-0 top-full z-30 mt-1 hidden rounded-xl border border-[#ddd5c7] bg-[#fffdf8] p-3 shadow-xl dark:border-[#335047] dark:bg-[#142923]">
+          <div class="mb-3 flex flex-wrap items-center gap-4">
+            <button type="button" id="schoolSelectAll" class="text-xs font-semibold text-terracotta dark:text-[#e08260]">Select all</button>
+            <button type="button" id="schoolDeselectAll" class="text-xs font-semibold text-terracotta dark:text-[#e08260]">Deselect all</button>
+          </div>
+          <div id="schoolCheckboxes" class="max-h-56 overflow-y-auto flex flex-col gap-2"></div>
+        </div>
+      </div>
+      <div id="showVMBOWrap" class="flex flex-wrap items-center gap-4 md:col-span-3">
         <label class="inline-flex items-center gap-2 cursor-pointer text-sm text-slate-600 dark:text-slate-400">
           <input type="checkbox" id="showVMBO" class="rounded border-slate-300 text-slate-600 focus:ring-slate-400">
           <span id="labelShowVMBO">Include VMBO-only schools</span>
         </label>
       </div>
     </div>
-    <aside id="gemeenteList" class="v2-surface h-fit rounded-2xl p-4 md:sticky md:top-4">
-      <p id="filterTitle" class="font-display text-lg font-bold text-forest dark:text-[#f4efe4]">Refine results</p>
-      <p id="filterHint" class="mt-1 mb-4 text-xs leading-5 text-[#65716b] dark:text-[#afbbb4]">Choose one or more municipalities.</p>
-      <div class="gemeente-list-header flex flex-wrap items-center gap-4 mb-3">
-        <label class="inline-flex items-center gap-2 cursor-pointer text-sm font-medium text-slate-600 dark:text-slate-400">
-          <input type="checkbox" id="selectAll" class="rounded border-slate-300 text-slate-600 focus:ring-slate-400">
-          <span id="labelSelectAll">Select all</span>
-        </label>
-        <label class="inline-flex items-center gap-2 cursor-pointer text-sm font-medium text-slate-600 dark:text-slate-400">
-          <input type="checkbox" id="deselectAll" class="rounded border-slate-300 text-slate-600 focus:ring-slate-400">
-          <span id="labelDeselectAll">Deselect all</span>
-        </label>
-      </div>
-      <div id="gemeenteCheckboxes" class="max-h-56 overflow-y-auto flex flex-col gap-3"></div>
-    </aside>
     </section>
-    <button type="button" id="mobileFiltersBtn" aria-haspopup="dialog" aria-controls="mobileFiltersPanel" aria-expanded="false" class="fixed md:hidden right-4 bottom-4 z-30 inline-flex items-center gap-2 px-3 py-2 rounded-full bg-slate-900 text-white text-xs font-medium shadow-lg border border-slate-700">
-      <span id="mobileFiltersText">Filters</span>
-      <span id="mobileFiltersBtnLabel" class="opacity-80">Cities (0)</span>
-    </button>
-    <div id="mobileFiltersSheet" class="fixed inset-0 z-40 md:hidden pointer-events-none" aria-hidden="true">
-      <div id="mobileFiltersBackdrop" class="absolute inset-0 bg-slate-900/40 opacity-0 transition-opacity"></div>
-      <div id="mobileFiltersPanel" role="dialog" aria-modal="true" aria-labelledby="mobileFiltersHeader" class="absolute inset-x-0 bottom-0 translate-y-full transition-transform">
-        <div class="mx-auto max-w-6xl px-4 pb-4">
-          <div class="bg-white dark:bg-slate-900 rounded-t-2xl shadow-xl border border-slate-200 dark:border-slate-700 max-h-[70vh] overflow-hidden">
-            <div class="flex items-center justify-between px-4 pt-3 pb-2 border-b border-slate-200 dark:border-slate-700">
-              <p id="mobileFiltersHeader" class="text-xs font-medium text-slate-700 dark:text-slate-200">Cities (0)</p>
-              <button type="button" id="mobileFiltersClose" class="text-xs text-slate-500 dark:text-slate-400 px-2 py-1">Close</button>
-            </div>
-            <div id="mobileFiltersContent" class="px-4 py-2">
-              <!-- 将现有的 #gemeenteList 在 JS 中移动到这里 -->
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
     <div id="excludedSection" class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-600 text-sm text-slate-500 dark:text-slate-400"></div>
-    <div id="algorithmSection" class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-600 text-sm text-slate-600 dark:text-slate-400">
-      <details class="group/details">
-        <summary id="algorithmTitle" class="text-base font-semibold text-slate-700 dark:text-slate-300 cursor-pointer list-none flex items-center gap-2 [&::-webkit-details-marker]:hidden">
-          <span class="collapsible-arrow transition-transform group-open/details:rotate-90 origin-center">▶</span>
-          <span id="algorithmTitleText"></span>
-        </summary>
-        <div id="algorithmBody" class="mt-3 space-y-2 prose prose-slate max-w-none text-sm"></div>
-      </details>
-    </div>
-    <div id="disclaimerSection" class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-600 text-sm text-slate-500 dark:text-slate-400">
-      <details class="group/details">
-        <summary id="disclaimerTitle" class="text-base font-semibold text-slate-700 dark:text-slate-300 cursor-pointer list-none flex items-center gap-2 [&::-webkit-details-marker]:hidden">
-          <span class="collapsible-arrow transition-transform group-open/details:rotate-90 origin-center">▶</span>
-          <span id="disclaimerTitleText"></span>
-        </summary>
-        <p id="disclaimerBody" class="mt-2 text-slate-500 dark:text-slate-400"></p>
-      </details>
-    </div>
     <div id="contactSection" class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-600 text-sm text-slate-500 dark:text-slate-400 pb-4">
       <h2 class="text-base font-semibold mb-2">
         <a id="contactTitle" href="https://zhaidewei.com/" target="_blank" rel="noopener noreferrer" class="text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 underline"></a>
@@ -197,7 +166,7 @@
       <p id="supportHint" class="text-slate-500 dark:text-slate-400 text-xs"></p>
     </div>
     <footer id="copyrightSection" class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-600 text-xs text-slate-400 dark:text-slate-500 pb-8">
-      <p id="copyrightText"></p>
+      <p>© 2026 <a id="copyrightOwner" class="font-medium underline" href="https://zhaidewei.com" target="_blank" rel="noopener noreferrer">Dewei AI Advisory</a><span id="copyrightLicense"></span></p>
     </footer>
   </div>
   <script>
@@ -212,6 +181,7 @@
     // VO profiel: 4 组 profiel 指数点集 + 专用 meta（暂未在前端渲染，仅先注入数据）
     const dataVOProfiles = __INJECT_DATA_VO_PROFILES__;
     const metaVOProfiles = __INJECT_META_VO_PROFILES__;
+    const yearlyComparison = __INJECT_YEARLY_COMPARISON__;
     let currentMode = ['vo', 'po'].includes(localStorage.getItem('schools-mode')) ? localStorage.getItem('schools-mode') : 'vo';
     let data = currentMode === 'vo' ? dataVO : dataPO;
     let excluded = currentMode === 'vo' ? excludedVO : excludedPO;
@@ -244,49 +214,6 @@
       return VIEW_XY.getMetricFromMeta(metaVOProfiles, metricId, currentLang);
     }
 
-    function buildAlgorithmBodyFromMeta() {
-      if (!meta || !meta.axes || !meta.i18n) return null;
-      var axes = meta.axes;
-      var parts = [];
-      if (axes.x && axes.x.metric_id) {
-        var mx = resolveMetricFromMeta(axes.x.metric_id);
-        if (mx && (mx.label || mx.description)) {
-          parts.push(
-            '<p><strong>X axis – ' +
-            (mx.label || axes.x.metric_id) +
-            '</strong><br>' +
-            (mx.description || '') +
-            '</p>'
-          );
-        }
-      }
-      if (axes.y && axes.y.metric_id) {
-        var my = resolveMetricFromMeta(axes.y.metric_id);
-        if (my && (my.label || my.description)) {
-          parts.push(
-            '<p><strong>Y axis – ' +
-            (my.label || axes.y.metric_id) +
-            '</strong><br>' +
-            (my.description || '') +
-            '</p>'
-          );
-        }
-      }
-      if (axes.size && axes.size.metric_id) {
-        var ms = resolveMetricFromMeta(axes.size.metric_id);
-        if (ms && (ms.label || ms.description)) {
-          parts.push(
-            '<p><strong>Dot size – ' +
-            (ms.label || axes.size.metric_id) +
-            '</strong><br>' +
-            (ms.description || '') +
-            '</p>'
-          );
-        }
-      }
-      if (!parts.length) return null;
-      return parts.join('');
-    }
     function updateExcludedSection() {
       excluded = currentMode === 'vo' ? excludedVO : excludedPO;
       const el = document.getElementById('excludedSection');
@@ -307,34 +234,47 @@
     let currentLang = ['en', 'zh', 'nl'].includes(localStorage.getItem('schools-lang')) ? localStorage.getItem('schools-lang') : 'en';
     const L = {
       en: {
-        navMethodology: 'Methodology',
+        navMethodology: 'Data & methodology',
         navData: 'About the data',
         navContact: 'Contact',
         heroEyebrow: 'Explore Dutch schools',
         heroTitle: 'Find schools. Understand the data.',
-        heroBody: 'Search for schools, then narrow the results with the separate municipality filter.',
+        heroBody: 'Choose a province, select municipalities, then search within those schools.',
         heroCaveat: 'A starting point for exploration — never a ranking or final judgement.',
         explorerTitle: 'School explorer',
         filterTitle: 'Refine results',
         filterHint: 'Choose one or more municipalities.',
+        labelProvince: 'Province',
+        labelSchoolDisplay: 'Schools shown',
+        schoolsShown: 'Schools',
+        allProvinces: 'All provinces',
         mobileFilters: 'Filters',
-        comparisonTitle: 'Compare schools',
-        comparisonHint: 'Up to four schools. No score or ranking.',
+        comparisonTitle: 'Pinned schools and yearly comparison',
+        comparisonHint: 'Pin up to four schools. They remain visible while you search and filter.',
         comparisonClear: 'Clear all',
-        comparisonRemove: 'Remove',
-        comparisonLimit: 'You can compare up to four schools.',
+        comparisonRemove: 'Unpin',
+        comparisonLimit: 'You can pin up to four schools.',
         comparisonMunicipality: 'Municipality',
         comparisonSample: 'Sample',
         mobileCities: 'Cities',
         mobileClose: 'Close',
-        noResults: 'No schools match the current search and municipality filters. Your filters are unchanged.',
+        noResults: 'No schools match the current display filters or search. Your selections are preserved.',
         accessibleResultsTitle: 'Matching schools',
-        resultsSummary: '{count} schools shown. Use the buttons below to add or remove a school from comparison.',
-        addToComparison: 'Add to comparison',
-        removeFromComparison: 'Remove from comparison',
+        resultsSummary: '{count} schools shown. Use the buttons below to pin or unpin a school.',
+        addToComparison: 'Pin school',
+        removeFromComparison: 'Unpin school',
         legendBase: 'All schools',
         legendMatch: 'Search match',
-        legendSelected: 'Selected for comparison',
+        legendSelected: 'Pinned',
+        comparisonChartTitle: 'Year-by-year data',
+        comparisonChartHint: 'Missing annual values are left blank.',
+        comparisonMetricLabel: 'Metric',
+        comparisonMetricXVo: 'VWO share (%)',
+        comparisonMetricYVo: 'Profile subject score',
+        comparisonMetricXPo: 'VWO-equivalent advice (%)',
+        comparisonMetricYPo: 'Average home value (thousand €)',
+        comparisonNoYearly: 'No yearly data is available for these schools.',
+        comparisonYearAxis: 'School year',
         profileMethodCommon: '<p><strong>X:</strong> VWO graduate share. <strong>Dot size:</strong> five-year weighted average of annual candidates.</p>',
         profileMethod_nt: '<p><strong>NT Y:</strong> 0.50×Wiskunde B + 0.25×Natuurkunde + 0.25×Scheikunde.</p>',
         profileMethod_ng: '<p><strong>NG Y:</strong> 0.35×Biologie + 0.25×Scheikunde + 0.40×Wiskunde B.</p>',
@@ -357,12 +297,10 @@
         titleMain: '🏫 Dutch VWO schools map',
         subtitleBefore: 'Data from DUO (excluding international schools). Only schools with VWO. Under current filters: ',
         subtitleAfter: ' schools shown.',
-        labelSchoolSearch: 'School search',
+        labelSchoolSearch: 'Search school name, BRIN or postcode',
         schoolSearchPlaceholder: 'Search by name or acronym (e.g. HWC), comma for multiple, partial match highlighted',
         schoolSearchPlaceholderShort: 'Name or acronym (e.g. HWC)',
-        labelGemeente: 'Municipality filter',
-        gemeentePlaceholder: 'Leave empty for all, comma for multiple',
-        gemeentePlaceholderShort: 'Empty = all, comma for multiple',
+        labelGemeente: 'Municipalities',
         labelShowVMBO: 'Include VMBO-only schools',
         labelSelectAll: 'Select all',
         labelDeselectAll: 'Deselect all',
@@ -378,7 +316,7 @@
         disclaimerBody: 'Data from DUO Open Onderwijsdata (exam candidates and pass counts). This tool is for reference only; no warranty of accuracy or fitness for any decision. Not affiliated with DUO or the Dutch government.<br><br><strong>University admission:</strong> Exam scores are not the deciding factor for WO (research university) admission. Typical priority order: 1) VWO completion; 2) Meeting subject requirements (e.g. engineering needs Wiskunde B, medicine needs biology + chemistry); 3) Non-Numerus Fixus programmes usually do not consider ranking; 4) Numerus Fixus programmes (e.g. medicine, psychology, some business) → grades &amp; selection matter.',
         contactTitle: 'Contact',
         supportHint: 'Like this tool? Buy me a coffee on Ko-fi.',
-        copyrightText: '© 2026 Dewei Zhai. This project is licensed under the MIT License.',
+        copyrightLicense: '. This project is licensed under the MIT License.',
         voProfilesTitle: 'VWO profiles (NT / NG / EM / CM) — VWO profiel index',
         axisXVoProfiles: 'VWO share (%)',
         axisYVoProfiles: 'VWO graduates / total (incl. non-VWO) %',
@@ -394,34 +332,47 @@
         tooltipCandidates_po: 'pupils (advised)'
       },
       zh: {
-        navMethodology: '方法论',
+        navMethodology: '数据与方法',
         navData: '关于数据',
         navContact: '联系',
         heroEyebrow: '探索荷兰学校',
         heroTitle: '找到学校，读懂数据。',
-        heroBody: '搜索学校，再使用独立的市镇筛选缩小结果范围。',
+        heroBody: '先选择省份和市镇，再在范围内搜索学校。',
         heroCaveat: '这是探索的起点，不提供排名，也不替你做最终判断。',
         explorerTitle: '学校探索器',
         filterTitle: '细化结果',
         filterHint: '选择一个或多个市镇。',
+        labelProvince: '省份',
+        labelSchoolDisplay: '展示学校',
+        schoolsShown: '学校',
+        allProvinces: '全部省份',
         mobileFilters: '筛选',
-        comparisonTitle: '比较学校',
-        comparisonHint: '最多四所，不计算总分或名次。',
+        comparisonTitle: '钉住学校与逐年比较',
+        comparisonHint: '最多钉住四所；继续搜索和筛选时，它们仍保留在图中。',
         comparisonClear: '全部清除',
-        comparisonRemove: '移除',
-        comparisonLimit: '最多只能比较四所学校。',
+        comparisonRemove: '取消钉住',
+        comparisonLimit: '最多只能钉住四所学校。',
         comparisonMunicipality: '市镇',
         comparisonSample: '样本量',
         mobileCities: '市镇',
         mobileClose: '关闭',
-        noResults: '当前搜索与市镇筛选没有匹配学校。输入和筛选均已保留。',
+        noResults: '当前展示筛选或搜索没有匹配学校。所有选择均已保留。',
         accessibleResultsTitle: '匹配学校',
-        resultsSummary: '当前显示 {count} 所学校。使用下方按钮添加或移除比较学校。',
-        addToComparison: '加入比较',
-        removeFromComparison: '移出比较',
+        resultsSummary: '当前显示 {count} 所学校。使用下方按钮钉住或取消钉住学校。',
+        addToComparison: '钉住学校',
+        removeFromComparison: '取消钉住',
         legendBase: '全部学校',
         legendMatch: '搜索命中',
-        legendSelected: '已加入比较',
+        legendSelected: '已钉住',
+        comparisonChartTitle: '逐年数据',
+        comparisonChartHint: '缺失的年度值保持空白。',
+        comparisonMetricLabel: '比较指标',
+        comparisonMetricXVo: 'VWO 占比 (%)',
+        comparisonMetricYVo: 'Profile 核心科目成绩',
+        comparisonMetricXPo: 'VWO 等价升学建议占比 (%)',
+        comparisonMetricYPo: '平均房产价值（千欧元）',
+        comparisonNoYearly: '所选学校暂无可用的逐年数据。',
+        comparisonYearAxis: '学年',
         profileMethodCommon: '<p><strong>X：</strong>VWO 毕业生占比。<strong>点大小：</strong>近五年每年考生人数加权平均。</p>',
         profileMethod_nt: '<p><strong>NT 的 Y：</strong>0.50×数学 B + 0.25×物理 + 0.25×化学。</p>',
         profileMethod_ng: '<p><strong>NG 的 Y：</strong>0.35×生物 + 0.25×化学 + 0.40×数学 B。</p>',
@@ -444,12 +395,10 @@
         titleMain: '🏫 荷兰 VWO 中学定位图',
         subtitleBefore: '数据来自DUO（不含国际学校），仅包含有 VWO 的中学。当前筛选条件下展示 ',
         subtitleAfter: ' 所学校。',
-        labelSchoolSearch: '学校搜索',
+        labelSchoolSearch: '搜索学校名称、BRIN 或邮编',
         schoolSearchPlaceholder: '按校名或首字母缩写（如 HWC）搜索，逗号分隔多个，部分匹配高亮',
         schoolSearchPlaceholderShort: '校名或缩写（如 HWC）',
-        labelGemeente: '市镇筛选',
-        gemeentePlaceholder: '不输入显示全部，多个用逗号分隔',
-        gemeentePlaceholderShort: '空=全部，逗号分隔',
+        labelGemeente: '市镇',
         labelShowVMBO: '包括纯 VMBO 学校',
         labelSelectAll: '全选',
         labelDeselectAll: '全部取消',
@@ -465,7 +414,7 @@
         disclaimerBody: '数据来自 DUO Open Onderwijsdata（考试考生与通过人数）。本工具仅供参考，不保证准确或适用于任何决策；与 DUO 及荷兰政府无关联。<br><br><strong>大学录取：</strong>分数并不是大学录取的决定性因素。对 WO 大学来说，重要性排序通常是：1）是否完成 VWO；2）是否满足专业科目要求（例如：工程类必须 Wiskunde B，医学必须生物+化学）；3）非 Numerus Fixus 专业（不限额专业）通常不看排名；4）限额专业（例如医学、心理学、部分商科）→ 成绩 &amp; 选拔表现。',
         contactTitle: '联系作者',
         supportHint: '觉得有用？请在 Ko-fi 请我喝杯咖啡。',
-        copyrightText: '© 2026 翟德炜。本项目采用 MIT 许可证。',
+        copyrightLicense: '。本项目采用 MIT 许可证。',
         voProfilesTitle: 'VWO profiles (NT / NG / EM / CM) — VWO profiel 指数',
         axisXVoProfiles: 'VWO 占比 (%)',
         axisYVoProfiles: '毕业 VWO 人数 / 全校总人数（含非 VWO）%',
@@ -481,34 +430,47 @@
         tooltipCandidates_po: '人数(建议)'
       },
       nl: {
-        navMethodology: 'Methodologie',
+        navMethodology: 'Data & methode',
         navData: 'Over de data',
         navContact: 'Contact',
         heroEyebrow: 'Ontdek Nederlandse scholen',
         heroTitle: 'Vind scholen. Begrijp de data.',
-        heroBody: 'Zoek scholen en verfijn de resultaten daarna met het aparte gemeentefilter.',
+        heroBody: 'Kies een provincie en gemeenten en zoek daarna binnen die scholen.',
         heroCaveat: 'Een startpunt voor verkenning — zonder ranglijst of eindoordeel.',
         explorerTitle: 'Scholenverkenner',
         filterTitle: 'Verfijn resultaten',
         filterHint: 'Kies één of meer gemeenten.',
+        labelProvince: 'Provincie',
+        labelSchoolDisplay: 'Getoonde scholen',
+        schoolsShown: 'Scholen',
+        allProvinces: 'Alle provincies',
         mobileFilters: 'Filters',
-        comparisonTitle: 'Scholen vergelijken',
-        comparisonHint: 'Maximaal vier scholen, zonder score of ranglijst.',
+        comparisonTitle: 'Vastgezette scholen en jaarvergelijking',
+        comparisonHint: 'Zet maximaal vier scholen vast; ze blijven zichtbaar tijdens zoeken en filteren.',
         comparisonClear: 'Alles wissen',
-        comparisonRemove: 'Verwijderen',
-        comparisonLimit: 'Je kunt maximaal vier scholen vergelijken.',
+        comparisonRemove: 'Losmaken',
+        comparisonLimit: 'Je kunt maximaal vier scholen vastzetten.',
         comparisonMunicipality: 'Gemeente',
         comparisonSample: 'Steekproef',
         mobileCities: 'Gemeenten',
         mobileClose: 'Sluiten',
-        noResults: 'Geen scholen passen bij de huidige zoek- en gemeentefilters. Uw filters blijven behouden.',
+        noResults: 'Geen scholen passen bij de huidige weergavefilters of zoekopdracht. Uw keuzes blijven behouden.',
         accessibleResultsTitle: 'Overeenkomende scholen',
-        resultsSummary: '{count} scholen getoond. Gebruik de knoppen hieronder om een school toe te voegen aan of te verwijderen uit de vergelijking.',
-        addToComparison: 'Toevoegen aan vergelijking',
-        removeFromComparison: 'Verwijderen uit vergelijking',
+        resultsSummary: '{count} scholen getoond. Gebruik de knoppen hieronder om een school vast te zetten of los te maken.',
+        addToComparison: 'School vastzetten',
+        removeFromComparison: 'School losmaken',
         legendBase: 'Alle scholen',
         legendMatch: 'Zoekresultaat',
-        legendSelected: 'Geselecteerd voor vergelijking',
+        legendSelected: 'Vastgezet',
+        comparisonChartTitle: 'Gegevens per schooljaar',
+        comparisonChartHint: 'Ontbrekende jaarwaarden blijven leeg.',
+        comparisonMetricLabel: 'Indicator',
+        comparisonMetricXVo: 'VWO-aandeel (%)',
+        comparisonMetricYVo: 'Profielvakscore',
+        comparisonMetricXPo: 'VWO-equivalent advies (%)',
+        comparisonMetricYPo: 'Gemiddelde woningwaarde (duizend €)',
+        comparisonNoYearly: 'Voor deze scholen zijn geen jaargegevens beschikbaar.',
+        comparisonYearAxis: 'Schooljaar',
         profileMethodCommon: '<p><strong>X:</strong> aandeel VWO-geslaagden. <strong>Puntgrootte:</strong> vijfjarig gewogen gemiddelde van jaarlijkse kandidaten.</p>',
         profileMethod_nt: '<p><strong>NT Y:</strong> 0,50×Wiskunde B + 0,25×Natuurkunde + 0,25×Scheikunde.</p>',
         profileMethod_ng: '<p><strong>NG Y:</strong> 0,35×Biologie + 0,25×Scheikunde + 0,40×Wiskunde B.</p>',
@@ -531,12 +493,10 @@
         titleMain: '🏫 Nederlandse VWO-scholenkaart',
         subtitleBefore: 'Data van DUO (zonder internationale scholen). Alleen scholen met VWO. Onder huidige filters: ',
         subtitleAfter: ' scholen getoond.',
-        labelSchoolSearch: 'Zoek school',
+        labelSchoolSearch: 'Zoek schoolnaam, BRIN of postcode',
         schoolSearchPlaceholder: 'Zoek op naam of afkorting (bijv. HWC), komma voor meerdere, deelmatch gemarkeerd',
         schoolSearchPlaceholderShort: 'Naam of afkorting (bijv. HWC)',
-        labelGemeente: 'Gemeentefilter',
-        gemeentePlaceholder: 'Leeg = alle, komma voor meerdere',
-        gemeentePlaceholderShort: 'Leeg = alle, komma voor meerdere',
+        labelGemeente: 'Gemeenten',
         labelShowVMBO: 'Inclusief alleen VMBO-scholen',
         labelSelectAll: 'Alles selecteren',
         labelDeselectAll: 'Alles deselecteren',
@@ -552,7 +512,7 @@
         disclaimerBody: 'Data van DUO Open Onderwijsdata (examenkandidaten en geslaagden). Dit hulpmiddel is alleen voor referentie; geen garantie op juistheid of geschiktheid voor beslissingen. Niet gelieerd aan DUO of de overheid.<br><br><strong>Universiteitstoelating:</strong> Cijfers zijn geen doorslaggevende factor voor WO-toelating. Typische volgorde: 1) VWO afgerond; 2) Vakkenvereisten (bv. techniek: Wiskunde B, geneeskunde: biologie + scheikunde); 3) Niet-Numerus Fixus opleidingen: ranglijst speelt meestal geen rol; 4) Numerus Fixus (bv. geneeskunde, psychologie, sommige business) → cijfers &amp; selectie tellen mee.',
         contactTitle: 'Contact',
         supportHint: 'Waardevol? Trakteer me op een koffie via Ko-fi.',
-        copyrightText: '© 2026 Dewei Zhai. Dit project valt onder de MIT-licentie.',
+        copyrightLicense: '. Dit project valt onder de MIT-licentie.',
         voProfilesTitle: 'VWO profielen (NT / NG / EM / CM) — VWO profielindex',
         axisXVoProfiles: 'VWO-aandeel (%)',
         axisYVoProfiles: 'VWO geslaagden / totaal (incl. non-VWO) %',
@@ -609,16 +569,20 @@
       if (navVO) navVO.textContent = t('navVO');
       var navPO = document.getElementById('navPO');
       if (navPO) navPO.textContent = t('navPO');
-      ['navMethodology', 'navData', 'navContact', 'heroEyebrow', 'heroTitle', 'heroBody', 'heroCaveat', 'explorerTitle', 'filterTitle', 'filterHint'].forEach(function(id) {
+      var methodologyLink = document.getElementById('navMethodology');
+      if (methodologyLink) methodologyLink.href = 'methodology.html?lang=' + encodeURIComponent(currentLang);
+      ['navMethodology', 'navContact', 'heroEyebrow', 'heroTitle', 'heroBody', 'heroCaveat', 'explorerTitle', 'filterTitle', 'filterHint', 'labelProvince'].forEach(function(id) {
         var element = document.getElementById(id);
         if (element) element.textContent = t(id);
       });
       var mobileFiltersText = document.getElementById('mobileFiltersText');
       if (mobileFiltersText) mobileFiltersText.textContent = t('mobileFilters');
-      ['comparisonTitle', 'comparisonHint'].forEach(function(id) {
+      ['comparisonTitle', 'comparisonHint', 'comparisonChartTitle', 'comparisonChartHint', 'comparisonMetricLabel', 'comparisonNoYearly'].forEach(function(id) {
         var element = document.getElementById(id);
         if (element) element.textContent = t(id);
       });
+      updateComparisonMetricOptions();
+      if (comparisonChart) renderComparisonYearChart();
       var comparisonClear = document.getElementById('comparisonClear');
       if (comparisonClear) comparisonClear.textContent = t('comparisonClear');
       var mobileFiltersClose = document.getElementById('mobileFiltersClose');
@@ -645,28 +609,22 @@
       }
       var schoolSearchHint = document.getElementById('schoolSearchHint');
       if (schoolSearchHint) schoolSearchHint.textContent = t('schoolSearchPlaceholder');
-      var labelMobileSchoolSearch = document.getElementById('labelMobileSchoolSearch');
-      if (labelMobileSchoolSearch) labelMobileSchoolSearch.textContent = t('labelSchoolSearch');
-      var mobileSchoolSearch = document.getElementById('mobileSchoolSearch');
-      if (mobileSchoolSearch) {
-        mobileSchoolSearch.placeholder = t('schoolSearchPlaceholderShort');
-        mobileSchoolSearch.title = t('schoolSearchPlaceholder');
-      }
       var labelGemeente = document.getElementById('labelGemeente');
       if (labelGemeente) labelGemeente.textContent = t('labelGemeente');
-      var gemeenteFilter = document.getElementById('gemeenteFilter');
-      if (gemeenteFilter) {
-        gemeenteFilter.placeholder = t('gemeentePlaceholderShort');
-        gemeenteFilter.title = t('gemeentePlaceholder');
-      }
-      var gemeenteFilterHint = document.getElementById('gemeenteFilterHint');
-      if (gemeenteFilterHint) gemeenteFilterHint.textContent = t('gemeentePlaceholder');
+      var labelSchoolDisplay = document.getElementById('labelSchoolDisplay');
+      if (labelSchoolDisplay) labelSchoolDisplay.textContent = t('labelSchoolDisplay');
       var labelShowVMBO = document.getElementById('labelShowVMBO');
       if (labelShowVMBO) labelShowVMBO.textContent = currentMode === 'vo' ? t('labelShowVMBO') : t('labelShowSbo');
       var labelSelectAll = document.getElementById('labelSelectAll');
       if (labelSelectAll) labelSelectAll.textContent = t('labelSelectAll');
       var labelDeselectAll = document.getElementById('labelDeselectAll');
       if (labelDeselectAll) labelDeselectAll.textContent = t('labelDeselectAll');
+      var schoolSelectAll = document.getElementById('schoolSelectAll');
+      if (schoolSelectAll) schoolSelectAll.textContent = t('labelSelectAll');
+      var schoolDeselectAll = document.getElementById('schoolDeselectAll');
+      if (schoolDeselectAll) schoolDeselectAll.textContent = t('labelDeselectAll');
+      var provinceFilter = document.getElementById('provinceFilter');
+      if (provinceFilter && provinceFilter.options.length) provinceFilter.options[0].textContent = t('allProvinces');
       var themeToggleBtn = document.getElementById('themeToggle');
       if (themeToggleBtn) {
         var themeLabel = isDarkTheme() ? t('labelLight') : t('labelDark');
@@ -690,19 +648,12 @@
       if (excludedTitleText) excludedTitleText.textContent = t('excludedTitle');
       var excludedDesc = document.getElementById('excludedDesc');
       if (excludedDesc) excludedDesc.textContent = t('excludedDesc');
-      var algorithmTitleText = document.getElementById('algorithmTitleText');
-      if (algorithmTitleText) algorithmTitleText.textContent = t('algorithmTitle');
-      updateAlgorithmBody();
-      var disclaimerTitleText = document.getElementById('disclaimerTitleText');
-      if (disclaimerTitleText) disclaimerTitleText.textContent = t('disclaimerTitle');
-      var disclaimerBody = document.getElementById('disclaimerBody');
-      if (disclaimerBody) disclaimerBody.innerHTML = t('disclaimerBody');
       var contactTitle = document.getElementById('contactTitle');
       if (contactTitle) contactTitle.textContent = t('contactTitle');
       var supportHint = document.getElementById('supportHint');
       if (supportHint) supportHint.textContent = t('supportHint');
-      var copyrightText = document.getElementById('copyrightText');
-      if (copyrightText) copyrightText.textContent = t('copyrightText');
+      var copyrightLicense = document.getElementById('copyrightLicense');
+      if (copyrightLicense) copyrightLicense.textContent = t('copyrightLicense');
       if (typeof chart !== 'undefined') {
         var xTitleFromMeta = getAxisTitleFromMeta('x');
         var yTitleFromMeta = getAxisTitleFromMeta('y');
@@ -712,9 +663,10 @@
       }
       updateMobileModeSpecificUI();
     }
-    let points = data.map(d => ({ x: d.X_linear, y: d.Y_linear, label: d.naam, type: d.type, gemeente: d.gemeente, postcode: d.postcode || '', size: d.size, brin: d.BRIN, vestigingId: d.vestiging_id || d.vestigingId || d.vestigingsnummer || d.id, layer: currentMode }));
+    let points = data.map(d => ({ x: d.X_linear, y: d.Y_linear, label: d.naam, type: d.type, gemeente: d.gemeente, provincie: d.provincie || d.province || '', postcode: d.postcode || '', size: d.size, brin: d.BRIN, vestigingId: d.vestiging_id || d.vestigingId || d.vestigingsnummer || d.id, layer: currentMode }));
     let currentProfile = VIEW_XY.normalizeProfile(new URLSearchParams(window.location.search).get('profile') || localStorage.getItem('schools-profile') || 'nt', currentMode);
     let comparisonSchools = [];
+    let comparisonChart = null;
     let restoringState = true;
     const V2_STATE_KEY = 'schools-v2-state';
     // VO profile 点集（后端注入），按当前标签加载到唯一主图。
@@ -731,6 +683,11 @@
     function buildVoProfilesPoints() {
       voProfilesPoints = {};
       if (!dataVOProfiles || typeof dataVOProfiles !== 'object') return;
+      var provinceByMunicipality = {};
+      dataVO.concat(dataPO).forEach(function (d) {
+        var province = d.provincie || d.province || '';
+        if (d.gemeente && province) provinceByMunicipality[String(d.gemeente).toUpperCase()] = province;
+      });
       ['NT', 'NG', 'EM', 'CM'].forEach(function (prof) {
         const src = dataVOProfiles[prof] || [];
         voProfilesPoints[prof] = src.map(function (d) {
@@ -739,6 +696,7 @@
             y: Number(d.X_profile),
             label: (d.naam || d.vestigingsnaam || ''),
             gemeente: d.gemeente || '',
+            provincie: d.provincie || d.province || provinceByMunicipality[String(d.gemeente || '').toUpperCase()] || '',
             postcode: (d.postcode || '').trim(),
             type: d.type || '',
             size: (d.candidates_weighted_avg != null ? Number(d.candidates_weighted_avg) : null) ?? (d.candidates_total != null ? Number(d.candidates_total) : 0),
@@ -762,6 +720,64 @@
         ? (voProfilesPoints[currentProfile.toUpperCase()] || []).slice()
         : points.slice();
       return candidates.find(function(item) { return VIEW_XY.getStableSchoolId(item, currentMode) === key; }) || null;
+    }
+
+    function updateComparisonMetricOptions() {
+      var select = document.getElementById('comparisonMetric');
+      if (!select) return;
+      var current = select.value || 'x';
+      select.options[0].textContent = t(currentMode === 'vo' ? 'comparisonMetricXVo' : 'comparisonMetricXPo');
+      select.options[1].textContent = t(currentMode === 'vo' ? 'comparisonMetricYVo' : 'comparisonMetricYPo');
+      select.value = current;
+    }
+
+    function getPinnedYearlySeries() {
+      var layerData = yearlyComparison && yearlyComparison[currentMode] || {};
+      var metric = document.getElementById('comparisonMetric') && document.getElementById('comparisonMetric').value || 'x';
+      var rowsBySchool = comparisonSchools.map(function(school) {
+        var stableId = VIEW_XY.getStableSchoolId(school, currentMode) || '';
+        var rawId = stableId.slice(stableId.indexOf(':') + 1);
+        return { school: school, rows: layerData[rawId] || {} };
+      });
+      var years = Array.from(new Set(rowsBySchool.flatMap(function(item) { return Object.keys(item.rows); }))).sort();
+      var colors = ['#173f35', '#c65f3b', '#4f6f8f', '#9a7b3f'];
+      var datasets = rowsBySchool.map(function(item, index) {
+        return {
+          label: item.school.label || item.school.naam || 'School ' + (index + 1),
+          data: years.map(function(year) {
+            var row = item.rows[year];
+            if (!row) return null;
+            var value = currentMode === 'vo' && metric === 'y'
+              ? row.profiles && row.profiles[currentProfile.toUpperCase()]
+              : row[metric];
+            return Number.isFinite(Number(value)) ? Number(value) : null;
+          }),
+          backgroundColor: colors[index] + 'cc',
+          borderColor: colors[index],
+          borderWidth: 1,
+          borderRadius: 4,
+        };
+      });
+      return { years: years, datasets: datasets, metric: metric };
+    }
+
+    function renderComparisonYearChart() {
+      if (!comparisonChart) return;
+      updateComparisonMetricOptions();
+      var series = getPinnedYearlySeries();
+      comparisonChart.data.labels = series.years;
+      comparisonChart.data.datasets = series.datasets;
+      comparisonChart.options.scales.y.title.text = t(currentMode === 'vo'
+        ? (series.metric === 'x' ? 'comparisonMetricXVo' : 'comparisonMetricYVo')
+        : (series.metric === 'x' ? 'comparisonMetricXPo' : 'comparisonMetricYPo'));
+      comparisonChart.options.scales.x.title.text = t('comparisonYearAxis');
+      comparisonChart.options.scales.y.min = 0;
+      comparisonChart.options.scales.y.max = currentMode === 'vo' && series.metric === 'x' ? 100 : undefined;
+      var hasValues = series.datasets.some(function(dataset) { return dataset.data.some(function(value) { return value != null; }); });
+      var noYearly = document.getElementById('comparisonNoYearly');
+      if (noYearly) noYearly.classList.toggle('hidden', hasValues || comparisonSchools.length === 0);
+      comparisonChart.canvas.classList.toggle('hidden', !hasValues);
+      comparisonChart.update();
     }
 
     function renderComparison() {
@@ -798,6 +814,7 @@
         card.appendChild(details);
         list.appendChild(card);
       });
+      renderComparisonYearChart();
     }
 
     function toggleSchoolComparison(school) {
@@ -826,16 +843,6 @@
       if (title) title.textContent = t('titleMain') + (currentMode === 'vo' ? ' — ' + currentProfile.toUpperCase() : '');
     }
 
-    function updateAlgorithmBody() {
-      var algorithmBody = document.getElementById('algorithmBody');
-      if (!algorithmBody) return;
-      if (currentMode === 'vo') {
-        algorithmBody.innerHTML = t('profileMethodCommon') + t('profileMethod_' + currentProfile);
-        return;
-      }
-      algorithmBody.innerHTML = buildAlgorithmBodyFromMeta() || t('algorithmBody');
-    }
-
     function setCurrentProfile(profile, syncUrl) {
       currentProfile = VIEW_XY.normalizeProfile(profile || 'nt', currentMode);
       if (currentProfile) localStorage.setItem('schools-profile', currentProfile);
@@ -844,8 +851,10 @@
         comparisonSchools = VIEW_XY.normalizeComparisonList(identities.map(findSchoolById).filter(function(school) { return school && Number.isFinite(Number(school.x)) && Number.isFinite(Number(school.y)); }), currentMode);
         renderComparison();
       }
+      schoolSelectionExplicit = false;
+      selectAllAvailableSchools();
+      renderSchoolCheckboxes();
       updateProfileTabs();
-      updateAlgorithmBody();
       refreshChart();
       if (syncUrl !== false) {
         syncCanonicalUrl();
@@ -853,7 +862,10 @@
     }
 
     let selectedGemeenten = new Set();
+    let selectedSchoolIds = new Set();
+    let selectedProvince = 'all';
     let citySelectionExplicit = false;
+    let schoolSelectionExplicit = false;
     var DEFAULT_GEMEENTEN = ["'S-GRAVENHAGE", 'AMSTERDAM', 'UTRECHT', 'ROTTERDAM'];
 
     function getSelectedCitiesCount() {
@@ -866,6 +878,58 @@
       var text = t('mobileCities') + ' (' + n + ')';
       if (label) label.textContent = text;
       if (header) header.textContent = text;
+      var triggerValue = document.getElementById('cityFilterTriggerValue');
+      if (triggerValue) triggerValue.textContent = text;
+    }
+
+    function getAllAvailableSchools() {
+      var source = currentMode === 'vo' && hasVoProfilesData() ? (voProfilesPoints[currentProfile.toUpperCase()] || []) : points;
+      return source.filter(function(point) {
+        return (selectedProvince === 'all' || point.provincie === selectedProvince)
+          && point.gemeente && selectedGemeenten.has(point.gemeente);
+      });
+    }
+
+    function selectAllAvailableSchools() {
+      selectedSchoolIds = new Set(getAllAvailableSchools().map(function(point) { return VIEW_XY.getStableSchoolId(point, currentMode); }).filter(Boolean));
+    }
+
+    function updateSchoolFilterSummary() {
+      var value = document.getElementById('schoolFilterTriggerValue');
+      if (value) value.textContent = t('schoolsShown') + ' (' + selectedSchoolIds.size + ')';
+    }
+
+    function renderSchoolCheckboxes() {
+      var container = document.getElementById('schoolCheckboxes');
+      if (!container) return;
+      var schools = getAllAvailableSchools().slice().sort(function(a, b) { return String(a.label || '').localeCompare(String(b.label || ''), currentLang); });
+      var universe = new Set(schools.map(function(point) { return VIEW_XY.getStableSchoolId(point, currentMode); }).filter(Boolean));
+      if (!schoolSelectionExplicit) selectAllAvailableSchools();
+      else selectedSchoolIds = new Set(Array.from(selectedSchoolIds).filter(function(id) { return universe.has(id); }));
+      container.innerHTML = '';
+      schools.forEach(function(school) {
+        var id = VIEW_XY.getStableSchoolId(school, currentMode);
+        if (!id) return;
+        var label = document.createElement('label');
+        label.className = 'flex cursor-pointer items-start gap-2 text-sm text-slate-600 dark:text-slate-300';
+        var checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'school-display-cb mt-0.5';
+        checkbox.checked = selectedSchoolIds.has(id);
+        checkbox.addEventListener('change', function() {
+          schoolSelectionExplicit = true;
+          if (checkbox.checked) selectedSchoolIds.add(id); else selectedSchoolIds.delete(id);
+          updateSchoolFilterSummary();
+          refreshChart();
+          syncCanonicalUrl();
+        });
+        var text = document.createElement('span');
+        text.textContent = (school.label || school.naam || id) + (school.gemeente ? ' · ' + school.gemeente : '');
+        label.appendChild(checkbox);
+        label.appendChild(text);
+        container.appendChild(label);
+      });
+      updateSchoolFilterSummary();
     }
 
     function renderAccessibleResults(filtered, matched) {
@@ -909,6 +973,10 @@
       var gemeenteState = cityList.length === 0 ? [] : (allCities.length > 0 && allCities.every(function(city) { return selectedGemeenten.has(city); }) ? 'all' : cityList);
       var canonical = VIEW_XY.serializeShareState({ lang: currentLang, mode: currentMode, q: q, gemeente: gemeenteState, profile: currentProfile, compare: comparisonSchools.map(function(school) { return VIEW_XY.getStableSchoolId(school, currentMode); }) });
       var parts = canonical ? canonical.split('&') : [];
+      if (selectedProvince !== 'all') parts.push('province=' + encodeURIComponent(selectedProvince));
+      var schoolUniverse = getAllAvailableSchools().map(function(point) { return VIEW_XY.getStableSchoolId(point, currentMode); }).filter(Boolean);
+      var schoolsState = selectedSchoolIds.size === 0 ? '' : (schoolUniverse.length > 0 && schoolUniverse.every(function(id) { return selectedSchoolIds.has(id); }) ? 'all' : Array.from(selectedSchoolIds).join(','));
+      parts.push('schools=' + encodeURIComponent(schoolsState));
       var showSbo = document.getElementById('showVMBO');
       if (currentMode === 'po' && showSbo && showSbo.checked) parts.push('include_sbo=1');
       if (parts.length) base += '?' + parts.join('&');
@@ -941,6 +1009,9 @@
       });
       var showSbo = document.getElementById('showVMBO');
       normalized.include_sbo = currentMode === 'po' && !!(showSbo && showSbo.checked);
+      normalized.province = selectedProvince;
+      var schoolUniverse = getAllAvailableSchools().map(function(point) { return VIEW_XY.getStableSchoolId(point, currentMode); }).filter(Boolean);
+      normalized.schools = selectedSchoolIds.size === 0 ? '' : (schoolUniverse.length > 0 && schoolUniverse.every(function(id) { return selectedSchoolIds.has(id); }) ? 'all' : Array.from(selectedSchoolIds));
       localStorage.setItem(V2_STATE_KEY, JSON.stringify(normalized));
     }
     function updateShareLinks() {
@@ -971,6 +1042,10 @@
       currentProfile = VIEW_XY.normalizeProfile(state.profile || 'nt', currentMode);
       if (currentProfile) localStorage.setItem('schools-profile', currentProfile);
       buildVoProfilesPoints();
+      selectedProvince = params.get('province') || persistedState.province || 'all';
+      var availableProvinces = getAllAvailableProvinces();
+      if (selectedProvince !== 'all' && availableProvinces.indexOf(selectedProvince) === -1) selectedProvince = 'all';
+      renderProvinceOptions();
       citySelectionExplicit = urlHasGemeente || persistedHasGemeente;
       var allCitiesSelected = state.gemeente === 'all';
       var rawCities = allCitiesSelected ? [] : (Array.isArray(state.gemeente) ? state.gemeente : String(state.gemeente || '').split(',').map(function(s) { return s.trim(); }).filter(Boolean));
@@ -982,6 +1057,19 @@
         selectedGemeenten = new Set(availableCities.filter(function(name) { return defaultCitySet.has(String(name || '').toUpperCase()); }));
         if (selectedGemeenten.size === 0) selectedGemeenten = new Set(availableCities);
       }
+      var urlHasSchools = params.has('schools');
+      var persistedHasSchools = Object.prototype.hasOwnProperty.call(persistedState, 'schools');
+      var rawSchoolState = urlHasSchools ? params.get('schools') : (persistedHasSchools ? persistedState.schools : 'all');
+      schoolSelectionExplicit = urlHasSchools || persistedHasSchools;
+      var schoolUniverse = getAllAvailableSchools();
+      var schoolUniverseById = new Map(schoolUniverse.map(function(point) { return [VIEW_XY.getStableSchoolId(point, currentMode), point]; }));
+      if (rawSchoolState === 'all') {
+        selectAllAvailableSchools();
+      } else {
+        var rawSchoolIds = Array.isArray(rawSchoolState) ? rawSchoolState : String(rawSchoolState || '').split(',').map(function(value) { return value.trim(); }).filter(Boolean);
+        selectedSchoolIds = new Set(rawSchoolIds.filter(function(id) { return schoolUniverseById.has(id); }));
+      }
+      renderSchoolCheckboxes();
       // include_sbo (只在 PO 时生效)
       var includeSbo = params.get('include_sbo');
       if (includeSbo == null && Object.prototype.hasOwnProperty.call(persistedState, 'include_sbo')) includeSbo = persistedState.include_sbo ? '1' : '0';
@@ -999,12 +1087,15 @@
     }
 
     function getPointsByTextFilter(points) {
-      return VIEW_XY.filterPointsByGemeenteText(points, VIEW_XY.parseGemeenteFilter(document.getElementById('gemeenteFilter').value));
+      return selectedProvince === 'all' ? points : points.filter(function(point) { return point.provincie === selectedProvince; });
     }
     function getFilteredPoints(points) {
       const byText = getPointsByTextFilter(points);
       /* 只显示勾选的 gemeenten：未勾选任何时显示为空，图例仅包含当前勾选项 */
-      let result = byText.filter(p => p.gemeente && selectedGemeenten.has(p.gemeente));
+      let result = byText.filter(function(p) {
+        var id = VIEW_XY.getStableSchoolId(p, currentMode);
+        return p.gemeente && selectedGemeenten.has(p.gemeente) && id && selectedSchoolIds.has(id);
+      });
       var showVMBOEl = document.getElementById('showVMBO');
       /* VO profile 模式下所有点都含 VWO，不再按 VMBO 过滤；PO 模式按 Sbo 过滤 */
       if (showVMBOEl && !showVMBOEl.checked && currentMode === 'po') {
@@ -1025,7 +1116,30 @@
     }
     function getAllAvailableGemeenten() {
       var source = currentMode === 'vo' && hasVoProfilesData() ? (voProfilesPoints[currentProfile.toUpperCase()] || []) : points;
+      if (selectedProvince !== 'all') source = source.filter(function(point) { return point.provincie === selectedProvince; });
       return Array.from(new Set(source.map(function(point) { return point.gemeente; }).filter(Boolean))).sort();
+    }
+    function getAllAvailableProvinces() {
+      var source = currentMode === 'vo' && hasVoProfilesData() ? (voProfilesPoints[currentProfile.toUpperCase()] || []) : points;
+      return Array.from(new Set(source.map(function(point) { return point.provincie; }).filter(Boolean))).sort(function(a, b) { return a.localeCompare(b, 'nl'); });
+    }
+    function renderProvinceOptions() {
+      var select = document.getElementById('provinceFilter');
+      if (!select) return;
+      var provinces = getAllAvailableProvinces();
+      if (selectedProvince !== 'all' && provinces.indexOf(selectedProvince) === -1) selectedProvince = 'all';
+      select.innerHTML = '';
+      var allOption = document.createElement('option');
+      allOption.value = 'all';
+      allOption.textContent = t('allProvinces');
+      select.appendChild(allOption);
+      provinces.forEach(function(province) {
+        var option = document.createElement('option');
+        option.value = province;
+        option.textContent = province;
+        select.appendChild(option);
+      });
+      select.value = selectedProvince;
     }
     function getFirstLetterForGroup(name) {
       var s = (name || '').trim();
@@ -1069,6 +1183,9 @@
           cb.addEventListener('change', function() {
             citySelectionExplicit = true;
             if (cb.checked) selectedGemeenten.add(g); else selectedGemeenten.delete(g);
+            schoolSelectionExplicit = false;
+            selectAllAvailableSchools();
+            renderSchoolCheckboxes();
             syncSelectAllDeselectAll();
             refreshChart();
             syncCanonicalUrl();
@@ -1082,6 +1199,7 @@
       });
       syncSelectAllDeselectAll();
       updateMobileFiltersSummary();
+      renderSchoolCheckboxes();
     }
     function syncSelectAllDeselectAll() {
       const list = getGemeentenInList();
@@ -1188,13 +1306,25 @@
       var filtered = getFilteredPoints(source).filter(function(point) { return Number.isFinite(Number(point.x)) && Number.isFinite(Number(point.y)); });
       var terms = getSchoolSearchTerms();
       var matched = terms.length ? filtered.filter(function(point) { return pointMatchesSearch(point, terms); }) : filtered.slice();
-      chart.data.datasets = makeDatasets(filtered, source);
-      document.getElementById('schoolCount').textContent = matched.length;
+      var chartPoints = filtered.slice();
+      var visibleIds = new Set(chartPoints.map(function(point) { return VIEW_XY.getStableSchoolId(point, currentMode); }));
+      comparisonSchools.forEach(function(pinned) {
+        var pinnedId = VIEW_XY.getStableSchoolId(pinned, currentMode);
+        if (!pinnedId || visibleIds.has(pinnedId)) return;
+        var resolved = source.find(function(point) { return VIEW_XY.getStableSchoolId(point, currentMode) === pinnedId; }) || pinned;
+        if (resolved && Number.isFinite(Number(resolved.x)) && Number.isFinite(Number(resolved.y))) {
+          chartPoints.push(resolved);
+          visibleIds.add(pinnedId);
+        }
+      });
+      chart.data.datasets = makeDatasets(chartPoints, source);
+      document.getElementById('schoolCount').textContent = filtered.length;
       updateStateLegend();
       if (currentMode === 'vo') {
         chart.options.scales.x.title.text = t('axisXVoProfiles');
         chart.options.scales.x.min = -5;
         chart.options.scales.x.max = 105;
+        chart.options.scales.x.afterBuildTicks = function(axis) { axis.ticks = [0,10,20,30,40,50,60,70,80,90,100].map(function(v){ return { value: v }; }); };
         chart.options.scales.x.ticks = { stepSize: 10 };
         chart.options.scales.y.title.text = getVoProfileYAxisLabel();
         chart.options.scales.y.min = 4.5;
@@ -1273,10 +1403,7 @@
     function updateNavButtons() {
       document.querySelectorAll('.navSchoolType').forEach(function(btn) {
         const active = btn.getAttribute('data-mode') === currentMode;
-        btn.classList.toggle('bg-slate-200', active); btn.classList.toggle('dark:bg-slate-600', active);
-        btn.classList.toggle('bg-transparent', !active);
-        btn.classList.toggle('text-slate-800', active); btn.classList.toggle('dark:text-slate-100', active);
-        btn.classList.toggle('text-slate-600', !active); btn.classList.toggle('dark:text-slate-400', !active);
+        btn.setAttribute('aria-selected', active ? 'true' : 'false');
       });
     }
     function switchMode(mode) {
@@ -1288,12 +1415,16 @@
       localStorage.setItem('schools-mode', mode);
       data = mode === 'vo' ? dataVO : dataPO;
       meta = mode === 'vo' ? metaVO : metaPO;
-      points = data.map(d => ({ x: d.X_linear, y: d.Y_linear, label: d.naam, type: d.type, gemeente: d.gemeente, postcode: d.postcode || '', size: d.size, brin: d.BRIN, vestigingId: d.vestiging_id || d.vestigingId || d.vestigingsnummer || d.id, layer: currentMode }));
+      points = data.map(d => ({ x: d.X_linear, y: d.Y_linear, label: d.naam, type: d.type, gemeente: d.gemeente, provincie: d.provincie || d.province || '', postcode: d.postcode || '', size: d.size, brin: d.BRIN, vestigingId: d.vestiging_id || d.vestigingId || d.vestigingsnummer || d.id, layer: currentMode }));
       updateExcludedSection();
       applyLanguage();
       setChartScaleForMode();
       selectedGemeenten = new Set();
+      selectedSchoolIds = new Set();
+      selectedProvince = 'all';
       citySelectionExplicit = false;
+      schoolSelectionExplicit = false;
+      renderProvinceOptions();
       renderGemeenteCheckboxes();
       refreshChart();
       updateNavButtons();
@@ -1505,6 +1636,25 @@
       },
     });
 
+    comparisonChart = new Chart(document.getElementById('comparisonChart'), {
+      type: 'bar',
+      data: { labels: [], datasets: [] },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { position: 'bottom' },
+          tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + (ctx.raw == null ? '—' : Number(ctx.raw).toFixed(2)); } } }
+        },
+        scales: {
+          x: { title: { display: true, text: 'School year' } },
+          y: { beginAtZero: true, title: { display: true, text: '' } }
+        }
+      }
+    });
+    document.getElementById('comparisonMetric').addEventListener('change', renderComparisonYearChart);
+
     // 当鼠标移开导致 tooltip 消失时，如果仍有搜索词，则恢复名称 label
     (function attachHoverLabelRestore() {
       var canvas = chart && chart.canvas;
@@ -1555,6 +1705,9 @@
         document.getElementById('deselectAll').checked = true;
         document.querySelectorAll('.gemeente-cb').forEach(cb => { cb.checked = false; });
       }
+      schoolSelectionExplicit = false;
+      selectAllAvailableSchools();
+      renderSchoolCheckboxes();
       syncSelectAllDeselectAll();
       refreshChart();
       updateMobileFiltersSummary();
@@ -1572,9 +1725,24 @@
         document.getElementById('selectAll').checked = true;
         document.querySelectorAll('.gemeente-cb').forEach(cb => { cb.checked = true; });
       }
+      schoolSelectionExplicit = false;
+      selectAllAvailableSchools();
+      renderSchoolCheckboxes();
       syncSelectAllDeselectAll();
       refreshChart();
       updateMobileFiltersSummary();
+      syncCanonicalUrl();
+    });
+
+    var provinceFilterInput = document.getElementById('provinceFilter');
+    if (provinceFilterInput) provinceFilterInput.addEventListener('change', function() {
+      selectedProvince = this.value || 'all';
+      citySelectionExplicit = true;
+      selectedGemeenten = new Set(getGemeentenInList());
+      schoolSelectionExplicit = false;
+      selectAllAvailableSchools();
+      renderGemeenteCheckboxes();
+      refreshChart();
       syncCanonicalUrl();
     });
 
@@ -1584,42 +1752,56 @@
     schoolSearchInput.addEventListener('change', function() { refreshChart(); syncCanonicalUrl(); });
     schoolSearchInput.addEventListener('focus', function() { if (schoolSearchWrap) schoolSearchWrap.classList.add('show-hint'); });
     schoolSearchInput.addEventListener('blur', function() { if (schoolSearchWrap) schoolSearchWrap.classList.remove('show-hint'); });
-    var mobileSchoolSearch = document.getElementById('mobileSchoolSearch');
-    if (mobileSchoolSearch && schoolSearchInput) {
-      mobileSchoolSearch.addEventListener('input', function() {
-        if (schoolSearchInput.value !== mobileSchoolSearch.value) {
-          schoolSearchInput.value = mobileSchoolSearch.value;
-          var ev = new Event('input', { bubbles: true });
-          schoolSearchInput.dispatchEvent(ev);
-        }
-      });
-      schoolSearchInput.addEventListener('input', function() {
-        if (mobileSchoolSearch.value !== schoolSearchInput.value) {
-          mobileSchoolSearch.value = schoolSearchInput.value;
-        }
-      });
-    }
 
-    var gemeenteFilterInput = document.getElementById('gemeenteFilter');
-    var gemeenteFilterWrap = document.getElementById('gemeenteFilterWrap');
-    function applyMunicipalityTextSelection() {
-      citySelectionExplicit = true;
-      selectedGemeenten = new Set(getGemeentenInList());
+    var cityFilterTrigger = document.getElementById('cityFilterTrigger');
+    var cityFilterMenu = document.getElementById('cityFilterMenu');
+    var schoolFilterTrigger = document.getElementById('schoolFilterTrigger');
+    var schoolFilterMenu = document.getElementById('schoolFilterMenu');
+    function setFilterMenu(trigger, menu, open) {
+      if (!trigger || !menu) return;
+      menu.classList.toggle('hidden', !open);
+      trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
     }
-    gemeenteFilterInput.addEventListener('input', function() {
-      applyMunicipalityTextSelection();
-      renderGemeenteCheckboxes();
+    if (cityFilterTrigger) cityFilterTrigger.addEventListener('click', function(event) {
+      event.stopPropagation();
+      var open = cityFilterMenu.classList.contains('hidden');
+      setFilterMenu(schoolFilterTrigger, schoolFilterMenu, false);
+      setFilterMenu(cityFilterTrigger, cityFilterMenu, open);
+    });
+    if (schoolFilterTrigger) schoolFilterTrigger.addEventListener('click', function(event) {
+      event.stopPropagation();
+      var open = schoolFilterMenu.classList.contains('hidden');
+      setFilterMenu(cityFilterTrigger, cityFilterMenu, false);
+      setFilterMenu(schoolFilterTrigger, schoolFilterMenu, open);
+    });
+    [cityFilterMenu, schoolFilterMenu].forEach(function(menu) { if (menu) menu.addEventListener('click', function(event) { event.stopPropagation(); }); });
+    document.addEventListener('click', function() {
+      setFilterMenu(cityFilterTrigger, cityFilterMenu, false);
+      setFilterMenu(schoolFilterTrigger, schoolFilterMenu, false);
+    });
+    document.addEventListener('keydown', function(event) {
+      if (event.key !== 'Escape') return;
+      var cityWasOpen = cityFilterMenu && !cityFilterMenu.classList.contains('hidden');
+      var schoolWasOpen = schoolFilterMenu && !schoolFilterMenu.classList.contains('hidden');
+      setFilterMenu(cityFilterTrigger, cityFilterMenu, false);
+      setFilterMenu(schoolFilterTrigger, schoolFilterMenu, false);
+      if (schoolWasOpen && schoolFilterTrigger) schoolFilterTrigger.focus();
+      else if (cityWasOpen && cityFilterTrigger) cityFilterTrigger.focus();
+    });
+    document.getElementById('schoolSelectAll').addEventListener('click', function() {
+      schoolSelectionExplicit = true;
+      selectAllAvailableSchools();
+      renderSchoolCheckboxes();
       refreshChart();
       syncCanonicalUrl();
     });
-    gemeenteFilterInput.addEventListener('change', function() {
-      applyMunicipalityTextSelection();
-      renderGemeenteCheckboxes();
+    document.getElementById('schoolDeselectAll').addEventListener('click', function() {
+      schoolSelectionExplicit = true;
+      selectedSchoolIds = new Set();
+      renderSchoolCheckboxes();
       refreshChart();
       syncCanonicalUrl();
     });
-    gemeenteFilterInput.addEventListener('focus', function() { if (gemeenteFilterWrap) gemeenteFilterWrap.classList.add('show-hint'); });
-    gemeenteFilterInput.addEventListener('blur', function() { if (gemeenteFilterWrap) gemeenteFilterWrap.classList.remove('show-hint'); });
 
     var showVMBOEl = document.getElementById('showVMBO');
     if (showVMBOEl) showVMBOEl.addEventListener('change', function() {
@@ -1750,97 +1932,29 @@
       });
     });
 
-    // Mobile Filters bottom sheet
-    (function setupMobileFiltersSheet() {
-      var btn = document.getElementById('mobileFiltersBtn');
-      var sheet = document.getElementById('mobileFiltersSheet');
-      var backdrop = document.getElementById('mobileFiltersBackdrop');
-      var panel = document.getElementById('mobileFiltersPanel');
-      var content = document.getElementById('mobileFiltersContent');
-      var closeBtn = document.getElementById('mobileFiltersClose');
-      var gemeenteList = document.getElementById('gemeenteList');
-      if (!btn || !sheet || !backdrop || !panel || !content || !gemeenteList) return;
-      var originalParent = gemeenteList.parentElement;
-      var placeholder = document.createElement('div');
-      originalParent.insertBefore(placeholder, gemeenteList.nextSibling);
-      var wrap = document.getElementById('wrap');
-      var inertTargets = [document.querySelector('body > header')].concat(wrap ? Array.prototype.slice.call(wrap.children).filter(function(child) { return child !== sheet; }) : []).filter(Boolean);
-      var open = false;
-      function setPageBackgroundInert(inert) {
-        inertTargets.forEach(function(element) {
-          if ('inert' in element) {
-            element.inert = inert;
-          } else if (inert) {
-            element.setAttribute('aria-hidden', 'true');
-            element.setAttribute('data-sheet-inert-fallback', 'true');
-          } else if (element.getAttribute('data-sheet-inert-fallback') === 'true') {
-            element.removeAttribute('aria-hidden');
-            element.removeAttribute('data-sheet-inert-fallback');
-          }
-        });
+    function revealHashSection(hash, updateHistory) {
+      if (!hash || hash.charAt(0) !== '#') return;
+      var target = document.getElementById(hash.slice(1));
+      if (!target) return;
+      var details = target.querySelector('details');
+      if (details) details.open = true;
+      if (updateHistory && window.location.hash !== hash) {
+        window.history.pushState(null, '', hash);
       }
-      function openSheet() {
-        if (open) return;
-        open = true;
-        sheet.setAttribute('aria-hidden', 'false');
-        btn.setAttribute('aria-expanded', 'true');
-        sheet.classList.remove('pointer-events-none');
-        backdrop.classList.add('opacity-100');
-        panel.classList.remove('translate-y-full');
-        content.appendChild(gemeenteList);
-        setPageBackgroundInert(true);
-        if (closeBtn) closeBtn.focus();
-        else { panel.tabIndex = -1; panel.focus(); }
-      }
-      function closeSheet() {
-        if (!open) return;
-        open = false;
-        sheet.setAttribute('aria-hidden', 'true');
-        btn.setAttribute('aria-expanded', 'false');
-        sheet.classList.add('pointer-events-none');
-        backdrop.classList.remove('opacity-100');
-        panel.classList.add('translate-y-full');
-        if (placeholder.parentElement) {
-          originalParent.insertBefore(gemeenteList, placeholder);
-        }
-        setPageBackgroundInert(false);
-        btn.focus();
-      }
-      btn.addEventListener('click', function() { openSheet(); });
-      closeBtn && closeBtn.addEventListener('click', function() { closeSheet(); });
-      backdrop.addEventListener('click', function() { closeSheet(); });
-      document.addEventListener('keydown', function(event) {
-        if (!open) return;
-        if (event.key === 'Escape') {
-          closeSheet();
-          return;
-        }
-        if (event.key === 'Tab') {
-          var focusable = Array.prototype.slice.call(
-            panel.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])')
-          ).filter(function(element) { return element.offsetParent !== null; });
-          if (!focusable.length) {
-            event.preventDefault();
-            panel.focus();
-            return;
-          }
-          var first = focusable[0];
-          var last = focusable[focusable.length - 1];
-          if (focusable.indexOf(document.activeElement) === -1) {
-            event.preventDefault();
-            first.focus();
-          } else if (event.shiftKey && document.activeElement === first) {
-            event.preventDefault();
-            last.focus();
-          } else if (!event.shiftKey && document.activeElement === last) {
-            event.preventDefault();
-            first.focus();
-          }
-        }
+      window.requestAnimationFrame(function() {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
-      // 初始同步一次摘要
-      updateMobileFiltersSummary();
-    })();
+    }
+    ['navContact'].forEach(function(id) {
+      var link = document.getElementById(id);
+      if (!link) return;
+      link.addEventListener('click', function(event) {
+        event.preventDefault();
+        revealHashSection(link.getAttribute('href'), true);
+      });
+    });
+    window.addEventListener('hashchange', function() { revealHashSection(window.location.hash, false); });
+
     document.getElementById('navVO').addEventListener('click', function() { switchMode('vo'); });
     document.getElementById('navPO').addEventListener('click', function() { switchMode('po'); });
     document.querySelectorAll('.profile-tab').forEach(function(tab) {
@@ -1870,6 +1984,7 @@
     renderGemeenteCheckboxes();
     refreshChart();
     syncCanonicalUrl();
+    if (window.location.hash) revealHashSection(window.location.hash, false);
   </script>
 </body>
 </html>
