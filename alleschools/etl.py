@@ -77,7 +77,7 @@ def fetch_vo_exams(data_root: Path) -> Path:
 
     返回实际写入的文件路径。
     """
-    url = "https://duo.nl/open_onderwijsdata/images/examenkandidaten-en-geslaagden-2019-2024.csv"
+    url = "https://duo.nl/open_onderwijsdata/images/examenkandidaten-en-geslaagden-2020-2025.csv"
     data_root.mkdir(parents=True, exist_ok=True)
     out_path = data_root / "duo_examen_raw_all.csv"
     print(f"[fetch] VO exams: {url} -> {out_path}")

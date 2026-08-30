@@ -489,11 +489,11 @@ def run_vo_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
     if not year_cols:
         # 内建默认与 config 一致
         year_cols = [
-            [13, 14, "2019-2020", 0.2],
-            [22, 23, "2020-2021", 0.4],
-            [31, 32, "2021-2022", 0.6],
-            [40, 41, "2022-2023", 0.8],
-            [49, 50, "2023-2024", 1.0],
+            [13, 14, "2020-2021", 0.2],
+            [22, 23, "2021-2022", 0.4],
+            [31, 32, "2022-2023", 0.6],
+            [40, 41, "2023-2024", 0.8],
+            [49, 50, "2024-2025", 1.0],
         ]
 
     schools = vo_loader.load_exam_schools(str(raw_root), exams_all, exams_small, year_cols)

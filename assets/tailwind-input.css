@@ -38,7 +38,7 @@
   .v2-surface { background: var(--surface); border: 1px solid var(--line); }
   .v2-input { @apply w-full rounded-xl px-4 py-3 text-sm transition-shadow; background: var(--surface); border: 1px solid var(--line); color: var(--ink); }
   .v2-input:focus { @apply outline-none ring-2 ring-terracotta/30; border-color: var(--accent); }
-  .profile-tab { @apply shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition; color: var(--muted); border-color: var(--line); background: transparent; }
+  .profile-tab { @apply shrink-0 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-semibold transition; color: var(--muted); border-color: var(--line); background: transparent; }
   .profile-tab[aria-selected="true"] { @apply bg-forest text-white shadow-sm; border-color: #173f35; }
   .dark .profile-tab[aria-selected="true"] { @apply bg-terracotta; border-color: #e08260; }
   .school-type-tab { @apply rounded-lg border-0 px-3 py-1.5 text-sm font-semibold transition; color: var(--muted); background: transparent; }
