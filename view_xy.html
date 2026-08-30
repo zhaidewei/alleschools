@@ -53,7 +53,6 @@
       <p id="heroEyebrow" class="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-terracotta dark:text-[#e08260]">Explore Dutch schools</p>
       <h1 id="heroTitle" class="font-display text-4xl font-bold leading-[1.08] tracking-tight text-forest dark:text-[#f4efe4] sm:text-6xl">People say Dutch schools are much the same. Does the data agree?</h1>
       <p id="heroBody" class="mt-4 max-w-2xl text-base leading-7 text-[#65716b] dark:text-[#afbbb4] sm:text-lg">Compare school advice, exam performance and community context.</p>
-      <p id="heroCaveat" class="mt-2 text-sm text-[#65716b] dark:text-[#afbbb4]">The data offers clues. The choice remains yours.</p>
       <p id="datasetOverview" class="mt-4 text-sm font-medium text-forest dark:text-[#dce8e2]" aria-live="polite"></p>
       <aside class="mt-5 max-w-2xl rounded-2xl border border-[#ddd5c7] bg-[#fffaf1] px-4 py-3 dark:border-[#335047] dark:bg-[#142923]">
         <p id="insightTitle" class="text-xs font-bold uppercase tracking-[0.14em] text-terracotta dark:text-[#e08260]">Did you know?</p>
@@ -245,7 +244,6 @@
         heroEyebrow: 'Explore Dutch schools',
         heroTitle: 'People say Dutch schools are much the same. Does the data agree?',
         heroBody: 'Compare school advice, exam performance and community context.',
-        heroCaveat: 'The data offers clues. The choice remains yours.',
         insightTitle: 'Did you know?',
         insightBody: 'School performance and student background often move together. Results alone cannot show how much comes from the school, peers or family circumstances.',
         insightBody_po: 'School advice and nearby home values often move together. That does not prove causation: family background, school choice, peers and neighbourhood resources may influence both.',
@@ -306,7 +304,7 @@
         titleMain: '🏫 Dutch VWO schools map',
         subtitleBefore: 'Data from DUO (excluding international schools). Only schools with VWO. Under current filters: ',
         subtitleAfter: ' schools shown.',
-        labelSchoolSearch: 'Search school name, BRIN or postcode',
+        labelSchoolSearch: 'Search school name or postcode (BRIN)',
         schoolSearchPlaceholder: 'Search by name or acronym (e.g. HWC), comma for multiple, partial match highlighted',
         schoolSearchPlaceholderShort: 'Name or acronym (e.g. HWC)',
         labelGemeente: 'Municipalities',
@@ -347,7 +345,6 @@
         heroEyebrow: '探索荷兰学校',
         heroTitle: '都说荷兰学校差不多。数据同意吗？',
         heroBody: '比较学校的升学建议、考试表现与社区环境。',
-        heroCaveat: '数据提供线索，选择仍由你决定。',
         insightTitle: '你知道吗？',
         insightBody: '学校表现与学生背景经常同时变化。仅凭结果无法区分学校、同伴和家庭环境各自带来的影响。',
         insightBody_po: '学校升学建议与周边房价经常同向变化。这不代表因果关系：家庭背景、择校、同伴构成和社区资源都可能同时影响两者。',
@@ -408,7 +405,7 @@
         titleMain: '🏫 荷兰 VWO 中学定位图',
         subtitleBefore: '数据来自DUO（不含国际学校），仅包含有 VWO 的中学。当前筛选条件下展示 ',
         subtitleAfter: ' 所学校。',
-        labelSchoolSearch: '搜索学校名称、BRIN 或邮编',
+        labelSchoolSearch: '搜索学校名称或邮编（BRIN）',
         schoolSearchPlaceholder: '按校名或首字母缩写（如 HWC）搜索，逗号分隔多个，部分匹配高亮',
         schoolSearchPlaceholderShort: '校名或缩写（如 HWC）',
         labelGemeente: '市镇',
@@ -449,7 +446,6 @@
         heroEyebrow: 'Ontdek Nederlandse scholen',
         heroTitle: 'Men zegt dat Nederlandse scholen veel op elkaar lijken. Zeggen de gegevens dat ook?',
         heroBody: 'Vergelijk schooladviezen, examenprestaties en de context van de buurt.',
-        heroCaveat: 'De gegevens geven aanwijzingen. De keuze blijft aan jou.',
         insightTitle: 'Wist je dat?',
         insightBody: 'Schoolprestaties en de achtergrond van leerlingen bewegen vaak samen. Resultaten alleen laten niet zien welk deel samenhangt met school, medeleerlingen of gezin.',
         insightBody_po: 'Schooladviezen en woningwaarden in de buurt bewegen vaak samen. Dat bewijst geen oorzakelijk verband: gezinsachtergrond, schoolkeuze, medeleerlingen en buurtvoorzieningen kunnen beide beïnvloeden.',
@@ -510,7 +506,7 @@
         titleMain: '🏫 Nederlandse VWO-scholenkaart',
         subtitleBefore: 'Data van DUO (zonder internationale scholen). Alleen scholen met VWO. Onder huidige filters: ',
         subtitleAfter: ' scholen getoond.',
-        labelSchoolSearch: 'Zoek schoolnaam, BRIN of postcode',
+        labelSchoolSearch: 'Zoek schoolnaam of postcode (BRIN)',
         schoolSearchPlaceholder: 'Zoek op naam of afkorting (bijv. HWC), komma voor meerdere, deelmatch gemarkeerd',
         schoolSearchPlaceholderShort: 'Naam of afkorting (bijv. HWC)',
         labelGemeente: 'Gemeenten',
@@ -588,7 +584,7 @@
       if (navPO) navPO.textContent = t('navPO');
       var methodologyLink = document.getElementById('navMethodology');
       if (methodologyLink) methodologyLink.href = 'methodology.html?lang=' + encodeURIComponent(currentLang);
-      ['navMethodology', 'navContact', 'heroEyebrow', 'heroTitle', 'heroBody', 'heroCaveat', 'insightTitle', 'insightBody', 'explorerTitle', 'filterTitle', 'filterHint', 'labelProvince'].forEach(function(id) {
+      ['navMethodology', 'navContact', 'heroEyebrow', 'heroTitle', 'heroBody', 'insightTitle', 'insightBody', 'explorerTitle', 'filterTitle', 'filterHint', 'labelProvince'].forEach(function(id) {
         var element = document.getElementById(id);
         if (element) element.textContent = t(id);
       });
@@ -610,6 +606,7 @@
       if (noResults) noResults.textContent = t('noResults');
       if (typeof renderComparison === 'function') renderComparison();
       if (typeof updateMobileFiltersSummary === 'function') updateMobileFiltersSummary();
+      if (typeof updateSchoolFilterSummary === 'function') updateSchoolFilterSummary();
       var countEl = document.getElementById('schoolCount');
       var count = countEl ? countEl.textContent : '0';
       document.title = t('titleMain');
