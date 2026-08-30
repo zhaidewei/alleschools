@@ -22,3 +22,11 @@ def test_build_html_keeps_untrusted_data_inside_script(tmp_path: Path) -> None:
 
     assert html.count("</script>") == 1
     assert "<h1>owned</h1>" not in html
+
+
+def test_excluded_school_fields_are_rendered_as_text() -> None:
+    template = Path(__file__).parents[1] / "view_xy.html"
+    source = template.read_text(encoding="utf-8")
+
+    assert "item.textContent = (s.BRIN || '')" in source
+    assert "excluded.map(function(s) { return '<li>'" not in source

@@ -7,7 +7,7 @@ import pytest
 
 from alleschools.compute.indicators import compute_po_xy, compute_vo_xy
 from alleschools.exporters import csv_exporter
-from alleschools.exporters.meta_builder import build_po_meta, build_vo_meta, SCHEMA_VERSION
+from alleschools.exporters.meta_builder import SCHEMA_VERSION, build_po_meta
 import alleschools.config as cfg
 from alleschools.pipeline import run_po_pipeline, run_vo_pipeline
 

@@ -19,7 +19,6 @@ from alleschools import schema_validator as sv
 from alleschools.compute import (
     compute_po_xy,
     compute_vo_xy,
-    compute_vwo_mean_latest_year,
     compute_vwo_profile_indices,
 )
 from alleschools.exporters import csv_exporter, geojson_exporter, json_exporter, long_table_exporter
@@ -34,7 +33,6 @@ from alleschools.loaders import (
     cbs_loader,
     duo_loader,
     vo_loader,
-    load_vwo_exam_cijferlijst_scores,
     load_vwo_central_exam_scores,
 )
 from alleschools.logging_utils import setup_logger
@@ -472,7 +470,6 @@ def run_vo_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
     weights_cfg: Dict[str, Any] = dict(vo_cfg.get("weights") or {})
     year_cols: List[Any] = list(weights_cfg.get("year_cols") or [])
     min_havo_vwo_total = int(thresholds.get("min_havo_vwo_total") or 20)
-    min_vwo_subjects_per_year = int(thresholds.get("min_vwo_subjects_per_year") or 3)
 
     logger = setup_logger(name="alleschools.vo")
     logger.info("Starting VO pipeline")

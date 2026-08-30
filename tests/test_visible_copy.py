@@ -45,6 +45,20 @@ def test_methodology_is_a_dedicated_page() -> None:
     assert 'id="po"' in methodology
 
 
+def test_primary_navigation_is_consistent_on_both_pages() -> None:
+    home = (PROJECT_ROOT / "view_xy.html").read_text(encoding="utf-8")
+    methodology = (PROJECT_ROOT / "methodology.html").read_text(encoding="utf-8")
+
+    for source in (home, methodology):
+        assert 'id="navHome"' in source
+        assert 'id="navMethodology"' in source
+        assert 'id="navSupport"' in source
+        assert 'href="https://ko-fi.com/deweizhai"' in source
+        assert 'id="navContact"' not in source
+
+    assert 'id="supportSection"' not in home
+
+
 def test_province_filter_is_available_in_all_languages() -> None:
     home = (PROJECT_ROOT / "view_xy.html").read_text(encoding="utf-8")
     assert 'id="provinceFilter"' in home
@@ -74,4 +88,6 @@ def test_footer_links_to_advisory_homepage() -> None:
     home = (PROJECT_ROOT / "view_xy.html").read_text(encoding="utf-8")
     assert 'href="https://zhaidewei.com"' in home
     assert '>Dewei AI Advisory</a>' in home
-    assert "copyrightLicense: '。本项目采用 MIT 许可证。'" in home
+    assert "网站代码采用 MIT 许可证" in home
+    assert "DUO Open Onderwijsdata（CC0 1.0）" in home
+    assert "CBS StatLine（CC BY 4.0）" in home

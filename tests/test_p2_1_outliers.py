@@ -2,8 +2,6 @@ from __future__ import annotations
 
 """P2-1：X/Y 异常值截断（winsorization）策略测试。"""
 
-from pathlib import Path
-
 from alleschools.compute.indicators import compute_po_xy, compute_vo_xy
 
 
@@ -77,4 +75,3 @@ def test_compute_vo_xy_outliers_clip_percentiles() -> None:
     assert xs[0] > 0.0
     assert xs[-1] < 100.0
     assert 0.0 <= xs[0] <= xs[-1] <= 100.0
-

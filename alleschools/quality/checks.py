@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import csv
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, Optional, Sequence
+from typing import Any, Dict, List, Mapping, Sequence
 
 def _collect_duplicate_brins_po(
     data_root: Path, pattern: str, schoolyears: Sequence[Sequence[Any]]

@@ -1,5 +1,4 @@
 """单元测试：VO 中学 X/Y 计算逻辑（alleschools.loaders.vo_loader + compute）"""
-import pytest
 from alleschools.loaders import vo_loader
 
 

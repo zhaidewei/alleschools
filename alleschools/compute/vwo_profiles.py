@@ -15,7 +15,7 @@ This module implements section 3.5 of VO_X_AXIS_VWO_MEDIAN_SCORE.md:
 The output is four mappings: profile_id -> { brin -> X_profile_5yr }.
 """
 
-from typing import Dict, Mapping, MutableMapping, Sequence
+from typing import Dict, Mapping, Sequence
 
 from alleschools.loaders.vwo_exam_loader import SchoolYearCentralExamScores
 
