@@ -4,6 +4,209 @@
  */
 (function () {
   const GOLDEN = 137.508;
+  const MAX_COMPARISON_SCHOOLS = 4;
+  const VALID_MODES = ['vo', 'po'];
+  const VALID_LANGUAGES = ['en', 'zh', 'nl'];
+  const VALID_PROFILES = ['nt', 'ng', 'em', 'cm'];
+
+  function normalizeEnum(value, allowed, fallback) {
+    const normalized = value == null ? '' : String(value).trim().toLowerCase();
+    return allowed.indexOf(normalized) === -1 ? fallback : normalized;
+  }
+
+  /** URL/storage 边界使用的枚举归一化。 */
+  function normalizeMode(value) {
+    return normalizeEnum(value, VALID_MODES, 'vo');
+  }
+
+  function normalizeLanguage(value) {
+    return normalizeEnum(value, VALID_LANGUAGES, 'en');
+  }
+
+  function normalizeProfile(value, mode) {
+    if (mode != null && normalizeMode(mode) === 'po') return null;
+    return normalizeEnum(value, VALID_PROFILES, 'nt');
+  }
+
+  /**
+   * 比较项的稳定身份。数据契约优先使用 BRIN；显式 id 可供未来数据源使用。
+   * 返回 null 表示该值不能进入比较列表。
+   */
+  function getStableSchoolId(school, layer) {
+    if (school == null) return null;
+    if (typeof school === 'string') {
+      const identity = school.trim();
+      if (!identity) return null;
+      if (identity.includes(':')) {
+        const separator = identity.indexOf(':');
+        const identityLayer = identity.slice(0, separator);
+        const schoolId = identity.slice(separator + 1);
+        return VALID_MODES.includes(identityLayer) && schoolId ? identityLayer + ':' + schoolId : null;
+      }
+      return layer ? normalizeMode(layer) + ':' + identity : null;
+    }
+    const schoolLayer = layer != null ? normalizeMode(layer) : normalizeMode(school.layer != null ? school.layer : school.mode);
+    const raw = school.vestigingId != null ? school.vestigingId
+      : school.vestiging_id != null ? school.vestiging_id
+      : school.pointId != null ? school.pointId
+      : school.point_id != null ? school.point_id
+      : school.id != null ? school.id
+      : school.schoolId != null ? school.schoolId
+      : school.school_id != null ? school.school_id
+      : school.brin != null ? school.brin
+      : school.BRIN;
+    if (raw == null) return null;
+    const id = String(raw).trim();
+    return id ? schoolLayer + ':' + id : null;
+  }
+
+  /** 当前 profile 的两个坐标都存在且为有限数值时，学校才可进入比较。 */
+  function isComparisonEligible(school) {
+    return !!school && Number.isFinite(school.x) && Number.isFinite(school.y);
+  }
+
+  /** 稳定去重并截断到四所；保留第一次出现的完整对象。 */
+  function normalizeComparisonList(schools, layer, limit) {
+    if (typeof layer === 'number') { limit = layer; layer = null; }
+    const max = limit == null ? MAX_COMPARISON_SCHOOLS : Math.max(0, Math.min(MAX_COMPARISON_SCHOOLS, Number(limit) || 0));
+    if (!Array.isArray(schools) || max === 0) return [];
+    const seen = new Set();
+    const result = [];
+    for (let i = 0; i < schools.length && result.length < max; i++) {
+      if (!isComparisonEligible(schools[i])) continue;
+      const id = getStableSchoolId(schools[i], layer);
+      if (id == null || seen.has(id)) continue;
+      seen.add(id);
+      result.push(schools[i]);
+    }
+    return result;
+  }
+
+  /** 已存在则移除，否则在未满四所时加入。 */
+  function toggleComparison(schools, school, layer) {
+    const current = normalizeComparisonList(schools, layer);
+    const id = getStableSchoolId(school, layer);
+    if (id == null) return current;
+    const existingIndex = current.findIndex(function (item) { return getStableSchoolId(item, layer) === id; });
+    if (existingIndex !== -1) {
+      return current.filter(function (_, index) { return index !== existingIndex; });
+    }
+    return current.length >= MAX_COMPARISON_SCHOOLS || !isComparisonEligible(school) ? current : current.concat([school]);
+  }
+
+  function removeComparison(schools, schoolOrId, layer) {
+    const id = getStableSchoolId(schoolOrId, layer);
+    const current = normalizeComparisonList(schools, layer);
+    if (id == null) return current;
+    return current.filter(function (item) { return getStableSchoolId(item, layer) !== id; });
+  }
+
+  function clearComparison() {
+    return [];
+  }
+
+  function comparisonAfterLayerChange(schools, previousLayer, nextLayer) {
+    return normalizeMode(previousLayer) === normalizeMode(nextLayer)
+      ? normalizeComparisonList(schools, nextLayer)
+      : [];
+  }
+
+  function comparisonAfterProfileChange(schools, layer) {
+    return normalizeComparisonList(schools, layer);
+  }
+
+  function normalizeGemeenteState(value, allGemeenten) {
+    if (typeof value === 'string' && value.trim().toLowerCase() === 'all') return 'all';
+    const wasArray = Array.isArray(value);
+    const values = wasArray ? value : (value == null || String(value).trim() === '' ? [] : String(value).split(','));
+    const seen = new Set();
+    const selected = values.map(function (item) { return String(item).trim(); }).filter(function (item) {
+      if (!item || seen.has(item)) return false;
+      seen.add(item);
+      return true;
+    });
+    if (selected.some(function (item) { return item.toLowerCase() === 'all'; })) return 'all';
+
+    /* 旧状态会把当前 layer 的完整城市列表逐项持久化；已知全集时迁移为 compact sentinel。 */
+    if (Array.isArray(allGemeenten) && allGemeenten.length > 0) {
+      const expected = new Set(allGemeenten.map(function (item) { return String(item).trim(); }).filter(Boolean));
+      if (expected.size === selected.length && selected.every(function (item) { return expected.has(item); })) return 'all';
+    }
+    if (selected.length === 0) return wasArray ? [] : '';
+    return wasArray ? selected : selected.join(',');
+  }
+
+  /** 分享前生成唯一的 canonical 状态；all 与显式空选择具有不同语义。 */
+  function normalizeShareState(state) {
+    const source = state && typeof state === 'object' ? state : {};
+    const mode = normalizeMode(source.mode);
+    const rawGemeente = source.gemeente != null ? source.gemeente : source.city;
+    const allGemeenten = source.allGemeenten || source.availableGemeenten || source.gemeentenAvailable;
+    const gemeente = normalizeGemeenteState(rawGemeente, allGemeenten);
+    const rawComparison = source.compare != null ? source.compare : source.comparison;
+    const comparisonValues = Array.isArray(rawComparison) ? rawComparison : String(rawComparison || '').split(',');
+    const comparison = [];
+    const seenComparison = new Set();
+    comparisonValues.forEach(function (item) {
+      const identity = getStableSchoolId(item, mode);
+      if (identity && identity.startsWith(mode + ':') && !seenComparison.has(identity) && comparison.length < MAX_COMPARISON_SCHOOLS) {
+        seenComparison.add(identity);
+        comparison.push(identity);
+      }
+    });
+    return {
+      lang: normalizeLanguage(source.lang),
+      mode: mode,
+      q: source.q == null ? '' : String(source.q).trim(),
+      gemeente: gemeente,
+      profile: normalizeProfile(source.profile, mode),
+      compare: comparison,
+    };
+  }
+
+  function stateObject(value) {
+    if (!value) return {};
+    if (typeof value === 'object' && !(value instanceof URLSearchParams)) return value;
+    const params = value instanceof URLSearchParams ? value : new URLSearchParams(String(value).replace(/^\?/, ''));
+    const result = {};
+    params.forEach(function (item, key) { result[key] = item; });
+    return result;
+  }
+
+  /** URL 中存在的键逐项覆盖 storage，storage 再覆盖 default；兼容旧 city。 */
+  function deserializeShareState(urlState, storageState, defaultState) {
+    const defaults = stateObject(defaultState);
+    const storage = stateObject(storageState);
+    const url = stateObject(urlState);
+    const merged = {};
+    ['lang', 'mode', 'q', 'gemeente', 'profile', 'compare'].forEach(function (key) {
+      if (Object.prototype.hasOwnProperty.call(url, key)) merged[key] = url[key];
+      else if (key === 'gemeente' && Object.prototype.hasOwnProperty.call(url, 'city')) merged[key] = url.city;
+      else if (Object.prototype.hasOwnProperty.call(storage, key)) merged[key] = storage[key];
+      else if (key === 'gemeente' && Object.prototype.hasOwnProperty.call(storage, 'city')) merged[key] = storage.city;
+      else if (Object.prototype.hasOwnProperty.call(defaults, key)) merged[key] = defaults[key];
+      else if (key === 'gemeente' && Object.prototype.hasOwnProperty.call(defaults, 'city')) merged[key] = defaults.city;
+    });
+    const cityUniverse = url.allGemeenten || url.availableGemeenten
+      || storage.allGemeenten || storage.availableGemeenten
+      || defaults.allGemeenten || defaults.availableGemeenten;
+    if (cityUniverse) merged.allGemeenten = cityUniverse;
+    return normalizeShareState(merged);
+  }
+
+  /** 确定性的 URL 查询串；空值也编码，以支持显式空城市回放。 */
+  function serializeShareState(state) {
+    const normalized = normalizeShareState(state);
+    const pairs = [
+      ['lang', normalized.lang],
+      ['mode', normalized.mode],
+      ['q', normalized.q],
+      ['gemeente', Array.isArray(normalized.gemeente) ? normalized.gemeente.join(',') : normalized.gemeente],
+    ];
+    if (normalized.profile != null) pairs.push(['profile', normalized.profile]);
+    pairs.push(['compare', normalized.compare.join(',')]);
+    return pairs.map(function (pair) { return encodeURIComponent(pair[0]) + '=' + encodeURIComponent(pair[1]); }).join('&');
+  }
 
   /** 从搜索框原始字符串解析出词列表（逗号分隔、去空、大写） */
   function parseSearchTerms(raw) {
@@ -25,18 +228,27 @@
     return String(naam).trim().split(/\s+/).map(function (w) { return (w[0] || '').toUpperCase(); }).join('');
   }
 
-  /** 点 p 是否匹配任意一个搜索词（校名、首字母缩写、BRIN、gemeente、邮编） */
+  /** 点 p 是否匹配任意一个搜索词（校名、首字母缩写、BRIN、邮编）。市镇由独立筛选负责。 */
   function pointMatchesSearch(p, searchTerms) {
     if (!searchTerms || searchTerms.length === 0) return true;
     const naam = (p.label || '').toUpperCase();
     const acr = acronymFromName(p.label || '');
     const brin = (p.brin || '').toUpperCase();
-    const gemeente = (p.gemeente || '').toUpperCase();
     const postcode = (p.postcode || '').toUpperCase().replace(/\s/g, '');
     return searchTerms.some(function (term) {
       const termNorm = term.replace(/\s/g, '');
-      return naam.includes(term) || (acr && acr.includes(termNorm)) || brin.includes(term) || gemeente.includes(term) || postcode.includes(termNorm);
+      return naam.includes(term) || (acr && acr.includes(termNorm)) || brin.includes(term) || postcode.includes(termNorm);
     });
+  }
+
+  /** 返回匹配点的新数组，供图表高亮、空状态和计数共用同一判定。 */
+  function filterPointsBySearch(points, searchTerms) {
+    if (!Array.isArray(points)) return [];
+    return points.filter(function (point) { return pointMatchesSearch(point, searchTerms); });
+  }
+
+  function countSearchMatches(points, searchTerms) {
+    return filterPointsBySearch(points, searchTerms).length;
   }
 
   /** 在 label 中找出被 searchTerms 命中的区间，合并重叠后返回 [[start,end], ...] */
@@ -155,10 +367,28 @@
   }
 
   const VIEW_XY = {
+    MAX_COMPARISON_SCHOOLS: MAX_COMPARISON_SCHOOLS,
+    normalizeMode: normalizeMode,
+    normalizeLanguage: normalizeLanguage,
+    normalizeProfile: normalizeProfile,
+    normalizeGemeenteState: normalizeGemeenteState,
+    getStableSchoolId: getStableSchoolId,
+    isComparisonEligible: isComparisonEligible,
+    normalizeComparisonList: normalizeComparisonList,
+    toggleComparison: toggleComparison,
+    removeComparison: removeComparison,
+    clearComparison: clearComparison,
+    comparisonAfterLayerChange: comparisonAfterLayerChange,
+    comparisonAfterProfileChange: comparisonAfterProfileChange,
+    normalizeShareState: normalizeShareState,
+    deserializeShareState: deserializeShareState,
+    serializeShareState: serializeShareState,
     parseSearchTerms: parseSearchTerms,
     parseGemeenteFilter: parseGemeenteFilter,
     acronymFromName: acronymFromName,
     pointMatchesSearch: pointMatchesSearch,
+    filterPointsBySearch: filterPointsBySearch,
+    countSearchMatches: countSearchMatches,
     getNameHighlights: getNameHighlights,
     hashString: hashString,
     gemeenteToColor: gemeenteToColor,

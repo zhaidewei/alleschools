@@ -1,3 +1,54 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+    --page: #f7f3eb;
+    --surface: #fffdf8;
+    --surface-muted: #eee8dc;
+    --ink: #173f35;
+    --muted: #65716b;
+    --line: #ddd5c7;
+    --accent: #c65f3b;
+  }
+
+  .dark {
+    color-scheme: dark;
+    --page: #0d1f1b;
+    --surface: #142923;
+    --surface-muted: #1c342d;
+    --ink: #f4efe4;
+    --muted: #afbbb4;
+    --line: #335047;
+    --accent: #e08260;
+  }
+
+  html { scroll-behavior: smooth; }
+  body { background: var(--page); color: var(--ink); }
+  :focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 65%, transparent); outline-offset: 3px; }
+}
+
+@layer components {
+  .v2-shell { @apply max-w-6xl mx-auto px-4 sm:px-6; }
+  .v2-nav-link { @apply text-sm font-medium no-underline transition-colors; color: var(--muted); }
+  .v2-nav-link:hover { color: var(--ink); }
+  .v2-surface { background: var(--surface); border: 1px solid var(--line); }
+  .v2-input { @apply w-full rounded-xl px-4 py-3 text-sm transition-shadow; background: var(--surface); border: 1px solid var(--line); color: var(--ink); }
+  .v2-input:focus { @apply outline-none ring-2 ring-terracotta/30; border-color: var(--accent); }
+  .profile-tab { @apply shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition; color: var(--muted); border-color: var(--line); background: transparent; }
+  .profile-tab[aria-selected="true"] { @apply bg-forest text-white shadow-sm; border-color: #173f35; }
+  .dark .profile-tab[aria-selected="true"] { @apply bg-terracotta; border-color: #e08260; }
+  .v2-explorer { display: grid; grid-template-areas: "search search" "filters chart"; grid-template-columns: 220px minmax(0, 1fr); gap: 1.25rem; }
+  .v2-explorer > .controls { grid-area: search; }
+  .v2-explorer > #gemeenteList { grid-area: filters; }
+  .v2-explorer > #chartWrap { grid-area: chart; }
+
+  @media (max-width: 767px) {
+    .v2-explorer { display: flex; flex-direction: column; gap: 1rem; }
+    .v2-explorer > .controls { order: 1; }
+    .v2-explorer > #chartWrap { order: 2; }
+    .v2-explorer > #gemeenteList { order: 3; }
+  }
+}

@@ -8,6 +8,115 @@ const path = require('path');
 
 const VIEW_XY = require(path.join(__dirname, '..', 'view_xy_logic.js'));
 
+describe('V2 enum normalization', function () {
+  it('normalizes mode and falls back to vo', function () {
+    assert.strictEqual(VIEW_XY.normalizeMode(' PO '), 'po');
+    assert.strictEqual(VIEW_XY.normalizeMode('invalid'), 'vo');
+    assert.strictEqual(VIEW_XY.normalizeMode(null), 'vo');
+  });
+  it('normalizes language and falls back to en', function () {
+    assert.strictEqual(VIEW_XY.normalizeLanguage('ZH'), 'zh');
+    assert.strictEqual(VIEW_XY.normalizeLanguage('de'), 'en');
+  });
+  it('accepts only VO profiles, defaults VO to nt and makes PO profile absent', function () {
+    assert.strictEqual(VIEW_XY.normalizeProfile(' NT '), 'nt');
+    assert.strictEqual(VIEW_XY.normalizeProfile('overview'), 'nt');
+    assert.strictEqual(VIEW_XY.normalizeProfile('bad'), 'nt');
+    assert.strictEqual(VIEW_XY.normalizeProfile('cm', 'po'), null);
+  });
+});
+
+describe('comparison list', function () {
+  const schools = [
+    { layer: 'vo', brin: 'A', label: 'Alpha', x: 1, y: 6.1 },
+    { layer: 'vo', brin: 'B', label: 'Beta', x: 2, y: 6.2 },
+    { layer: 'vo', brin: 'C', label: 'Gamma', x: 3, y: 6.3 },
+    { layer: 'vo', brin: 'D', label: 'Delta', x: 4, y: 6.4 },
+    { layer: 'vo', brin: 'E', label: 'Epsilon', x: 5, y: 6.5 },
+  ];
+
+  it('deduplicates by stable id, preserves order and caps at four', function () {
+    const duplicate = { layer: 'vo', brin: 'A', label: 'Second Alpha', x: 9, y: 9 };
+    const result = VIEW_XY.normalizeComparisonList([schools[0], duplicate].concat(schools.slice(1)));
+    assert.deepStrictEqual(result, schools.slice(0, 4));
+  });
+  it('toggles without mutating the input and blocks a fifth school', function () {
+    const original = schools.slice(0, 2);
+    assert.deepStrictEqual(VIEW_XY.toggleComparison(original, schools[0]), [schools[1]]);
+    assert.deepStrictEqual(original, schools.slice(0, 2));
+    assert.deepStrictEqual(VIEW_XY.toggleComparison(schools.slice(0, 4), schools[4]), schools.slice(0, 4));
+  });
+  it('removes by object or id and clears', function () {
+    assert.deepStrictEqual(VIEW_XY.removeComparison(schools.slice(0, 3), { layer: 'vo', brin: 'B' }), [schools[0], schools[2]]);
+    assert.deepStrictEqual(VIEW_XY.removeComparison(schools.slice(0, 3), 'vo:C'), schools.slice(0, 2));
+    assert.deepStrictEqual(VIEW_XY.clearComparison(schools), []);
+  });
+  it('accepts explicit id fields and rejects identity-less entries', function () {
+    assert.strictEqual(VIEW_XY.getStableSchoolId({ layer: 'po', vestiging_id: 42, brin: 'ignored' }), 'po:42');
+    const valid = { layer: 'vo', BRIN: '00AA', x: 0, y: 0 };
+    assert.deepStrictEqual(VIEW_XY.normalizeComparisonList([{ layer: 'vo', label: 'No id', x: 1, y: 1 }, valid]), [valid]);
+  });
+  it('requires finite x and y for the current profile', function () {
+    assert.strictEqual(VIEW_XY.isComparisonEligible({ x: 0, y: 0 }), true);
+    assert.strictEqual(VIEW_XY.isComparisonEligible({ x: '1', y: 2 }), false);
+    assert.strictEqual(VIEW_XY.isComparisonEligible({ x: NaN, y: 2 }), false);
+    assert.strictEqual(VIEW_XY.isComparisonEligible({ x: 1, y: Infinity }), false);
+    assert.deepStrictEqual(VIEW_XY.toggleComparison(schools.slice(0, 1), { layer: 'vo', brin: 'Z', x: 1, y: null }), schools.slice(0, 1));
+  });
+  it('clears on layer change and preserves identities on profile change', function () {
+    assert.deepStrictEqual(VIEW_XY.comparisonAfterLayerChange(schools.slice(0, 2), 'vo', 'po'), []);
+    assert.deepStrictEqual(VIEW_XY.comparisonAfterProfileChange(schools.slice(0, 2), 'vo'), schools.slice(0, 2));
+  });
+});
+
+describe('share state normalization', function () {
+  it('normalizes enums, text, comparison and preserves explicit empty cities', function () {
+    assert.deepStrictEqual(VIEW_XY.normalizeShareState({
+      lang: 'NL', mode: 'PO', q: '  school ', gemeente: [], profile: 'NT',
+      compare: ['po:A', 'po:A', 'po:B'],
+    }), {
+      lang: 'nl', mode: 'po', q: 'school', gemeente: [], profile: null, compare: ['po:A', 'po:B'],
+    });
+  });
+  it('serializes a deterministic canonical query string', function () {
+    assert.strictEqual(
+      VIEW_XY.serializeShareState({ lang: 'zh', mode: 'vo', q: 'A B', gemeente: [], profile: 'EM' }),
+      'lang=zh&mode=vo&q=A%20B&gemeente=&profile=em&compare=',
+    );
+  });
+  it('roundtrips the all sentinel without expanding it', function () {
+    const query = VIEW_XY.serializeShareState({ lang: 'en', mode: 'vo', gemeente: 'all', profile: 'nt' });
+    assert.strictEqual(query, 'lang=en&mode=vo&q=&gemeente=all&profile=nt&compare=');
+    assert.strictEqual(VIEW_XY.deserializeShareState(query).gemeente, 'all');
+  });
+  it('roundtrips explicit empty selection separately from all', function () {
+    const query = VIEW_XY.serializeShareState({ mode: 'vo', gemeente: [] });
+    assert.strictEqual(query, 'lang=en&mode=vo&q=&gemeente=&profile=nt&compare=');
+    assert.strictEqual(VIEW_XY.deserializeShareState(query).gemeente, '');
+  });
+  it('migrates an old complete city list when its layer city universe is available', function () {
+    assert.strictEqual(VIEW_XY.normalizeShareState({
+      mode: 'vo', city: ['Amsterdam', 'Utrecht'], allGemeenten: ['Utrecht', 'Amsterdam'],
+    }).gemeente, 'all');
+    assert.strictEqual(VIEW_XY.deserializeShareState({}, {
+      city: ['Amsterdam', 'Utrecht'],
+    }, { allGemeenten: ['Utrecht', 'Amsterdam'] }).gemeente, 'all');
+  });
+  it('omits profile for PO and keeps canonical parameter order', function () {
+    assert.strictEqual(VIEW_XY.serializeShareState({ mode: 'po', profile: 'nt' }), 'lang=en&mode=po&q=&gemeente=&compare=');
+  });
+  it('deserializes with URL over storage over defaults and migrates city', function () {
+    assert.deepStrictEqual(
+      VIEW_XY.deserializeShareState('?mode=vo&q=url&city=&profile=cm', { lang: 'nl', q: 'storage', gemeente: 'Utrecht' }, { lang: 'en', mode: 'po', q: 'default' }),
+      { lang: 'nl', mode: 'vo', q: 'url', gemeente: '', profile: 'cm', compare: [] },
+    );
+  });
+  it('lets an explicit URL all or empty value override storage', function () {
+    assert.strictEqual(VIEW_XY.deserializeShareState('?gemeente=all', { gemeente: ['Utrecht'] }).gemeente, 'all');
+    assert.strictEqual(VIEW_XY.deserializeShareState('?gemeente=', { gemeente: 'all' }).gemeente, '');
+  });
+});
+
 describe('parseSearchTerms', function () {
   it('returns [] for empty or whitespace', function () {
     assert.deepStrictEqual(VIEW_XY.parseSearchTerms(''), []);
@@ -64,13 +173,23 @@ describe('pointMatchesSearch', function () {
     assert.strictEqual(VIEW_XY.pointMatchesSearch(p, ['HW']), true);
     assert.strictEqual(VIEW_XY.pointMatchesSearch(p, ['XY']), false);
   });
-  it('matches on brin, gemeente, postcode', function () {
+  it('matches on brin and postcode but leaves municipality to its own filter', function () {
     assert.strictEqual(VIEW_XY.pointMatchesSearch({ label: '', brin: '02QZ00', gemeente: '', postcode: '' }, ['02QZ']), true);
-    assert.strictEqual(VIEW_XY.pointMatchesSearch({ label: '', brin: '', gemeente: 'Amsterdam', postcode: '' }, ['AMSTERDAM']), true);
+    assert.strictEqual(VIEW_XY.pointMatchesSearch({ label: '', brin: '', gemeente: 'Amsterdam', postcode: '' }, ['AMSTERDAM']), false);
     assert.strictEqual(VIEW_XY.pointMatchesSearch({ label: '', brin: '', gemeente: '', postcode: '1234 AB' }, ['1234']), true);
   });
   it('normalizes postcode (no spaces) for matching', function () {
     assert.strictEqual(VIEW_XY.pointMatchesSearch({ label: '', brin: '', gemeente: '', postcode: '1234AB' }, ['1234 AB']), true);
+  });
+  it('reuses the same predicate for filtering and match counts', function () {
+    const points = [
+      { label: 'Alpha School', brin: '01AA', postcode: '1234 AB', gemeente: 'Utrecht' },
+      { label: 'Beta College', brin: '02BB', postcode: '5678 CD', gemeente: 'Amsterdam' },
+    ];
+    assert.deepStrictEqual(VIEW_XY.filterPointsBySearch(points, ['ALPHA']), [points[0]]);
+    assert.strictEqual(VIEW_XY.countSearchMatches(points, ['ALPHA']), 1);
+    assert.strictEqual(VIEW_XY.countSearchMatches(points, ['AMSTERDAM']), 0);
+    assert.strictEqual(VIEW_XY.countSearchMatches(points, []), 2);
   });
 });
 
