@@ -27,7 +27,6 @@
 
   html { scroll-behavior: smooth; }
   body { background: var(--page); color: var(--ink); }
-  #contactSection { scroll-margin-top: 5rem; }
   :focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 65%, transparent); outline-offset: 3px; }
 }
 

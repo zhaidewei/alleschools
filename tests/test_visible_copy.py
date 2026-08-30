@@ -57,6 +57,8 @@ def test_primary_navigation_is_consistent_on_both_pages() -> None:
         assert 'id="navContact"' not in source
 
     assert 'id="supportSection"' not in home
+    assert 'id="contactSection"' not in home
+    assert 'id="contactTitle"' not in home
 
 
 def test_province_filter_is_available_in_all_languages() -> None:
