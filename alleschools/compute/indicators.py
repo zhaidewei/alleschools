@@ -9,9 +9,6 @@ from __future__ import annotations
 
 from typing import Any, Dict, Iterable, List, Sequence, Tuple
 
-from alleschools.config import SCHOOLJARS, WEIGHTS, WOZ_YEARS, MIN_PUPILS_TOTAL
-
-
 def get_woz_for_year(
     woz: Dict[Tuple[str, int], float],
     available_years: List[int],
@@ -101,6 +98,8 @@ def compute_po_xy(
     schools: Dict[str, dict],
     woz: Dict[Tuple[str, int], float],
     woz_years: Iterable[int],
+    school_years: Sequence[Sequence[Any]] | None = None,
+    min_pupils_total: int | None = None,
     woz_strategy: str = "nearest_year",
     outliers: Dict[str, Any] | None = None,
 ) -> Tuple[List[dict], List[dict]]:
@@ -111,6 +110,13 @@ def compute_po_xy(
         rows_out: 可直接用于写 CSV 的行列表
         excluded: 因样本过少被排除的学校列表
     """
+    if school_years is None or min_pupils_total is None:
+        # 兼容直接调用；唯一默认值仍从 config.yaml 读取。
+        from alleschools.config import build_effective_config
+        po_cfg = build_effective_config()["po"]
+        school_years = po_cfg["weights"]["school_years"]
+        min_pupils_total = int(po_cfg["thresholds"]["min_pupils_total"])
+    years_cfg = [(str(v[0]), str(v[1]), int(v[2]), float(v[3])) for v in school_years]
     rows_out: List[dict] = []
     excluded: List[dict] = []
 
@@ -135,7 +141,7 @@ def compute_po_xy(
             continue
 
         pupils_total = sum(y["total"] for y in years_data.values())
-        if pupils_total < MIN_PUPILS_TOTAL:
+        if pupils_total < min_pupils_total:
             excluded.append(
                 {"BRIN": brin, "naam": data["naam"], "gemeente": data["gemeente"]}
             )
@@ -149,12 +155,11 @@ def compute_po_xy(
         years_used: List[str] = []
         n_years_with_woz = 0
 
-        for i, (start, end) in enumerate(SCHOOLJARS):
+        for start, end, woz_year, w in years_cfg:
             key = (start, end)
             if key not in years_data:
                 continue
             ydat = years_data[key]
-            w = WEIGHTS[i]
             total = ydat["total"]
             if total <= 0:
                 continue
@@ -164,7 +169,6 @@ def compute_po_xy(
             sum_w += w
             sum_w_x += w * x_year
 
-            woz_year = WOZ_YEARS[i]
             if pc4:
                 if woz_strategy == "nearest_year":
                     woz_val = get_woz_for_year(woz, woz_years_list, pc4, woz_year)
@@ -330,4 +334,3 @@ def compute_vo_xy(
 
 
 __all__ = ["get_woz_for_year", "compute_po_xy", "compute_vo_xy"]
-

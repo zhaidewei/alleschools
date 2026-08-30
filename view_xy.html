@@ -5,17 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>🏫 Dutch secondary school map: academic level × science focus</title>
   <link rel="icon" href="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ctext%20y%3D%22.9em%22%20font-size%3D%2290%22%3E%F0%9F%8E%AB%3C%2Ftext%3E%3C%2Fsvg%3E">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script>
-    tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } }
-  </script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <link rel="stylesheet" href="assets/site.css">
+  <script src="assets/chart.umd.min.js"></script>
+  <script src="assets/html2canvas.min.js"></script>
+  <script src="view_xy_logic.js"></script>
   <script>document.documentElement.classList.toggle('dark', localStorage.getItem('theme')==='dark');</script>
-  <style>.chartjs-tooltip { max-width: min(320px, 90vw); overflow-wrap: break-word; word-break: break-word; transform-origin: bottom center; z-index: 40; } #chartLabels { z-index: 10; } #shareWrap.open #shareDropdown, #langWrap.open #langDropdown { opacity: 1; visibility: visible; } details summary { list-style: none; } details summary::-webkit-details-marker { display: none; } .input-wrap { position: relative; } .input-hint { position: absolute; left: 0; right: 0; top: 100%; margin-top: 4px; padding: 8px 10px; font-size: 0.75rem; line-height: 1.35; color: var(--hint-text, #475569); background: var(--hint-bg, #f1f5f9); border: 1px solid var(--hint-border, #e2e8f0); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); z-index: 30; opacity: 0; visibility: hidden; transition: opacity 0.15s, visibility 0.15s; pointer-events: none; max-width: min(100%, 420px); } .input-wrap.show-hint .input-hint, .input-wrap:hover .input-hint { opacity: 1; visibility: visible; } .dark .input-hint { --hint-text: #94a3b8; --hint-bg: #334155; --hint-border: #475569; } .segmented-btn { @apply inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium rounded-full border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 bg-white/80 dark:bg-slate-800/80; } .segmented-btn-active { @apply bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 border-slate-900 dark:border-slate-100; }</style>
+  <style>.chartjs-tooltip { max-width: min(320px, 90vw); overflow-wrap: break-word; word-break: break-word; transform-origin: bottom center; z-index: 40; } #chartLabels { z-index: 10; } #shareWrap.open #shareDropdown, #langWrap.open #langDropdown { opacity: 1; visibility: visible; } details summary { list-style: none; } details summary::-webkit-details-marker { display: none; } .input-wrap { position: relative; } .input-hint { position: absolute; left: 0; right: 0; top: 100%; margin-top: 4px; padding: 8px 10px; font-size: 0.75rem; line-height: 1.35; color: var(--hint-text, #475569); background: var(--hint-bg, #f1f5f9); border: 1px solid var(--hint-border, #e2e8f0); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); z-index: 30; opacity: 0; visibility: hidden; transition: opacity 0.15s, visibility 0.15s; pointer-events: none; max-width: min(100%, 420px); } .input-wrap.show-hint .input-hint, .input-wrap:hover .input-hint { opacity: 1; visibility: visible; } .dark .input-hint { --hint-text: #94a3b8; --hint-bg: #334155; --hint-border: #475569; }</style>
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-200 font-sans antialiased">
   <div id="wrap" class="max-w-6xl mx-auto px-[2vw] sm:px-6 py-8">
@@ -68,7 +64,7 @@
       <div class="mt-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-600 shadow-sm p-[2vw] sm:p-6">
         <!-- 主图：仅 PO 模式显示；VO 模式只用下方 4 个 profiel 图 -->
         <div id="mainChartWrap" class="w-full aspect-[4/3] min-h-[55vh] sm:min-h-[420px] relative">
-          <canvas id="chart" class="w-full h-full block"></canvas>
+          <canvas id="chart" class="w-full h-full block" role="img" aria-label="School scatter chart"></canvas>
           <div id="chartLabels" class="absolute inset-0 pointer-events-none overflow-hidden" style="left:0;top:0;right:0;bottom:0;"></div>
         </div>
         <!-- VO 模式：4× profiel 图（NT/NG/EM/CM）作为主视图 -->
@@ -82,7 +78,7 @@
                 </div>
               </div>
               <div class="w-full aspect-[4/3] relative min-h-[180px]">
-                <canvas id="chartNT" class="w-full h-full block"></canvas>
+                <canvas id="chartNT" class="w-full h-full block" role="img" aria-label="Nature and Technology school scatter chart"></canvas>
                 <div id="voChartLabels_NT" class="absolute inset-0 pointer-events-none overflow-hidden" style="left:0;top:0;right:0;bottom:0;"></div>
               </div>
             </div>
@@ -94,7 +90,7 @@
                 </div>
               </div>
               <div class="w-full aspect-[4/3] relative min-h-[180px]">
-                <canvas id="chartNG" class="w-full h-full block"></canvas>
+                <canvas id="chartNG" class="w-full h-full block" role="img" aria-label="Nature and Health school scatter chart"></canvas>
                 <div id="voChartLabels_NG" class="absolute inset-0 pointer-events-none overflow-hidden" style="left:0;top:0;right:0;bottom:0;"></div>
               </div>
             </div>
@@ -106,7 +102,7 @@
                 </div>
               </div>
               <div class="w-full aspect-[4/3] relative min-h-[180px]">
-                <canvas id="chartEM" class="w-full h-full block"></canvas>
+                <canvas id="chartEM" class="w-full h-full block" role="img" aria-label="Economics and Society school scatter chart"></canvas>
                 <div id="voChartLabels_EM" class="absolute inset-0 pointer-events-none overflow-hidden" style="left:0;top:0;right:0;bottom:0;"></div>
               </div>
             </div>
@@ -118,7 +114,7 @@
                 </div>
               </div>
               <div class="w-full aspect-[4/3] relative min-h-[180px]">
-                <canvas id="chartCM" class="w-full h-full block"></canvas>
+                <canvas id="chartCM" class="w-full h-full block" role="img" aria-label="Culture and Society school scatter chart"></canvas>
                 <div id="voChartLabels_CM" class="absolute inset-0 pointer-events-none overflow-hidden" style="left:0;top:0;right:0;bottom:0;"></div>
               </div>
             </div>
@@ -158,13 +154,13 @@
       </div>
       <div id="gemeenteCheckboxes" class="max-h-56 overflow-y-auto flex flex-col gap-3"></div>
     </div>
-    <button type="button" id="mobileFiltersBtn" class="fixed md:hidden right-4 bottom-4 z-30 inline-flex items-center gap-2 px-3 py-2 rounded-full bg-slate-900 text-white text-xs font-medium shadow-lg border border-slate-700">
+    <button type="button" id="mobileFiltersBtn" aria-haspopup="dialog" aria-controls="mobileFiltersPanel" aria-expanded="false" class="fixed md:hidden right-4 bottom-4 z-30 inline-flex items-center gap-2 px-3 py-2 rounded-full bg-slate-900 text-white text-xs font-medium shadow-lg border border-slate-700">
       <span>Filters</span>
       <span id="mobileFiltersBtnLabel" class="opacity-80">Cities (0)</span>
     </button>
-    <div id="mobileFiltersSheet" class="fixed inset-0 z-40 md:hidden pointer-events-none">
+    <div id="mobileFiltersSheet" class="fixed inset-0 z-40 md:hidden pointer-events-none" aria-hidden="true">
       <div id="mobileFiltersBackdrop" class="absolute inset-0 bg-slate-900/40 opacity-0 transition-opacity"></div>
-      <div id="mobileFiltersPanel" class="absolute inset-x-0 bottom-0 translate-y-full transition-transform">
+      <div id="mobileFiltersPanel" role="dialog" aria-modal="true" aria-labelledby="mobileFiltersHeader" class="absolute inset-x-0 bottom-0 translate-y-full transition-transform">
         <div class="mx-auto max-w-6xl px-4 pb-4">
           <div class="bg-white dark:bg-slate-900 rounded-t-2xl shadow-xl border border-slate-200 dark:border-slate-700 max-h-[70vh] overflow-hidden">
             <div class="flex items-center justify-between px-4 pt-3 pb-2 border-b border-slate-200 dark:border-slate-700">
@@ -220,44 +216,20 @@
     const dataPO = __INJECT_DATA_PO__;
     const excludedVO = __INJECT_EXCLUDED_VO__;
     const excludedPO = __INJECT_EXCLUDED_PO__;
-    // demo / schema 模式下，后端会注入 metaVO / metaPO（遵守 refactor/SCHEMA.md）
+    // demo / schema 模式下，后端会注入遵守 docs/schema.md 的 metaVO / metaPO。
     // 非 demo 模式下，这里是 {}，后续前端可以渐进式接入。
     const metaVO = __INJECT_META_VO__;
     const metaPO = __INJECT_META_PO__;
     // VO profiel: 4 组 profiel 指数点集 + 专用 meta（暂未在前端渲染，仅先注入数据）
     const dataVOProfiles = __INJECT_DATA_VO_PROFILES__;
     const metaVOProfiles = __INJECT_META_VO_PROFILES__;
-    let currentMode = localStorage.getItem('schools-mode') || 'vo';
+    let currentMode = ['vo', 'po'].includes(localStorage.getItem('schools-mode')) ? localStorage.getItem('schools-mode') : 'vo';
     let data = currentMode === 'vo' ? dataVO : dataPO;
     let excluded = currentMode === 'vo' ? excludedVO : excludedPO;
     let meta = currentMode === 'vo' ? metaVO : metaPO;
 
     function resolveMetricFromMeta(metricId) {
-      if (!meta || !metricId || !meta.i18n || typeof meta.i18n !== 'object') return null;
-      var tried = new Set();
-      var order = [];
-      if (currentLang && meta.i18n[currentLang]) {
-        order.push(currentLang);
-        tried.add(currentLang);
-      }
-      if (meta.i18n.en && !tried.has('en')) {
-        order.push('en');
-        tried.add('en');
-      }
-      Object.keys(meta.i18n).forEach(function (code) {
-        if (!tried.has(code)) {
-          order.push(code);
-          tried.add(code);
-        }
-      });
-      for (var i = 0; i < order.length; i++) {
-        var code = order[i];
-        var loc = meta.i18n[code];
-        if (!loc || !loc.metrics) continue;
-        var metric = loc.metrics[metricId];
-        if (metric) return metric;
-      }
-      return null;
+      return VIEW_XY.getMetricFromMeta(meta, metricId, currentLang);
     }
 
     function getAxisTitleFromMeta(axisKey) {
@@ -280,31 +252,7 @@
     }
 
     function resolveMetricFromProfilesMeta(metricId) {
-      if (!metaVOProfiles || !metricId || !metaVOProfiles.i18n || typeof metaVOProfiles.i18n !== 'object') return null;
-      var tried = new Set();
-      var order = [];
-      if (currentLang && metaVOProfiles.i18n[currentLang]) {
-        order.push(currentLang);
-        tried.add(currentLang);
-      }
-      if (metaVOProfiles.i18n.en && !tried.has('en')) {
-        order.push('en');
-        tried.add('en');
-      }
-      Object.keys(metaVOProfiles.i18n).forEach(function (code) {
-        if (!tried.has(code)) {
-          order.push(code);
-          tried.add(code);
-        }
-      });
-      for (var i = 0; i < order.length; i++) {
-        var code = order[i];
-        var loc = metaVOProfiles.i18n[code];
-        if (!loc || !loc.metrics) continue;
-        var metric = loc.metrics[metricId];
-        if (metric) return metric;
-      }
-      return null;
+      return VIEW_XY.getMetricFromMeta(metaVOProfiles, metricId, currentLang);
     }
 
     function buildAlgorithmBodyFromMeta() {
@@ -367,7 +315,7 @@
     // 简单前端 build 标记，便于确认是否加载了最新版本
     window.__VIEW_XY_BUILD_ID__ = '2026-02-10-linear-only';
     console.log('[view_xy] build', window.__VIEW_XY_BUILD_ID__);
-    let currentLang = localStorage.getItem('schools-lang') || 'en';
+    let currentLang = ['en', 'zh', 'nl'].includes(localStorage.getItem('schools-lang')) ? localStorage.getItem('schools-lang') : 'en';
     const L = {
       en: {
         navVO: 'Secondary',
@@ -407,7 +355,7 @@
         disclaimerBody: 'Data from DUO Open Onderwijsdata (exam candidates and pass counts). This tool is for reference only; no warranty of accuracy or fitness for any decision. Not affiliated with DUO or the Dutch government.<br><br><strong>University admission:</strong> Exam scores are not the deciding factor for WO (research university) admission. Typical priority order: 1) VWO completion; 2) Meeting subject requirements (e.g. engineering needs Wiskunde B, medicine needs biology + chemistry); 3) Non-Numerus Fixus programmes usually do not consider ranking; 4) Numerus Fixus programmes (e.g. medicine, psychology, some business) → grades &amp; selection matter.',
         contactTitle: 'Contact',
         supportHint: 'Like this tool? Buy me a coffee on Ko-fi.',
-        copyrightText: '© 2025 Dewei Zhai. This project is licensed under the MIT License.',
+        copyrightText: '© 2026 Dewei Zhai. This project is licensed under the MIT License.',
         voProfilesTitle: 'VWO profiles (NT / NG / EM / CM) — VWO profiel index',
         axisXVoProfiles: 'VWO share (%)',
         axisYVoProfiles: 'VWO graduates / total (incl. non-VWO) %',
@@ -460,7 +408,7 @@
         disclaimerBody: '数据来自 DUO Open Onderwijsdata（考试考生与通过人数）。本工具仅供参考，不保证准确或适用于任何决策；与 DUO 及荷兰政府无关联。<br><br><strong>大学录取：</strong>分数并不是大学录取的决定性因素。对 WO 大学来说，重要性排序通常是：1）是否完成 VWO；2）是否满足专业科目要求（例如：工程类必须 Wiskunde B，医学必须生物+化学）；3）非 Numerus Fixus 专业（不限额专业）通常不看排名；4）限额专业（例如医学、心理学、部分商科）→ 成绩 &amp; 选拔表现。',
         contactTitle: '联系作者',
         supportHint: '觉得有用？请在 Ko-fi 请我喝杯咖啡。',
-        copyrightText: '© 2025 翟德炜。本项目采用 MIT 许可证。',
+        copyrightText: '© 2026 翟德炜。本项目采用 MIT 许可证。',
         voProfilesTitle: 'VWO profiles (NT / NG / EM / CM) — VWO profiel 指数',
         axisXVoProfiles: 'VWO 占比 (%)',
         axisYVoProfiles: '毕业 VWO 人数 / 全校总人数（含非 VWO）%',
@@ -513,7 +461,7 @@
         disclaimerBody: 'Data van DUO Open Onderwijsdata (examenkandidaten en geslaagden). Dit hulpmiddel is alleen voor referentie; geen garantie op juistheid of geschiktheid voor beslissingen. Niet gelieerd aan DUO of de overheid.<br><br><strong>Universiteitstoelating:</strong> Cijfers zijn geen doorslaggevende factor voor WO-toelating. Typische volgorde: 1) VWO afgerond; 2) Vakkenvereisten (bv. techniek: Wiskunde B, geneeskunde: biologie + scheikunde); 3) Niet-Numerus Fixus opleidingen: ranglijst speelt meestal geen rol; 4) Numerus Fixus (bv. geneeskunde, psychologie, sommige business) → cijfers &amp; selectie tellen mee.',
         contactTitle: 'Contact',
         supportHint: 'Waardevol? Trakteer me op een koffie via Ko-fi.',
-        copyrightText: '© 2025 Dewei Zhai. Dit project valt onder de MIT-licentie.',
+        copyrightText: '© 2026 Dewei Zhai. Dit project valt onder de MIT-licentie.',
         voProfilesTitle: 'VWO profielen (NT / NG / EM / CM) — VWO profielindex',
         axisXVoProfiles: 'VWO-aandeel (%)',
         axisYVoProfiles: 'VWO geslaagden / totaal (incl. non-VWO) %',
@@ -554,6 +502,7 @@
     }
     var LANG_DISPLAY = { en: { flag: '🇬🇧', abbr: 'EN' }, zh: { flag: '🇨🇳', abbr: 'CHN' }, nl: { flag: '🇳🇱', abbr: 'NL' } };
     function applyLanguage() {
+      document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : currentLang;
       localStorage.setItem('schools-lang', currentLang);
       var d = LANG_DISPLAY[currentLang] || LANG_DISPLAY.en;
       var langBtnFlag = document.getElementById('langBtnFlag');
@@ -655,6 +604,10 @@
       }
       ['NT', 'NG', 'EM', 'CM'].forEach(function (prof) {
         var el = document.getElementById('voProfileCardLabel_' + prof);
+        if (el) {
+          el.tabIndex = 0;
+          el.setAttribute('aria-describedby', 'voProfileTip_' + prof);
+        }
         if (el && typeof getVoProfileFullName === 'function') el.textContent = getVoProfileFullName(prof);
         var tipEl = document.getElementById('voProfileTip_' + prof);
         if (tipEl && VO_PROFILE_TIPS) {
@@ -700,6 +653,7 @@
     }
 
     let selectedGemeenten = new Set();
+    let citySelectionExplicit = false;
     var DEFAULT_GEMEENTEN = ["'S-GRAVENHAGE", 'AMSTERDAM', 'UTRECHT', 'ROTTERDAM'];
 
     function getSelectedCitiesCount() {
@@ -724,10 +678,8 @@
       if (q) parts.push('q=' + encodeURIComponent(q));
       if (g) parts.push('gemeente=' + encodeURIComponent(g));
       // 将当前勾选的城市集合编码到 city= 参数，便于分享时还原精确城市选择
-      if (selectedGemeenten && selectedGemeenten.size > 0) {
-        var cityList = Array.from(selectedGemeenten);
-        parts.push('city=' + encodeURIComponent(cityList.join(',')));
-      }
+      var cityList = selectedGemeenten ? Array.from(selectedGemeenten) : [];
+      parts.push('city=' + encodeURIComponent(cityList.join(',')));
       var showVMBOEl = document.getElementById('showVMBO');
       if (showVMBOEl && currentMode === 'po') {
         parts.push('include_sbo=' + (showVMBOEl.checked ? '1' : '0'));
@@ -751,7 +703,7 @@
       }
       // language
       var langParam = params.get('lang');
-      if (langParam && (L[langParam] || L.en)) {
+      if (langParam && Object.prototype.hasOwnProperty.call(L, langParam)) {
         currentLang = langParam;
         localStorage.setItem('schools-lang', currentLang);
         applyLanguage();
@@ -772,7 +724,8 @@
       }
       // 兼容 UI_DESIGN 中 city= 参数，用于精确还原勾选的城市集合
       var cityParam = params.get('city');
-      if (cityParam != null && cityParam.trim() !== '') {
+      if (cityParam != null) {
+        citySelectionExplicit = true;
         if (currentMode === 'vo' && hasVoProfilesData()) buildVoProfilesPoints();
         var rawCities = cityParam.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
         var targetSet = new Set(rawCities.map(function(s) { return s.toUpperCase(); }));
@@ -792,9 +745,7 @@
     }
 
     function getPointsByTextFilter(points) {
-      const parts = (document.getElementById('gemeenteFilter').value || '').split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
-      if (parts.length === 0) return points;
-      return points.filter(p => p.gemeente && parts.some(q => p.gemeente.toUpperCase().includes(q)));
+      return VIEW_XY.filterPointsByGemeenteText(points, VIEW_XY.parseGemeenteFilter(document.getElementById('gemeenteFilter').value));
     }
     function getFilteredPoints(points) {
       const byText = getPointsByTextFilter(points);
@@ -830,7 +781,7 @@
     function renderGemeenteCheckboxes() {
       if (currentMode === 'vo' && hasVoProfilesData()) buildVoProfilesPoints();
       const list = getGemeentenInList();
-      if (list.length > 0 && selectedGemeenten.size === 0) {
+      if (list.length > 0 && selectedGemeenten.size === 0 && !citySelectionExplicit) {
         var defaultSet = new Set(DEFAULT_GEMEENTEN);
         selectedGemeenten = new Set(list.filter(function(g) { return defaultSet.has((g || '').toUpperCase()); }));
         if (selectedGemeenten.size === 0) selectedGemeenten = new Set(list);
@@ -862,9 +813,11 @@
           cb.dataset.gemeente = g;
           cb.checked = selectedGemeenten.has(g);
           cb.addEventListener('change', function() {
+            citySelectionExplicit = true;
             if (cb.checked) selectedGemeenten.add(g); else selectedGemeenten.delete(g);
             syncSelectAllDeselectAll();
             refreshChart();
+            updateShareLinks();
           });
           label.appendChild(cb);
           label.appendChild(document.createTextNode(g));
@@ -1193,6 +1146,7 @@
       applyLanguage();
       setChartScaleForMode();
       selectedGemeenten = new Set();
+      citySelectionExplicit = false;
       renderGemeenteCheckboxes();
       refreshChart();
       refreshVoProfilesCharts();
@@ -1201,54 +1155,12 @@
       updateMobileSboButton();
     }
 
-    /** 确定性 hash：gemeente 名字 -> 颜色。同一名字始终得到同一颜色。相似名字用黄金角+独立 S/L 拉开区分。 */
-    function hashString(s, seed) {
-      let h = seed || 0;
-      const str = (s || '').toString().toUpperCase();
-      for (let i = 0; i < str.length; i++) h = Math.imul(31, h) + str.charCodeAt(i) | 0;
-      return Math.abs(h) >>> 0;
-    }
-    const GOLDEN = 137.508;
-    function gemeenteToColor(gemeente) {
-      const h = hashString(gemeente);
-      const hS = hashString(gemeente, 1);
-      const hL = hashString(gemeente, 2);
-      const hue = (h * GOLDEN) % 360;
-      const sat = 60 + (hS % 35);
-      const light = 35 + (hL % 45);
-      return `hsla(${hue}, ${sat}%, ${light}%, 0.9)`;
-    }
-    function gemeenteToBorderColor(gemeente) {
-      const h = hashString(gemeente);
-      const hS = hashString(gemeente, 1);
-      const hL = hashString(gemeente, 2);
-      const hue = (h * GOLDEN) % 360;
-      const sat = Math.min(85, 60 + (hS % 35) + 10);
-      const light = Math.max(18, 35 + (hL % 45) - 22);
-      return `hsl(${hue}, ${sat}%, ${light}%)`;
-    }
-
-    /** 面积 ∝ 人数：r = k√size，使 339 与 272 的面积比 ≈ 1.25 */
-    function sizeToRadius(points) {
-      const sizes = points.map(p => (p.size != null && p.size > 0) ? p.size : 0).filter(Boolean);
-      if (sizes.length === 0) return () => 8;
-      const minS = Math.min(...sizes);
-      const maxS = Math.max(...sizes);
-      if (minS <= 0 || maxS <= minS) return () => 8;
-      var k = 4 / Math.sqrt(minS);
-      var maxR = 4 * Math.sqrt(maxS / minS);
-      var scale = maxR > 18 ? 18 / maxR : 1;
-      return function(size) {
-        if (size == null || size <= 0) return 8;
-        var r = k * Math.sqrt(size) * scale;
-        return Math.round(Math.max(4, Math.min(18, r)));
-      };
-    }
+    const gemeenteToColor = VIEW_XY.gemeenteToColor;
+    const gemeenteToBorderColor = VIEW_XY.gemeenteToBorderColor;
+    const sizeToRadius = VIEW_XY.sizeToRadius;
     var legendHighlightGemeenten = null;
     function getSchoolSearchTerms() {
-      const raw = (document.getElementById('schoolSearch') && document.getElementById('schoolSearch').value || '').trim();
-      if (!raw) return [];
-      return raw.split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
+      return VIEW_XY.parseSearchTerms(document.getElementById('schoolSearch') && document.getElementById('schoolSearch').value);
     }
     function escapeHtml(s) {
       if (!s) return '';
@@ -1287,44 +1199,8 @@
         container.appendChild(item);
       });
     }
-    function acronymFromName(naam) {
-      if (!naam || !String(naam).trim()) return '';
-      return String(naam).trim().split(/\s+/).map(w => (w[0] || '').toUpperCase()).join('');
-    }
-    function pointMatchesSearch(p, searchTerms) {
-      if (!searchTerms || searchTerms.length === 0) return true;
-      const naam = (p.label || '').toUpperCase();
-      const acr = acronymFromName(p.label || '');
-      const brin = (p.brin || '').toUpperCase();
-      const gemeente = (p.gemeente || '').toUpperCase();
-      const postcode = (p.postcode || '').toUpperCase().replace(/\s/g, '');
-      return searchTerms.some(term => {
-        const termNorm = term.replace(/\s/g, '');
-        return naam.includes(term) || (acr && acr.includes(termNorm)) || brin.includes(term) || gemeente.includes(term) || postcode.includes(termNorm);
-      });
-    }
-    function getNameHighlights(label, searchTerms) {
-      if (!label || !searchTerms || searchTerms.length === 0) return [];
-      const upper = label.toUpperCase();
-      const ranges = [];
-      for (const term of searchTerms) {
-        let idx = 0;
-        while (true) {
-          const i = upper.indexOf(term, idx);
-          if (i === -1) break;
-          ranges.push([i, i + term.length]);
-          idx = i + 1;
-        }
-      }
-      ranges.sort((a, b) => a[0] - b[0]);
-      const merged = [];
-      for (const [s, e] of ranges) {
-        if (merged.length && s <= merged[merged.length - 1][1]) {
-          merged[merged.length - 1][1] = Math.max(merged[merged.length - 1][1], e);
-        } else merged.push([s, e]);
-      }
-      return merged;
-    }
+    const pointMatchesSearch = VIEW_XY.pointMatchesSearch;
+    const getNameHighlights = VIEW_XY.getNameHighlights;
     function makeDatasets(points, allPointsForScale) {
       const radiusFn = sizeToRadius(allPointsForScale && allPointsForScale.length > 0 ? allPointsForScale : points);
       const searchTerms = getSchoolSearchTerms();
@@ -1760,6 +1636,7 @@
     }
 
     document.getElementById('selectAll').addEventListener('change', function() {
+      citySelectionExplicit = true;
       if (this.checked) {
         const list = getGemeentenInList();
         selectedGemeenten = new Set(list);
@@ -1773,8 +1650,10 @@
       syncSelectAllDeselectAll();
       refreshChart();
       updateMobileFiltersSummary();
+      updateShareLinks();
     });
     document.getElementById('deselectAll').addEventListener('change', function() {
+      citySelectionExplicit = true;
       if (this.checked) {
         selectedGemeenten = new Set();
         document.getElementById('selectAll').checked = false;
@@ -1788,6 +1667,7 @@
       syncSelectAllDeselectAll();
       refreshChart();
       updateMobileFiltersSummary();
+      updateShareLinks();
     });
 
     var schoolSearchInput = document.getElementById('schoolSearch');
@@ -1877,7 +1757,7 @@
         if (langBtn) langBtn.setAttribute('aria-expanded', 'false');
       });
     });
-    currentLang = localStorage.getItem('schools-lang') || 'en';
+    currentLang = ['en', 'zh', 'nl'].includes(localStorage.getItem('schools-lang')) ? localStorage.getItem('schools-lang') : 'en';
     applyLanguage();
 
     function isDarkTheme() { return document.documentElement.classList.contains('dark'); }
@@ -1971,24 +1851,56 @@
       function openSheet() {
         if (open) return;
         open = true;
+        sheet.setAttribute('aria-hidden', 'false');
+        btn.setAttribute('aria-expanded', 'true');
         sheet.classList.remove('pointer-events-none');
         backdrop.classList.add('opacity-100');
         panel.classList.remove('translate-y-full');
         content.appendChild(gemeenteList);
+        if (closeBtn) closeBtn.focus();
       }
       function closeSheet() {
         if (!open) return;
         open = false;
+        sheet.setAttribute('aria-hidden', 'true');
+        btn.setAttribute('aria-expanded', 'false');
         sheet.classList.add('pointer-events-none');
         backdrop.classList.remove('opacity-100');
         panel.classList.add('translate-y-full');
         if (placeholder.parentElement) {
           originalParent.insertBefore(gemeenteList, placeholder);
         }
+        btn.focus();
       }
       btn.addEventListener('click', function() { openSheet(); });
       closeBtn && closeBtn.addEventListener('click', function() { closeSheet(); });
       backdrop.addEventListener('click', function() { closeSheet(); });
+      document.addEventListener('keydown', function(event) {
+        if (!open) return;
+        if (event.key === 'Escape') {
+          closeSheet();
+          return;
+        }
+        if (event.key === 'Tab') {
+          var focusable = Array.prototype.slice.call(
+            panel.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])')
+          ).filter(function(element) { return element.offsetParent !== null; });
+          if (!focusable.length) {
+            event.preventDefault();
+            panel.focus();
+            return;
+          }
+          var first = focusable[0];
+          var last = focusable[focusable.length - 1];
+          if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+          } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+          }
+        }
+      });
       // 初始同步一次摘要
       updateMobileFiltersSummary();
     })();

@@ -9,18 +9,17 @@ echo "== 统一入口：fetch + ETL (VO + PO) =="
 # full 子命令的 --all / --vo / --po 互斥，这里用 --all 覆盖 VO+PO。
 python -m alleschools.cli full --all
 
-# 2. 可选：单独 schema 校验（若已在 config 中开启 schema_validation，可省略）
-echo "== 可选：校验 VO points + meta（generated/ 下） =="
+# 2. 发布门禁：独立校验最终 points + meta，失败立即终止构建
+echo "== 发布门禁：校验 VO points + meta（generated/ 下） =="
 python -m alleschools.cli validate \
   --layer vo \
   --data generated/schools_xy_coords.json \
-  --meta generated/schools_xy_coords_meta.json || true
+  --meta generated/schools_xy_coords_meta.json
 
-echo "== 可选：校验 PO points + meta（generated/ 下） =="
+echo "== 发布门禁：校验 PO points + meta（generated/ 下） =="
 python -m alleschools.cli validate \
   --layer po \
   --data generated/schools_xy_coords_po.json \
-  --meta generated/schools_xy_coords_po_meta.json || true
+  --meta generated/schools_xy_coords_po_meta.json
 
 echo "全部完成：generated/ 下的 CSV/JSON + run_report 已更新，可继续生成静态站点。"
-

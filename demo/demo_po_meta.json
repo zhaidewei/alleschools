@@ -83,12 +83,12 @@
         "po_woz_avg_pc4": {
           "label": "Gemiddelde WOZ (PC4)",
           "short": "WOZ (×1.000 EUR)",
-          "description": "Gewogen gemiddelde WOZ-waarde van woningen in deze 4-cijferige postcode (PC4)。"
+          "description": "Gewogen gemiddelde WOZ-waarde van woningen in deze 4-cijferige postcode (PC4)."
         },
         "po_pupils_total": {
           "label": "Totaal aantal leerlingen (advies)",
           "short": "Leerlingen",
-          "description": "Totaal aantal leerlingen met afgegeven schooladvies，用于散点大小。"
+          "description": "Totaal aantal leerlingen met een afgegeven schooladvies, gebruikt voor de puntgrootte."
         }
       },
       "dimensions": {

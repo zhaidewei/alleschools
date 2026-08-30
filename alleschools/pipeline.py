@@ -41,6 +41,11 @@ from alleschools.logging_utils import setup_logger
 from alleschools.quality import run_po_quality, run_vo_quality
 
 
+def _get_output_root(config: Dict[str, Any], data_root: Path) -> Path:
+    configured = Path(str(config.get("output_root") or "."))
+    return configured if configured.is_absolute() else data_root / configured
+
+
 def _get_git_commit(cwd: Path) -> Optional[str]:
     try:
         r = subprocess.run(
@@ -76,6 +81,7 @@ def run_po_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
 
     start = datetime.now(timezone.utc)
     data_root = Path(config.get("data_root") or config_mod.PROJECT_ROOT)
+    output_root = _get_output_root(config, data_root)
     # 原始数据目录：允许通过 raw_subdir 将 DUO/CBS 源文件移出项目根，便于 .gitignore 管理。
     raw_sub = str(config.get("raw_subdir") or "").strip()
     raw_root = data_root / raw_sub if raw_sub and not Path(raw_sub).is_absolute() else (
@@ -84,6 +90,10 @@ def run_po_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
     po_cfg: Dict[str, Any] = dict(config.get("po") or {})
     input_cfg: Dict[str, Any] = dict(po_cfg.get("input") or {})
     output_cfg: Dict[str, Any] = dict(po_cfg.get("output") or {})
+    school_years: List[Any] = list((po_cfg.get("weights") or {}).get("school_years") or [])
+    min_pupils_total = int((po_cfg.get("thresholds") or {})["min_pupils_total"])
+    if not school_years:
+        raise ValueError("po.weights.school_years must not be empty")
 
     # 初始化 logger（此处使用默认级别与 stderr 输出）
     logger = setup_logger()
@@ -99,7 +109,11 @@ def run_po_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
     )
 
     # 2. 加载 DUO Schooladviezen（从原始数据目录）
-    schools = duo_loader.load_schooladviezen_po(str(raw_root))
+    schools = duo_loader.load_schooladviezen_po(
+        str(raw_root),
+        [(str(v[0]), str(v[1])) for v in school_years],
+        str(input_cfg["duo_schooladviezen_pattern"]),
+    )
     logger.info(
         "Loaded PO schooladviezen",
         extra={
@@ -114,8 +128,8 @@ def run_po_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
         end = datetime.now(timezone.utc)
         duration = (end - start).total_seconds()
         csv_rel = output_cfg.get("csv") or "schools_xy_coords_po.csv"
-        csv_path = data_root / csv_rel
-        report_path = data_root / "run_report_po.json"
+        csv_path = output_root / csv_rel
+        report_path = output_root / "run_report_po.json"
         run_report = {
             "pipeline_type": "po",
             "profile": config.get("profile"),
@@ -156,6 +170,8 @@ def run_po_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
         schools,
         woz,
         woz_years,
+        school_years=school_years,
+        min_pupils_total=min_pupils_total,
         woz_strategy=woz_strategy,
         outliers=outliers_cfg or None,
     )
@@ -180,13 +196,13 @@ def run_po_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
     # 所有导出产物默认与 csv 位于同一目录（通常为 generated/ 前缀），
     # 通过 csv_rel 的父目录统一控制，便于在 config.yaml 中集中修改。
     csv_rel = output_cfg.get("csv") or "schools_xy_coords_po.csv"
-    csv_path = data_root / csv_rel
+    csv_path = output_root / csv_rel
     csv_rel_path = Path(csv_rel)
     out_dir_rel = csv_rel_path.parent  # 例如 "generated"
     stem = csv_rel_path.stem
 
     excluded_rel = output_cfg.get("excluded_json") or str(out_dir_rel / "excluded_schools_po.json")
-    excluded_path = data_root / excluded_rel
+    excluded_path = output_root / excluded_rel
     geo_rel_default = out_dir_rel / f"{stem}_geo.json"
     long_rel_default = out_dir_rel / f"{stem}_long.csv"
     points_rel_default = out_dir_rel / f"{stem}.json"
@@ -205,7 +221,7 @@ def run_po_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
 
     if output_cfg.get("export_geojson", True):
         geo_rel = str(geo_rel_default)
-        geo_path = data_root / geo_rel
+        geo_path = output_root / geo_rel
         pc4_path = (output_cfg.get("pc4_centroids_path") or "").strip()
         lookup_path = (
             str(data_root / pc4_path) if pc4_path and not Path(pc4_path).is_absolute() else (pc4_path or None)
@@ -213,14 +229,14 @@ def run_po_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
         geojson_exporter.export_geojson(rows_out, geo_path, lookup_path=lookup_path)
     if output_cfg.get("export_long_table", True):
         long_rel = str(long_rel_default)
-        long_path = data_root / long_rel
+        long_path = output_root / long_rel
         long_table_exporter.export_po_long_table(
             rows_out, long_path, include_meta_columns=include_meta_columns
         )
     points_path = None
     if output_cfg.get("export_points_json", True):
         points_rel = str(points_rel_default)
-        points_path = data_root / points_rel
+        points_path = output_root / points_rel
         export_po_points(rows_out, points_path)
 
     end = datetime.now(timezone.utc)
@@ -234,10 +250,11 @@ def run_po_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
             excluded,
             raw_root,
             input_cfg,
+            schoolyears=school_years,
             max_brins_in_report=int(dq_cfg.get("max_brins_in_report") or 50),
         )
         if dq_cfg.get("write_standalone_report"):
-            dq_path = data_root / "data_quality_report_po.json"
+            dq_path = output_root / "data_quality_report_po.json"
             json_exporter.write_meta_json(
                 {
                     "pipeline_type": "po",
@@ -298,7 +315,7 @@ def run_po_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
     meta_path = None
     if write_meta_json_flag:
         meta_rel = str(meta_rel_default)
-        meta_path = data_root / meta_rel
+        meta_path = output_root / meta_rel
         meta_columns = list(csv_exporter.PO_META_FIELDNAMES) if include_meta_columns else []
         fieldnames = list(csv_exporter.PO_FIELDNAMES) + meta_columns
         meta_dict = build_po_meta(
@@ -333,10 +350,12 @@ def run_po_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
                         "artifact": "po_points_meta",
                     }
                 )
+        elif output_cfg.get("export_points_json", True):
+            schema_errors.append({"kind": "missing_artifact", "message": "points JSON was not exported", "artifact": "po_points_meta"})
 
         # GeoJSON 校验
         if output_cfg.get("export_geojson", True):
-            geo_path = data_root / (csv_path.stem + "_geo.json")
+            geo_path = output_root / geo_rel_default
             if geo_path.exists():
                 try:
                     geo = json.loads(geo_path.read_text(encoding="utf-8"))
@@ -353,10 +372,12 @@ def run_po_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
                             "artifact": "po_geojson",
                         }
                     )
+            else:
+                schema_errors.append({"kind": "missing_artifact", "message": str(geo_path), "artifact": "po_geojson"})
 
         # 长表 CSV 校验
         if output_cfg.get("export_long_table", True):
-            long_path = data_root / (csv_path.stem + "_long.csv")
+            long_path = output_root / long_rel_default
             if long_path.exists():
                 try:
                     with long_path.open(encoding="utf-8", newline="") as f:
@@ -375,6 +396,8 @@ def run_po_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
                             "artifact": "po_long_table",
                         }
                     )
+            else:
+                schema_errors.append({"kind": "missing_artifact", "message": str(long_path), "artifact": "po_long_table"})
 
         if schema_errors:
             summary = run_report.get("summary") or {}
@@ -382,12 +405,16 @@ def run_po_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
             errors_list.append({"kind": "schema_validation", "details": schema_errors})
             summary["errors"] = errors_list
             run_report["summary"] = summary
+            run_report["summary"]["status"] = "error"
+    elif schema_val_cfg.get("enabled"):
+        run_report["summary"]["status"] = "error"
+        run_report["summary"]["errors"].append({"kind": "schema_validation", "details": [{"kind": "missing_artifact", "message": "meta JSON was not exported", "artifact": "po_points_meta"}]})
 
     # 补回运行报告中的 meta_path 引用并写出（同样使用相对于 data_root 的相对路径）
     if meta_rel is not None:
         run_report["outputs"]["po"]["meta_path"] = meta_rel
 
-    report_path = data_root / "run_report_po.json"
+    report_path = output_root / "run_report_po.json"
     # 使用 export_json 写单个对象时包在列表里，保持现有格式习惯
     json_exporter.export_json([run_report], report_path)
 
@@ -411,9 +438,9 @@ def run_po_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
     if meta_path is not None:
         stats["meta_path"] = str(meta_path)
     if geo_rel is not None:
-        stats["geojson_path"] = str(data_root / geo_rel)
+        stats["geojson_path"] = str(output_root / geo_rel)
     if long_rel is not None:
-        stats["long_table_path"] = str(data_root / long_rel)
+        stats["long_table_path"] = str(output_root / long_rel)
     if points_path is not None:
         stats["points_path"] = str(points_path)
 
@@ -432,6 +459,7 @@ def run_vo_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
 
     start = datetime.now(timezone.utc)
     data_root = Path(config.get("data_root") or config_mod.PROJECT_ROOT)
+    output_root = _get_output_root(config, data_root)
     raw_sub = str(config.get("raw_subdir") or "").strip()
     raw_root = data_root / raw_sub if raw_sub and not Path(raw_sub).is_absolute() else (
         Path(raw_sub) if raw_sub else data_root
@@ -472,7 +500,7 @@ def run_vo_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
         logger.error("VO input file not found (exams_all or exams_small)")
         end = datetime.now(timezone.utc)
         duration = (end - start).total_seconds()
-        report_path = data_root / "run_report_vo.json"
+        report_path = output_root / "run_report_vo.json"
         run_report = {
             "pipeline_type": "vo",
             "profile": config.get("profile"),
@@ -486,7 +514,7 @@ def run_vo_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
         }
         json_exporter.export_json([run_report], report_path)
         csv_rel = output_cfg.get("csv") or "schools_xy_coords.csv"
-        csv_path = data_root / csv_rel
+        csv_path = output_root / csv_rel
         stats = {
             "n_schools": 0,
             "n_excluded": 0,
@@ -557,13 +585,13 @@ def run_vo_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
         rows_out = kept_vo
 
     csv_rel = output_cfg.get("csv") or "schools_xy_coords.csv"
-    csv_path = data_root / csv_rel
+    csv_path = output_root / csv_rel
     csv_rel_path = Path(csv_rel)
     out_dir_rel = csv_rel_path.parent
     stem = csv_rel_path.stem
 
     excluded_rel = output_cfg.get("excluded_json") or str(out_dir_rel / "excluded_schools.json")
-    excluded_path = data_root / excluded_rel
+    excluded_path = output_root / excluded_rel
     geo_rel_default = out_dir_rel / f"{stem}_geo.json"
     long_rel_default = out_dir_rel / f"{stem}_long.csv"
     points_rel_default = out_dir_rel / f"{stem}.json"
@@ -635,8 +663,8 @@ def run_vo_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
                 continue
             csv_rel_prof = str(out_dir_rel / f"schools_profiles_{prof.lower()}.csv")
             points_rel_prof = str(out_dir_rel / f"schools_profiles_{prof.lower()}.json")
-            csv_path_prof = data_root / csv_rel_prof
-            points_path_prof = data_root / points_rel_prof
+            csv_path_prof = output_root / csv_rel_prof
+            points_path_prof = output_root / points_rel_prof
 
             csv_exporter.export_vo_profiles_csv(rows_prof, csv_path_prof)
             json_exporter.export_json(rows_prof, points_path_prof)
@@ -647,7 +675,7 @@ def run_vo_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
 
     if output_cfg.get("export_geojson", True):
         geo_rel = str(geo_rel_default)
-        geo_path = data_root / geo_rel
+        geo_path = output_root / geo_rel
         pc4_path = (output_cfg.get("pc4_centroids_path") or "").strip()
         lookup_path = (
             str(data_root / pc4_path) if pc4_path and not Path(pc4_path).is_absolute() else (pc4_path or None)
@@ -655,14 +683,14 @@ def run_vo_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
         geojson_exporter.export_geojson(rows_out, geo_path, lookup_path=lookup_path)
     if output_cfg.get("export_long_table", True):
         long_rel = str(long_rel_default)
-        long_path = data_root / long_rel
+        long_path = output_root / long_rel
         long_table_exporter.export_vo_long_table(
             rows_out, long_path, include_meta_columns=include_meta_columns
         )
     points_path = None
     if output_cfg.get("export_points_json", True):
         points_rel = str(points_rel_default)
-        points_path = data_root / points_rel
+        points_path = output_root / points_rel
         export_vo_points(rows_out, points_path)
 
     end = datetime.now(timezone.utc)
@@ -679,7 +707,7 @@ def run_vo_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
             max_brins_in_report=int(dq_cfg_vo.get("max_brins_in_report") or 50),
         )
         if dq_cfg_vo.get("write_standalone_report"):
-            dq_path_vo = data_root / "data_quality_report_vo.json"
+            dq_path_vo = output_root / "data_quality_report_vo.json"
             json_exporter.write_meta_json(
                 {
                     "pipeline_type": "vo",
@@ -743,7 +771,7 @@ def run_vo_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
     meta_path = None
     if write_meta_json_flag:
         meta_rel = str(meta_rel_default)
-        meta_path = data_root / meta_rel
+        meta_path = output_root / meta_rel
         meta_columns = list(csv_exporter.VO_META_FIELDNAMES) if include_meta_columns else []
         vo_fieldnames = list(csv_exporter.VO_FIELDNAMES) + meta_columns
         meta_dict_vo = build_vo_meta(
@@ -758,7 +786,7 @@ def run_vo_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
     profiles_meta_path = None
     if any(profiles_csv_rel.values()):
         profiles_meta_rel = str(out_dir_rel / "schools_profiles_meta.json")
-        profiles_meta_path = data_root / profiles_meta_rel
+        profiles_meta_path = output_root / profiles_meta_rel
         # 构建 profile_id -> Path 与行数映射
         data_files_map: Dict[str, Path] = {}
         row_counts_map: Dict[str, int] = {}
@@ -801,10 +829,12 @@ def run_vo_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
                         "artifact": "vo_points_meta",
                     }
                 )
+        elif output_cfg.get("export_points_json", True):
+            schema_errors_vo.append({"kind": "missing_artifact", "message": "points JSON was not exported", "artifact": "vo_points_meta"})
 
         # GeoJSON 校验
         if output_cfg.get("export_geojson", True):
-            geo_path_vo = data_root / (csv_path.stem + "_geo.json")
+            geo_path_vo = output_root / geo_rel_default
             if geo_path_vo.exists():
                 try:
                     geo_vo = json.loads(geo_path_vo.read_text(encoding="utf-8"))
@@ -821,10 +851,12 @@ def run_vo_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
                             "artifact": "vo_geojson",
                         }
                     )
+            else:
+                schema_errors_vo.append({"kind": "missing_artifact", "message": str(geo_path_vo), "artifact": "vo_geojson"})
 
         # 长表 CSV 校验
         if output_cfg.get("export_long_table", True):
-            long_path_vo = data_root / (csv_path.stem + "_long.csv")
+            long_path_vo = output_root / long_rel_default
             if long_path_vo.exists():
                 try:
                     with long_path_vo.open(encoding="utf-8", newline="") as f:
@@ -843,6 +875,8 @@ def run_vo_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
                             "artifact": "vo_long_table",
                         }
                     )
+            else:
+                schema_errors_vo.append({"kind": "missing_artifact", "message": str(long_path_vo), "artifact": "vo_long_table"})
 
         if schema_errors_vo:
             summary_vo = run_report.get("summary") or {}
@@ -850,11 +884,15 @@ def run_vo_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
             errors_list_vo.append({"kind": "schema_validation", "details": schema_errors_vo})
             summary_vo["errors"] = errors_list_vo
             run_report["summary"] = summary_vo
+            run_report["summary"]["status"] = "error"
+    elif schema_val_cfg_vo.get("enabled"):
+        run_report["summary"]["status"] = "error"
+        run_report["summary"]["errors"].append({"kind": "schema_validation", "details": [{"kind": "missing_artifact", "message": "meta JSON was not exported", "artifact": "vo_points_meta"}]})
 
     if meta_rel is not None:
         run_report["outputs"]["vo"]["meta_path"] = meta_rel
     if profiles_meta_path is not None:
-        rel_profiles_meta = str(profiles_meta_path.relative_to(data_root))
+        rel_profiles_meta = str(profiles_meta_path.relative_to(output_root))
         run_report["outputs"]["vo"]["profiles_meta_path"] = rel_profiles_meta
     # 仅当存在至少一个 profiles points/CSV 时记录对应映射（保持与其他路径一样使用相对路径）
     if any(profiles_points_rel.values()):
@@ -866,7 +904,7 @@ def run_vo_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
             prof: rel for prof, rel in profiles_csv_rel.items() if rel
         }
 
-    report_path = data_root / "run_report_vo.json"
+    report_path = output_root / "run_report_vo.json"
     json_exporter.export_json([run_report], report_path)
 
     logger.info(
@@ -889,14 +927,12 @@ def run_vo_pipeline(config: Optional[Dict[str, Any]] = None) -> tuple[Path, Dict
     if meta_path is not None:
         stats["meta_path"] = str(meta_path)
     if geo_rel is not None:
-        stats["geojson_path"] = str(data_root / geo_rel)
+        stats["geojson_path"] = str(output_root / geo_rel)
     if long_rel is not None:
-        stats["long_table_path"] = str(data_root / long_rel)
+        stats["long_table_path"] = str(output_root / long_rel)
     if points_path is not None:
         stats["points_path"] = str(points_path)
     return csv_path, stats
 
 
 __all__ = ["run_po_pipeline", "run_vo_pipeline"]
-
-

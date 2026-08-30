@@ -22,21 +22,6 @@ except ImportError:
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(BASE_DIR)
 
-# 学年标签（领域常量，用于 WOZ 等）
-SCHOOLJARS = [
-    ("2019", "2020"),
-    ("2020", "2021"),
-    ("2021", "2022"),
-    ("2022", "2023"),
-    ("2023", "2024"),
-    ("2024", "2025"),
-]
-
-WOZ_YEARS = [2019, 2020, 2021, 2022, 2023, 2024]
-WEIGHTS = [0.2, 0.4, 0.6, 0.8, 1.0, 1.2]
-MIN_PUPILS_TOTAL = 10
-
-
 def _load_config_file(path: Path) -> Dict[str, Any]:
     """从 YAML 加载配置。文件不存在或 PyYAML 不可用时抛出异常。"""
     if not path.exists() or path.is_dir():
@@ -107,9 +92,5 @@ def build_effective_config(
 __all__ = [
     "BASE_DIR",
     "PROJECT_ROOT",
-    "SCHOOLJARS",
-    "WOZ_YEARS",
-    "WEIGHTS",
-    "MIN_PUPILS_TOTAL",
     "build_effective_config",
 ]

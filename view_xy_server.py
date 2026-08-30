@@ -7,6 +7,7 @@ import argparse
 import csv
 import json
 import os
+import shutil
 import sys
 import webbrowser
 from http.server import HTTPServer, SimpleHTTPRequestHandler
@@ -23,6 +24,18 @@ PUBLIC_INDEX = os.path.join(BASE, "public", "index.html")
 DEMO_DIR = os.path.join(BASE, "demo")
 DEMO_INDEX = os.path.join(DEMO_DIR, "datasets_index.json")
 PORT = 8082
+
+
+def _json_for_inline_script(value):
+    """Serialize JSON without allowing data to terminate the containing script tag."""
+    return (
+        json.dumps(value, ensure_ascii=False)
+        .replace("<", "\\u003c")
+        .replace(">", "\\u003e")
+        .replace("&", "\\u0026")
+        .replace("\u2028", "\\u2028")
+        .replace("\u2029", "\\u2029")
+    )
 
 
 def _load_run_report(path, kind):
@@ -240,7 +253,7 @@ def _load_demo_meta(layer: str):
 
 def load_demo_data():
     """
-    使用 demo/ 下的 JSON（遵守 refactor/SCHEMA.md）加载 VO/PO 数据，
+    使用 demo/ 下遵守 docs/schema.md 的版本化 JSON 加载 VO/PO 数据，
     并转换为旧前端脚本期望的字段形状。
     """
     # PO
@@ -327,14 +340,14 @@ def build_html(
     meta_po = meta_po if meta_po is not None else {}
     data_vo_profiles = data_vo_profiles if data_vo_profiles is not None else {"NT": [], "NG": [], "EM": [], "CM": []}
     meta_vo_profiles = meta_vo_profiles if meta_vo_profiles is not None else {}
-    data_vo_js = json.dumps(data_vo, ensure_ascii=False)
-    data_po_js = json.dumps(data_po, ensure_ascii=False)
-    excluded_vo_js = json.dumps(excluded_vo, ensure_ascii=False)
-    excluded_po_js = json.dumps(excluded_po, ensure_ascii=False)
-    meta_vo_js = json.dumps(meta_vo, ensure_ascii=False)
-    meta_po_js = json.dumps(meta_po, ensure_ascii=False)
-    data_vo_profiles_js = json.dumps(data_vo_profiles, ensure_ascii=False)
-    meta_vo_profiles_js = json.dumps(meta_vo_profiles, ensure_ascii=False)
+    data_vo_js = _json_for_inline_script(data_vo)
+    data_po_js = _json_for_inline_script(data_po)
+    excluded_vo_js = _json_for_inline_script(excluded_vo)
+    excluded_po_js = _json_for_inline_script(excluded_po)
+    meta_vo_js = _json_for_inline_script(meta_vo)
+    meta_po_js = _json_for_inline_script(meta_po)
+    data_vo_profiles_js = _json_for_inline_script(data_vo_profiles)
+    meta_vo_profiles_js = _json_for_inline_script(meta_vo_profiles)
     print(f"[view_xy_server] 使用 HTML 模板: {html_path}", file=sys.stderr)
     with open(html_path, "r", encoding="utf-8") as f:
         html = f.read()
@@ -361,7 +374,7 @@ def main():
     parser.add_argument(
         "--demo",
         action="store_true",
-        help="Use demo JSON datasets from demo/ (following refactor/SCHEMA.md) instead of CSV.",
+        help="Use the versioned JSON datasets from demo/ instead of generated CSV files.",
     )
     args = parser.parse_args()
 
@@ -439,35 +452,37 @@ def main():
         meta_vo_profiles=meta_vo_profiles,
     )
 
+    out_dir = os.path.dirname(PUBLIC_INDEX)
+    os.makedirs(out_dir, exist_ok=True)
+    with open(PUBLIC_INDEX, "w", encoding="utf-8") as f:
+        f.write(html)
+    logic_source = os.path.join(BASE, "view_xy_logic.js")
+    if os.path.exists(logic_source):
+        shutil.copy2(logic_source, os.path.join(out_dir, "view_xy_logic.js"))
+    assets_source = os.path.join(BASE, "assets")
+    if os.path.isdir(assets_source):
+        shutil.copytree(assets_source, os.path.join(out_dir, "assets"), dirs_exist_ok=True)
+
     if args.static:
-        out_dir = os.path.dirname(PUBLIC_INDEX)
-        os.makedirs(out_dir, exist_ok=True)
-        with open(PUBLIC_INDEX, "w", encoding="utf-8") as f:
-            f.write(html)
         print(f"已生成: {PUBLIC_INDEX}")
         return 0
 
-    os.chdir(BASE)
-    injected_html = html
-
-    class Handler(SimpleHTTPRequestHandler):
-        def do_GET(self):
-            # 忽略查询参数，仅按路径匹配，确保带 ? 的 URL 也能得到注入后的 HTML
-            path_only = self.path.split("?", 1)[0].rstrip("/")
-            if path_only == "/view_xy.html":
-                self.send_response(200)
-                self.send_header("Content-type", "text/html; charset=utf-8")
-                self.end_headers()
-                self.wfile.write(injected_html.encode("utf-8"))
-            else:
-                super().do_GET()
-
-    server = HTTPServer(("", PORT), Handler)
-    url = f"http://127.0.0.1:{PORT}/view_xy.html"
+    # Only expose the generated static site on the local loopback interface.
+    # Raw inputs, config, source code and .git never enter the served directory.
+    handler = lambda *handler_args, **handler_kwargs: SimpleHTTPRequestHandler(  # noqa: E731
+        *handler_args, directory=out_dir, **handler_kwargs
+    )
+    server = HTTPServer(("127.0.0.1", PORT), handler)
+    url = f"http://127.0.0.1:{PORT}/"
     mode = "demo JSON" if args.demo else "CSV"
     print(f"本地服务: {url} （数据来源: {mode}）")
     webbrowser.open(url)
-    server.serve_forever()
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print("\n本地服务已停止。")
+    finally:
+        server.server_close()
     return 0
 
 

@@ -8,16 +8,16 @@ import csv
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence
 
-from alleschools.config import SCHOOLJARS
-
-
-def _collect_duplicate_brins_po(data_root: Path, pattern: str) -> List[str]:
+def _collect_duplicate_brins_po(
+    data_root: Path, pattern: str, schoolyears: Sequence[Sequence[Any]]
+) -> List[str]:
     """
     扫描 PO DUO Schooladviezen CSV，返回在同一文件内出现多于一次的 BRIN 列表。
     pattern 如 "duo_schooladviezen_{start}_{end}.csv"。
     """
     seen_brins: List[str] = []
-    for start, end in SCHOOLJARS:
+    for year_cfg in schoolyears:
+        start, end = str(year_cfg[0]), str(year_cfg[1])
         path = data_root / pattern.replace("{start}", start).replace("{end}", end)
         if not path.is_file():
             continue
@@ -92,6 +92,7 @@ def run_po_quality(
     excluded: Sequence[Mapping[str, Any]],
     data_root: Path,
     input_cfg: Mapping[str, Any],
+    schoolyears: Sequence[Sequence[Any]] | None = None,
     *,
     max_brins_in_report: int = 50,
 ) -> Dict[str, Any]:
@@ -101,7 +102,10 @@ def run_po_quality(
     返回 data_quality 字典，可直接并入 run_report。
     """
     pattern = str(input_cfg.get("duo_schooladviezen_pattern") or "duo_schooladviezen_{start}_{end}.csv")
-    duplicate_brins = _collect_duplicate_brins_po(data_root, pattern)
+    if schoolyears is None:
+        from alleschools.config import build_effective_config
+        schoolyears = build_effective_config()["po"]["weights"]["school_years"]
+    duplicate_brins = _collect_duplicate_brins_po(data_root, pattern, schoolyears)
     missing = _missing_postcode_brins(rows_out)
     return {
         "duplicate_brin_in_source": {

@@ -20,9 +20,8 @@ def _project_root() -> Path:
 def pipeline_data_root(tmp_path):
     """
     供 pipeline 测试使用的临时 data_root，避免在项目根下生成 generated/ 与 run_report_*.json。
-    若项目根存在 raw_data/，会复制到临时目录，以便需要真实输入的测试能跑通。
+    复制受版本控制的最小脱敏 fixture，不依赖本地 raw_data/ 或 generated/。
     """
-    raw_src = _project_root() / "raw_data"
-    if raw_src.is_dir():
-        shutil.copytree(raw_src, tmp_path / "raw_data", dirs_exist_ok=True)
+    raw_src = _project_root() / "tests" / "fixtures" / "input"
+    shutil.copytree(raw_src, tmp_path / "raw_data")
     return tmp_path

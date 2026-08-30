@@ -95,16 +95,20 @@
     return 'hsl(' + hue + ', ' + sat + '%, ' + light + '%)';
   }
 
-  /** 根据 points 的 size 得到映射函数：size -> 半径(约 4–20) */
+  /** 面积与人数成正比：半径按 sqrt(size) 缩放，并限制在 4–18 px。 */
   function sizeToRadius(points) {
     const sizes = points.map(function (p) { return (p.size != null && p.size > 0) ? p.size : 0; }).filter(Boolean);
     if (sizes.length === 0) return function () { return 8; };
     const minS = Math.min.apply(null, sizes);
     const maxS = Math.max.apply(null, sizes);
-    const range = maxS - minS || 1;
+    if (minS <= 0 || maxS <= minS) return function () { return 8; };
+    const k = 4 / Math.sqrt(minS);
+    const maxRadius = 4 * Math.sqrt(maxS / minS);
+    const scale = maxRadius > 18 ? 18 / maxRadius : 1;
     return function (size) {
       if (size == null || size <= 0) return 8;
-      return Math.round(4 + 14 * (size - minS) / range);
+      const radius = k * Math.sqrt(size) * scale;
+      return Math.round(Math.max(4, Math.min(18, radius)));
     };
   }
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 """
-meta_builder: 构建符合 refactor/SCHEMA.md 的 meta JSON（axes/fields/i18n）。
+meta_builder: 构建符合 docs/schema.md 的 meta JSON（axes/fields/i18n）。
 """
 
 from pathlib import Path
@@ -463,4 +463,3 @@ def build_vo_profiles_meta(
 
 
 __all__ = ["SCHEMA_VERSION", "build_po_meta", "build_vo_meta", "build_vo_profiles_meta"]
-

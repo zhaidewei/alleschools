@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 """
-points data 导出：将内部宽表行转换为前端使用的 points JSON（见 refactor/SCHEMA.md）。
+points data 导出：将内部宽表行转换为前端使用的 points JSON（见 docs/schema.md）。
 """
 
 from pathlib import Path
@@ -91,4 +91,3 @@ def export_vo_points(
 
 
 __all__ = ["export_po_points", "export_vo_points"]
-

@@ -89,9 +89,15 @@ def validate_points_schema(data: Any, layer: str) -> List[ValidationError]:
                 )
             )
 
-        # Basic type checks
+        for text_field in ("id", "brin", "name", "municipality", "postcode", "pc4", "school_type"):
+            if text_field in obj and not isinstance(obj[text_field], str):
+                errors.append(ValidationError("type_error", f"field '{text_field}' must be string", f"{base_path}.{text_field}"))
+
+        # Basic type checks（bool 不是业务数值）
         for num_field in ("x_linear", "y_linear", "size"):
-            if num_field in obj and not isinstance(obj[num_field], (int, float)):
+            if num_field in obj and (
+                isinstance(obj[num_field], bool) or not isinstance(obj[num_field], (int, float))
+            ):
                 errors.append(
                     ValidationError(
                         kind="type_error",
@@ -108,6 +114,8 @@ def validate_points_schema(data: Any, layer: str) -> List[ValidationError]:
                     path=f"{base_path}.years_covered",
                 )
             )
+        elif "years_covered" in obj and not all(isinstance(v, str) for v in obj["years_covered"]):
+            errors.append(ValidationError("type_error", "years_covered must contain only strings", f"{base_path}.years_covered"))
 
         if "flags" in obj and not isinstance(obj["flags"], dict):
             errors.append(
@@ -117,6 +125,10 @@ def validate_points_schema(data: Any, layer: str) -> List[ValidationError]:
                     path=f"{base_path}.flags",
                 )
             )
+        elif "flags" in obj:
+            for flag_name, flag_value in obj["flags"].items():
+                if not isinstance(flag_value, bool):
+                    errors.append(ValidationError("type_error", f"flag '{flag_name}' must be boolean", f"{base_path}.flags.{flag_name}"))
 
     return errors
 
@@ -205,6 +217,11 @@ def validate_geojson_schema(data: Any, layer: str) -> List[ValidationError]:
                             path=f"{base_path}.properties.{required_prop}",
                         )
                     )
+            if "BRIN" in props and not isinstance(props["BRIN"], str):
+                errors.append(ValidationError("type_error", "BRIN must be string", f"{base_path}.properties.BRIN"))
+            for prop in ("X_linear", "Y_linear"):
+                if prop in props and (isinstance(props[prop], bool) or not isinstance(props[prop], (int, float))):
+                    errors.append(ValidationError("type_error", f"{prop} must be number", f"{base_path}.properties.{prop}"))
 
         geom = feat.get("geometry")
         if geom is None:
@@ -237,7 +254,7 @@ def validate_geojson_schema(data: Any, layer: str) -> List[ValidationError]:
             )
         else:
             lon, lat = coords
-            if not isinstance(lon, (int, float)) or not isinstance(lat, (int, float)):
+            if isinstance(lon, bool) or isinstance(lat, bool) or not isinstance(lon, (int, float)) or not isinstance(lat, (int, float)):
                 errors.append(
                     ValidationError(
                         kind="type_error",
@@ -325,9 +342,15 @@ def validate_long_table_schema(rows: Any, layer: str) -> List[ValidationError]:
                 )
             )
             continue
+        for col in required_cols:
+            if col not in row:
+                errors.append(ValidationError("missing_field", f"missing required column '{col}'", f"$[{idx}].{col}"))
         for col in ("X_linear", "Y_linear", size_field):
             if col in row:
                 _check_numeric(row.get(col), path=f"$[{idx}].{col}")
+        for col in ("BRIN", "year"):
+            if col in row and not isinstance(row[col], str):
+                errors.append(ValidationError("type_error", f"field '{col}' must be string", f"$[{idx}].{col}"))
 
     return errors
 
@@ -488,6 +511,32 @@ def validate_points_against_meta(
     errors: List[ValidationError] = []
     errors.extend(validate_points_schema(points, layer))
     errors.extend(validate_meta_schema(meta, layer))
+    if isinstance(points, list) and isinstance(meta, dict):
+        seen_ids: set[str] = set()
+        summary = meta.get("summary")
+        if isinstance(summary, dict):
+            row_count = summary.get("row_count")
+            if isinstance(row_count, bool) or not isinstance(row_count, int):
+                errors.append(ValidationError("type_error", "summary.row_count must be integer", "$.summary.row_count"))
+            elif row_count != len(points):
+                errors.append(ValidationError("count_mismatch", f"meta row_count={row_count} but points count={len(points)}", "$.summary.row_count"))
+        else:
+            errors.append(ValidationError("missing_field", "meta.summary must be an object", "$.summary"))
+        axes = meta.get("axes") if isinstance(meta.get("axes"), dict) else {}
+        axis_fields = [axis.get("field") for axis in axes.values() if isinstance(axis, dict) and axis.get("field")]
+        for idx, point in enumerate(points):
+            if not isinstance(point, dict):
+                continue
+            point_id = point.get("id")
+            if isinstance(point_id, str):
+                if point_id in seen_ids:
+                    errors.append(ValidationError("duplicate_id", f"duplicate point id '{point_id}'", f"$[{idx}].id"))
+                seen_ids.add(point_id)
+            if point.get("id") != point.get("brin"):
+                errors.append(ValidationError("artifact_mismatch", "point id must equal brin", f"$[{idx}].id"))
+            for field in axis_fields:
+                if field not in point:
+                    errors.append(ValidationError("artifact_mismatch", f"meta axis field '{field}' missing from point", f"$[{idx}].{field}"))
     return errors
 
 
@@ -501,7 +550,7 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
             "Validate AlleSchools points data + meta JSON files "
-            "against refactor/SCHEMA.md (version 1.0.0)."
+            "against docs/schema.md (version 1.0.0)."
         )
     )
     parser.add_argument(
@@ -572,4 +621,3 @@ def main(argv: Optional[List[str]] = None) -> int:
 
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())
-

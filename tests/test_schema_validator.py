@@ -4,10 +4,9 @@ import csv
 import json
 from pathlib import Path
 
-import pytest
-
-import alleschools.config as cfg
 from alleschools import schema_validator as sv
+from alleschools import config as cfg
+from alleschools.pipeline import run_po_pipeline
 
 
 def test_validate_points_schema_happy_path() -> None:
@@ -64,13 +63,14 @@ def test_validate_points_schema_reports_missing_and_type_errors() -> None:
     assert any("flags" in e.path for e in errors)
 
 
-def test_validate_meta_schema_and_points_against_meta_with_real_files() -> None:
-    """使用当前导出的 PO points + meta 进行整体校验应无错误。"""
-    root = Path(cfg.PROJECT_ROOT)
-    data_path = root / "generated" / "schools_xy_coords_po.json"
-    meta_path = root / "generated" / "schools_xy_coords_po_meta.json"
-    assert data_path.exists(), "PO points JSON should exist for schema validation test"
-    assert meta_path.exists(), "PO meta JSON should exist for schema validation test"
+def test_validate_meta_schema_and_points_against_generated_fixture_files(
+    pipeline_data_root: Path,
+) -> None:
+    """由最小 fixture 现场生成 PO points + meta，再进行整体校验。"""
+    effective = cfg.build_effective_config(overrides={"data_root": str(pipeline_data_root)})
+    run_po_pipeline(effective)
+    data_path = pipeline_data_root / "generated" / "schools_xy_coords_po.json"
+    meta_path = pipeline_data_root / "generated" / "schools_xy_coords_po_meta.json"
 
     points = json.loads(data_path.read_text(encoding="utf-8"))
     meta = json.loads(meta_path.read_text(encoding="utf-8"))
@@ -148,17 +148,16 @@ def test_validate_long_table_schema_happy_path_po_and_vo() -> None:
     assert sv.validate_long_table_schema(vo_rows, layer="vo") == []
 
 
-def test_validate_geojson_and_long_table_with_real_po_files_if_present() -> None:
+def test_validate_geojson_and_long_table_from_generated_fixture_files(
+    pipeline_data_root: Path,
+) -> None:
     """
-    若 generated 下存在 PO 的 GeoJSON 与长表 CSV，则对其运行 schema 校验应无错误。
-    方便在本地/CI 上对实际导出结果做端到端验证。
+    由最小 fixture 生成 GeoJSON 与长表，对实际导出结果做端到端验证。
     """
-    root = Path(cfg.PROJECT_ROOT)
-    geo_path = root / "generated" / "schools_xy_coords_po_geo.json"
-    long_path = root / "generated" / "schools_xy_coords_po_long.csv"
-
-    if not geo_path.exists() or not long_path.exists():
-        pytest.skip("generated PO geojson/long-table files not present")
+    effective = cfg.build_effective_config(overrides={"data_root": str(pipeline_data_root)})
+    run_po_pipeline(effective)
+    geo_path = pipeline_data_root / "generated" / "schools_xy_coords_po_geo.json"
+    long_path = pipeline_data_root / "generated" / "schools_xy_coords_po_long.csv"
 
     geo = json.loads(geo_path.read_text(encoding="utf-8"))
     errors_geo = sv.validate_geojson_schema(geo, layer="po")
@@ -169,4 +168,3 @@ def test_validate_geojson_and_long_table_with_real_po_files_if_present() -> None
         rows = list(reader)
     errors_long = sv.validate_long_table_schema(rows, layer="po")
     assert errors_long == []
-

@@ -56,6 +56,21 @@ def _get_raw_root(cfg: Dict[str, Any]) -> Path:
 # Fetch helpers
 # ---------------------------------------------------------------------------
 
+def _download_atomic(url: str, out_path: Path) -> Path:
+    """下载到同目录临时文件，做最低限度校验后原子替换。"""
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp_name = tempfile.mkstemp(prefix=f".{out_path.name}.", suffix=".tmp", dir=out_path.parent)
+    os.close(fd)
+    tmp_path = Path(tmp_name)
+    try:
+        urllib.request.urlretrieve(url, tmp_path)
+        if not tmp_path.is_file() or tmp_path.stat().st_size == 0:
+            raise RuntimeError(f"downloaded file is empty: {url}")
+        os.replace(tmp_path, out_path)
+        return out_path
+    finally:
+        tmp_path.unlink(missing_ok=True)
+
 def fetch_vo_exams(data_root: Path) -> Path:
     """
     下载 VO 考试全量 CSV 到 data_root。
@@ -66,8 +81,7 @@ def fetch_vo_exams(data_root: Path) -> Path:
     data_root.mkdir(parents=True, exist_ok=True)
     out_path = data_root / "duo_examen_raw_all.csv"
     print(f"[fetch] VO exams: {url} -> {out_path}")
-    urllib.request.urlretrieve(url, out_path)
-    return out_path
+    return _download_atomic(url, out_path)
 
 
 def fetch_vo_vestigingen(data_root: Path) -> Path:
@@ -80,8 +94,7 @@ def fetch_vo_vestigingen(data_root: Path) -> Path:
     data_root.mkdir(parents=True, exist_ok=True)
     out_path = data_root / "duo_vestigingen_vo.csv"
     print(f"[fetch] VO vestigingen: {url} -> {out_path}")
-    urllib.request.urlretrieve(url, out_path)
-    return out_path
+    return _download_atomic(url, out_path)
 
 
 def fetch_vo_vwo_exam_scores(data_root: Path) -> Dict[str, Path]:
@@ -109,7 +122,7 @@ def fetch_vo_vwo_exam_scores(data_root: Path) -> Dict[str, Path]:
         url = f"{base_url}/{filename}"
         out_path = data_root / filename
         print(f"[fetch] VO VWO exam scores: {url} -> {out_path}")
-        urllib.request.urlretrieve(url, out_path)
+        _download_atomic(url, out_path)
         out[schooljaar] = out_path
     return out
 
@@ -124,7 +137,7 @@ def _schooladviezen_duo_filename(start: str, end: str) -> str:
 def fetch_po_schooladviezen(
     data_root: Path,
     schoolyears: Iterable[Tuple[str, str]] | None = None,
-) -> None:
+) -> Dict[str, Path]:
     """
     下载 PO schooladviezen CSV 到 data_root。
 
@@ -143,6 +156,8 @@ def fetch_po_schooladviezen(
 
     data_root.mkdir(parents=True, exist_ok=True)
     ok = 0
+    written: Dict[str, Path] = {}
+    failures: list[str] = []
     schoolyears = list(schoolyears)
     for start, end in schoolyears:
         duo_name = _schooladviezen_duo_filename(start, end)
@@ -151,11 +166,16 @@ def fetch_po_schooladviezen(
         out_path = data_root / out_name
         try:
             print(f"[fetch] PO schooladviezen: {url} -> {out_path}")
-            urllib.request.urlretrieve(url, out_path)
+            _download_atomic(url, out_path)
             ok += 1
+            written[f"{start}-{end}"] = out_path
         except Exception as exc:  # pragma: no cover - 网络异常
             print(f"[fetch]   failed for {out_name}: {exc}")
+            failures.append(out_name)
     print(f"[fetch] PO schooladviezen done: {ok}/{len(schoolyears)} files")
+    if failures:
+        raise RuntimeError(f"PO schooladviezen download failed: {', '.join(failures)}")
+    return written
 
 
 def fetch_cbs_woz(data_root: Path) -> Path:
@@ -172,18 +192,18 @@ def fetch_cbs_woz(data_root: Path) -> Path:
             zip_path = os.path.join(tmpdir, zip_name)
             try:
                 print(f"[fetch] CBS WOZ: downloading {url}")
-                urllib.request.urlretrieve(url, zip_path)
+                _download_atomic(url, Path(zip_path))
             except Exception as exc:  # pragma: no cover - 网络异常
                 print(f"[fetch]   download failed for {zip_name}: {exc}")
-                continue
+                raise RuntimeError(f"CBS WOZ download failed: {zip_name}") from exc
             if not zipfile.is_zipfile(zip_path):
                 print(f"[fetch]   invalid zip: {zip_path}")
-                continue
+                raise RuntimeError(f"CBS WOZ invalid zip: {zip_name}")
             with zipfile.ZipFile(zip_path, "r") as zf:
                 gpkg_names = [n for n in zf.namelist() if n.endswith(".gpkg")]
                 if not gpkg_names:
                     print(f"[fetch]   no .gpkg found in {zip_name}")
-                    continue
+                    raise RuntimeError(f"CBS WOZ archive contains no gpkg: {zip_name}")
                 zf.extract(gpkg_names[0], tmpdir)
                 gpkg_path = os.path.join(tmpdir, gpkg_names[0])
             rows = cbs_woz.extract_woz_from_gpkg(gpkg_path, year)
@@ -191,10 +211,16 @@ def fetch_cbs_woz(data_root: Path) -> Path:
             print(f"[fetch]   {year}: {len(rows)} valid WOZ rows")
 
     all_rows.sort(key=lambda r: (r[0], r[1]))
-    with out_path.open("w", encoding="utf-8", newline="") as f:
+    if not all_rows:
+        raise RuntimeError("CBS WOZ extraction produced no rows")
+    fd, tmp_name = tempfile.mkstemp(prefix=f".{out_path.name}.", suffix=".tmp", dir=out_path.parent)
+    os.close(fd)
+    tmp_path = Path(tmp_name)
+    with tmp_path.open("w", encoding="utf-8", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(["pc4", "year", "woz_waarde"])
         writer.writerows(all_rows)
+    os.replace(tmp_path, out_path)
 
     print(f"[fetch] CBS WOZ written: {out_path} ({len(all_rows)} rows)")
     return out_path
@@ -222,18 +248,29 @@ def run_etl_po(cfg: Dict[str, Any]) -> Dict[str, Any]:
     return stats
 
 
-def run_fetch_from_cli_args(cfg: Dict[str, Any], *, vo: bool, po: bool, cbs_woz: bool) -> None:
-    """根据 CLI 解析结果执行 fetch 步骤。"""
+def run_fetch_from_cli_args(cfg: Dict[str, Any], *, vo: bool, po: bool, cbs_woz: bool) -> bool:
+    """执行整批 fetch；失败时不替换现有快照。返回 True 表示失败。"""
     raw_root = _get_raw_root(cfg)
-    if vo:
-        # VO fetch 同时需要考试数据、vestigingen 映射，以及 VWO 科目成绩明细
-        fetch_vo_exams(raw_root)
-        fetch_vo_vestigingen(raw_root)
-        fetch_vo_vwo_exam_scores(raw_root)
-    if po:
-        fetch_po_schooladviezen(raw_root)
-    if cbs_woz:
-        fetch_cbs_woz(raw_root)
+    raw_root.mkdir(parents=True, exist_ok=True)
+    try:
+        with tempfile.TemporaryDirectory(prefix="alleschools-fetch-", dir=raw_root.parent) as tmpdir:
+            staging = Path(tmpdir)
+            if vo:
+                fetch_vo_exams(staging)
+                fetch_vo_vestigingen(staging)
+                fetch_vo_vwo_exam_scores(staging)
+            if po:
+                po_years = (cfg.get("po") or {}).get("weights", {}).get("school_years") or []
+                fetch_po_schooladviezen(staging, [(str(v[0]), str(v[1])) for v in po_years])
+            if cbs_woz:
+                fetch_cbs_woz(staging)
+            for staged in staging.iterdir():
+                if staged.is_file():
+                    os.replace(staged, raw_root / staged.name)
+        return False
+    except Exception as exc:
+        print(f"[fetch] failed; existing snapshot preserved: {exc}")
+        return True
 
 
 def run_etl_from_cli_args(cfg: Dict[str, Any], *, vo: bool, po: bool) -> bool:
@@ -266,4 +303,3 @@ __all__ = [
     "run_fetch_from_cli_args",
     "run_etl_from_cli_args",
 ]
-

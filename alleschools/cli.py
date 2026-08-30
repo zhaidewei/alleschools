@@ -15,7 +15,6 @@ from typing import Any, Dict, List, Optional
 from alleschools import config as config_mod
 from alleschools import etl as etl_mod
 from alleschools import schema_validator as sv
-from alleschools.pipeline import run_po_pipeline, run_vo_pipeline
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -139,22 +138,12 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     # 向后兼容：旧的 po / vo 子命令等价于新的 etl --po/--vo
     if args.command == "po":
-        csv_path, stats = run_po_pipeline(cfg)
-        n = int(stats.get("n_schools", 0))
-        n_excluded = int(stats.get("n_excluded", 0))
-        print(f"PO: 已写入 {csv_path}（共 {n} 所小学，排除 {n_excluded} 所）")
-        if stats.get("run_report_path"):
-            print(f"PO 运行报告: {stats['run_report_path']}")
-        return 0
+        stats = etl_mod.run_etl_po(cfg)
+        return 1 if stats.get("summary_status") == "error" else 0
 
     if args.command == "vo":
-        csv_path, stats = run_vo_pipeline(cfg)
-        n = int(stats.get("n_schools", 0))
-        n_excluded = int(stats.get("n_excluded", 0))
-        print(f"VO: 已写入 {csv_path}（共 {n} 所中学，排除 {n_excluded} 所）")
-        if stats.get("run_report_path"):
-            print(f"VO 运行报告: {stats['run_report_path']}")
-        return 0
+        stats = etl_mod.run_etl_vo(cfg)
+        return 1 if stats.get("summary_status") == "error" else 0
 
     if args.command == "fetch":
         vo = bool(args.vo or args.all)
@@ -163,8 +152,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         # 若用户未显式指定任何层，则默认等价于 --all
         if not (vo or po or cbs_woz):
             vo = po = cbs_woz = True
-        etl_mod.run_fetch_from_cli_args(cfg, vo=vo, po=po, cbs_woz=cbs_woz)
-        return 0
+        return 1 if etl_mod.run_fetch_from_cli_args(cfg, vo=vo, po=po, cbs_woz=cbs_woz) else 0
 
     if args.command == "etl":
         vo = bool(args.vo or args.all)
@@ -180,7 +168,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         if not (vo or po):
             vo = po = True
         # 1) fetch 原始数据
-        etl_mod.run_fetch_from_cli_args(cfg, vo=vo, po=po, cbs_woz=True)
+        if etl_mod.run_fetch_from_cli_args(cfg, vo=vo, po=po, cbs_woz=True):
+            return 1
         # 2) 跑 ETL
         had_error = etl_mod.run_etl_from_cli_args(cfg, vo=vo, po=po)
         # schema 校验与错误合并逻辑由 pipeline 中的 schema_validation 配置控制
@@ -192,7 +181,9 @@ def main(argv: Optional[List[str]] = None) -> int:
         meta_path_arg = args.meta
 
         # 根据 config 中的 output.csv 计算默认的 points/meta 路径
-        root = Path(cfg.get("data_root") or cfg.get("output_root") or ".")
+        data_root = Path(cfg.get("data_root") or ".")
+        configured_output = Path(str(cfg.get("output_root") or "."))
+        root = configured_output if configured_output.is_absolute() else data_root / configured_output
         if layer == "po":
             out_cfg = dict(cfg.get("po", {}).get("output", {}) or {})
         else:
@@ -237,4 +228,3 @@ def main(argv: Optional[List[str]] = None) -> int:
 
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())
-

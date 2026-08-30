@@ -83,12 +83,12 @@
         "vo_science_pass_share": {
           "label": "Bètaprofiel slaagpercentage",
           "short": "Bèta geslaagd %",
-          "description": "Indicatief slaagpercentage voor natuurprofiel/vakken (voorbeeld指标，仅用于 demo)。"
+          "description": "Indicatief slaagpercentage voor natuurprofielen en bètavakken (demogegeven)."
         },
         "vo_candidates_total": {
           "label": "Totaal aantal examenkandidaten",
           "short": "Kandidaten",
-          "description": "Totaal aantal examenkandidaten over alle jaren，用于散点大小。"
+          "description": "Totaal aantal examenkandidaten over alle jaren, gebruikt voor de puntgrootte."
         }
       },
       "dimensions": {

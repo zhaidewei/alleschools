@@ -16,9 +16,7 @@ DUO Schooladviezen (PO) 加载。
 
 import csv
 import os
-from typing import Dict, List, Tuple
-
-from alleschools.config import SCHOOLJARS
+from typing import Dict, Iterable, List, Tuple
 
 
 def _parse_int(s: str) -> int:
@@ -31,7 +29,11 @@ def _parse_int(s: str) -> int:
         return 0
 
 
-def load_schooladviezen_po(base_dir: str) -> Dict[str, dict]:
+def load_schooladviezen_po(
+    base_dir: str,
+    schoolyears: Iterable[Tuple[str, str]],
+    filename_pattern: str = "duo_schooladviezen_{start}_{end}.csv",
+) -> Dict[str, dict]:
     """
     读取所有 duo_schooladviezen_YYYY_YYYY.csv，按 BRIN 聚合。
 
@@ -43,8 +45,9 @@ def load_schooladviezen_po(base_dir: str) -> Dict[str, dict]:
     """
     schools: Dict[str, dict] = {}
 
-    for start, end in SCHOOLJARS:
-        path = os.path.join(base_dir, f"duo_schooladviezen_{start}_{end}.csv")
+    for start, end in schoolyears:
+        filename = filename_pattern.replace("{start}", start).replace("{end}", end)
+        path = os.path.join(base_dir, filename)
         if not os.path.exists(path):
             continue
 
@@ -120,4 +123,3 @@ def load_schooladviezen_po(base_dir: str) -> Dict[str, dict]:
 
 
 __all__ = ["load_schooladviezen_po"]
-
