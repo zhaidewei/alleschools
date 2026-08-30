@@ -83,7 +83,7 @@
         <div id="customLegend" class="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-3 pt-3 border-t border-slate-200 dark:border-slate-600" style="min-height: 24px;"></div>
       </div>
       <div id="noResults" class="v2-surface mt-4 hidden rounded-2xl p-5 text-sm text-[#65716b] dark:text-[#afbbb4]" role="status"></div>
-      <section id="comparisonSection" class="v2-surface mt-4 hidden rounded-2xl p-4 sm:p-5" aria-labelledby="comparisonTitle">
+      <section id="comparisonSection" class="v2-surface mt-4 hidden rounded-2xl p-3 sm:p-5" aria-labelledby="comparisonTitle">
         <div class="flex items-center justify-between gap-4">
           <div><h3 id="comparisonTitle" class="font-display text-xl font-bold text-forest dark:text-[#f4efe4]">Pinned schools and yearly comparison</h3><p id="comparisonHint" class="mt-1 text-xs text-[#65716b] dark:text-[#afbbb4]">Pin up to four schools. Pinned schools remain visible while you explore.</p></div>
           <button type="button" id="comparisonClear" class="text-sm font-semibold text-terracotta dark:text-[#e08260]">Clear all</button>
@@ -823,11 +823,39 @@
       comparisonChart.options.scales.x.title.text = t('comparisonYearAxis');
       comparisonChart.options.scales.y.min = 0;
       comparisonChart.options.scales.y.max = currentMode === 'vo' && series.metric === 'x' ? 100 : undefined;
+      applyResponsiveComparisonSizing();
       var hasValues = series.datasets.some(function(dataset) { return dataset.data.some(function(value) { return value != null; }); });
       var noYearly = document.getElementById('comparisonNoYearly');
       if (noYearly) noYearly.classList.toggle('hidden', hasValues || comparisonSchools.length === 0);
       comparisonChart.canvas.classList.toggle('hidden', !hasValues);
       comparisonChart.update();
+    }
+
+    function applyResponsiveComparisonSizing() {
+      var mobile = window.innerWidth < 768;
+      comparisonChart.options.layout = {
+        padding: mobile ? { top: 2, right: 0, bottom: 0, left: 0 } : { top: 6, right: 6, bottom: 4, left: 4 }
+      };
+      comparisonChart.options.scales.y.ticks = Object.assign({}, comparisonChart.options.scales.y.ticks || {}, {
+        font: { size: mobile ? 9 : 12 },
+        padding: mobile ? 2 : 4
+      });
+      comparisonChart.options.scales.y.title.font = { size: mobile ? 10 : 12, weight: mobile ? '500' : '600' };
+      comparisonChart.options.scales.y.title.padding = mobile ? { top: 2, bottom: 0 } : { top: 8, bottom: 2 };
+      comparisonChart.options.scales.y.grid.tickLength = mobile ? 3 : 8;
+      comparisonChart.options.scales.x.ticks = Object.assign({}, comparisonChart.options.scales.x.ticks || {}, {
+        font: { size: mobile ? 9 : 12 },
+        padding: mobile ? 2 : 4,
+        maxRotation: mobile ? 35 : 0,
+        minRotation: 0
+      });
+      comparisonChart.options.scales.x.title.font = { size: mobile ? 10 : 12, weight: mobile ? '500' : '600' };
+      comparisonChart.options.plugins.legend.labels = Object.assign({}, comparisonChart.options.plugins.legend.labels || {}, {
+        font: { size: mobile ? 10 : 12 },
+        boxWidth: mobile ? 14 : 40,
+        boxHeight: mobile ? 8 : 12,
+        padding: mobile ? 8 : 10
+      });
     }
 
     function renderComparison() {
@@ -1345,6 +1373,30 @@
         chart.update();
       }
     }
+    function applyResponsiveChartSizing() {
+      var mobile = window.innerWidth < 768;
+      var tickSize = mobile ? 9 : 12;
+      var titleSize = mobile ? 10 : 12;
+      chart.options.layout = {
+        padding: mobile ? { top: 2, right: 2, bottom: 0, left: 0 } : { top: 6, right: 8, bottom: 4, left: 4 }
+      };
+      ['x', 'y'].forEach(function(axisName) {
+        var axis = chart.options.scales[axisName];
+        axis.ticks = Object.assign({}, axis.ticks || {}, {
+          font: { size: tickSize },
+          padding: mobile ? 2 : 4
+        });
+        axis.title.font = { size: titleSize, weight: mobile ? '500' : '600' };
+        axis.title.padding = mobile ? { top: 4, bottom: 0 } : { top: 8, bottom: 2 };
+        axis.grid.tickLength = mobile ? 3 : 8;
+      });
+      if (mobile) {
+        chart.options.scales.x.ticks.maxRotation = 0;
+        chart.options.scales.x.ticks.minRotation = 0;
+        chart.options.scales.x.ticks.autoSkip = true;
+        chart.options.scales.x.ticks.maxTicksLimit = 6;
+      }
+    }
     function refreshChart() {
       var mainWrap = document.getElementById('mainChartWrap');
       var legendEl = document.getElementById('customLegend');
@@ -1383,6 +1435,7 @@
       } else if (filtered.length > 0) {
         setChartScaleForMode();
       }
+      applyResponsiveChartSizing();
       chart.update();
       renderAccessibleResults(filtered, matched);
       requestAnimationFrame(function() { updateChartLabels(); if (filtered.length) setSampleTooltip(); });

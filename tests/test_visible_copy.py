@@ -62,6 +62,11 @@ def test_explorer_flow_is_visually_ordered() -> None:
     assert 'class="hero-panel ' in home
     assert 'grid-template-columns: repeat(2, minmax(0, 1fr))' in css
     assert '#mainChartWrap { height: min(68vh, 35rem); min-height: 27rem; aspect-ratio: auto; }' in css
+    assert "function applyResponsiveChartSizing()" in home
+    assert "var tickSize = mobile ? 9 : 12" in home
+    assert "var titleSize = mobile ? 10 : 12" in home
+    assert "function applyResponsiveComparisonSizing()" in home
+    assert "boxWidth: mobile ? 14 : 40" in home
 
 
 def test_primary_navigation_is_consistent_on_both_pages() -> None:
