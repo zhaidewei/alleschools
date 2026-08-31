@@ -67,6 +67,8 @@ def test_explorer_flow_is_visually_ordered() -> None:
     assert "var titleSize = mobile ? 10 : 12" in home
     assert "function applyResponsiveComparisonSizing()" in home
     assert "boxWidth: mobile ? 14 : 40" in home
+    assert "function updateProfileTabsVisibility()" in home
+    assert "profileTabs.style.display = hiddenForPrimary ? 'none' : ''" in home
 
 
 def test_primary_navigation_is_consistent_on_both_pages() -> None:
