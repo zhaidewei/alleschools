@@ -48,6 +48,16 @@ def test_methodology_is_a_dedicated_page() -> None:
     assert 'id="insightBody"' not in home
 
 
+def test_public_pages_include_vercel_analytics() -> None:
+    for page in ("view_xy.html", "methodology.html"):
+        source = (PROJECT_ROOT / page).read_text(encoding="utf-8")
+        assert source.count('/_vercel/insights/script.js') == 1
+
+    home = (PROJECT_ROOT / "view_xy.html").read_text(encoding="utf-8")
+    assert "connect-src 'self'" in home
+    assert "connect-src 'none'" not in home
+
+
 def test_explorer_flow_is_visually_ordered() -> None:
     home = (PROJECT_ROOT / "view_xy.html").read_text(encoding="utf-8")
     css = (PROJECT_ROOT / "assets" / "tailwind-input.css").read_text(encoding="utf-8")

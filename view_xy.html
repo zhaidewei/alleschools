@@ -19,11 +19,13 @@
   <meta name="twitter:description" content="Explore and compare Dutch schools through public education and neighbourhood data.">
   <meta name="twitter:image" content="https://alleschools.nl/assets/social/alleschools-og.png">
   <link rel="icon" href="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ctext%20y%3D%22.9em%22%20font-size%3D%2290%22%3E%F0%9F%8E%AB%3C%2Ftext%3E%3C%2Fsvg%3E">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
   <link rel="stylesheet" href="assets/site.css">
   <script src="assets/chart.umd.min.js"></script>
   <script src="assets/html2canvas.min.js"></script>
   <script src="view_xy_logic.js"></script>
+  <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+  <script defer src="/_vercel/insights/script.js"></script>
   <script>document.documentElement.classList.toggle('dark', localStorage.getItem('theme')==='dark');</script>
   <style>.chartjs-tooltip { max-width: min(320px, 90vw); overflow-wrap: break-word; word-break: break-word; transform-origin: bottom center; z-index: 40; } #chartLabels { z-index: 10; } #accessibleResultsList { max-height: 32rem; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; } #shareWrap.open #shareDropdown, #langWrap.open #langDropdown { opacity: 1; visibility: visible; } details summary { list-style: none; } details summary::-webkit-details-marker { display: none; } .input-wrap { position: relative; } .input-hint { position: absolute; left: 0; right: 0; top: 100%; margin-top: 4px; padding: 8px 10px; font-size: 0.75rem; line-height: 1.35; color: var(--hint-text, #475569); background: var(--hint-bg, #f1f5f9); border: 1px solid var(--hint-border, #e2e8f0); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); z-index: 30; opacity: 0; visibility: hidden; transition: opacity 0.15s, visibility 0.15s; pointer-events: none; max-width: min(100%, 420px); } .input-wrap.show-hint .input-hint, .input-wrap:hover .input-hint { opacity: 1; visibility: visible; } .dark .input-hint { --hint-text: #94a3b8; --hint-bg: #334155; --hint-border: #475569; }</style>
 </head>
