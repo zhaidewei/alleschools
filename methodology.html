@@ -4,6 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="How AlleSchools processes and explains Dutch education and neighbourhood data.">
+  <link rel="canonical" href="https://alleschools.nl/en/methodology.html">
+  <link rel="alternate" hreflang="en" href="https://alleschools.nl/en/methodology.html">
+  <link rel="alternate" hreflang="nl" href="https://alleschools.nl/nl/methodology.html">
+  <link rel="alternate" hreflang="zh-Hans" href="https://alleschools.nl/zh/methodology.html">
+  <link rel="alternate" hreflang="x-default" href="https://alleschools.nl/en/methodology.html">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="AlleSchools">
   <meta property="og:title" content="AlleSchools — Data and methodology">
@@ -18,7 +23,8 @@
   <meta name="twitter:description" content="How AlleSchools processes and explains Dutch education and neighbourhood data.">
   <meta name="twitter:image" content="https://alleschools.nl/assets/social/alleschools-og.png">
   <title>AlleSchools · 数据与方法</title>
-  <link rel="stylesheet" href="assets/site.css">
+  <link rel="stylesheet" href="/assets/site.css">
+  <script src="/assets/language.js"></script>
   <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
   <script defer src="/_vercel/insights/script.js"></script>
   <style>
@@ -33,16 +39,16 @@
 <body class="min-h-screen antialiased">
   <header class="border-b" style="border-color:var(--line);background:var(--surface)">
     <div class="v2-shell flex flex-wrap items-center justify-between gap-x-4 py-3">
-      <a id="brandHome" href="./?lang=zh" class="font-display text-xl font-bold text-forest dark:text-[#f4efe4] no-underline">AlleSchools</a>
+      <a id="brandHome" href="./" class="font-display text-xl font-bold text-forest dark:text-[#f4efe4] no-underline">AlleSchools</a>
       <nav class="order-3 flex w-full items-center gap-4 overflow-x-auto border-t py-2 text-sm sm:order-none sm:w-auto sm:border-0 sm:py-0" style="border-color:var(--line)" aria-label="Primary navigation">
-        <a id="navHome" href="./?lang=zh" class="v2-nav-link">主页</a>
-        <a id="navMethodology" href="methodology.html?lang=zh" class="v2-nav-link" aria-current="page">数据与方法</a>
+        <a id="navHome" href="./" class="v2-nav-link">主页</a>
+        <a id="navMethodology" href="methodology.html" class="v2-nav-link" aria-current="page">数据与方法</a>
         <a id="navSupport" href="https://ko-fi.com/deweizhai" target="_blank" rel="noopener noreferrer" class="inline-flex whitespace-nowrap rounded-lg bg-amber-500/90 px-3 py-1.5 font-medium text-white no-underline shadow-sm hover:bg-amber-500">☕ 打赏</a>
       </nav>
       <nav class="flex gap-3 text-sm" aria-label="Language">
-        <a href="?lang=zh" data-lang-link="zh" class="v2-nav-link">中文</a>
-        <a href="?lang=nl" data-lang-link="nl" class="v2-nav-link">NL</a>
-        <a href="?lang=en" data-lang-link="en" class="v2-nav-link">EN</a>
+        <button type="button" data-lang-option="zh" class="v2-nav-link">中文</button>
+        <button type="button" data-lang-option="nl" class="v2-nav-link">NL</button>
+        <button type="button" data-lang-option="en" class="v2-nav-link">EN</button>
       </nav>
     </div>
   </header>
@@ -107,23 +113,29 @@
   </main>
   <script>
     (function () {
-      var lang = new URLSearchParams(location.search).get('lang');
-      if (!['zh', 'en', 'nl'].includes(lang)) lang = localStorage.getItem('schools-lang') || 'en';
-      if (!['zh', 'en', 'nl'].includes(lang)) lang = 'en';
+      var match = location.pathname.match(/^\/(en|nl|zh)(?:\/|$)/);
+      var lang = match ? match[1] : ALLESCHOOLS_LANGUAGE.get();
       document.documentElement.lang = lang === 'zh' ? 'zh-CN' : lang;
       document.documentElement.classList.toggle('dark', localStorage.getItem('schools-theme') === 'dark');
       document.querySelectorAll('[data-lang]').forEach(function (el) { el.classList.toggle('hidden', el.getAttribute('data-lang') !== lang); });
-      document.querySelectorAll('[data-lang-link]').forEach(function (el) { if (el.getAttribute('data-lang-link') === lang) { el.style.color = 'var(--ink)'; el.style.fontWeight = '700'; } });
+      document.querySelectorAll('[data-lang-option]').forEach(function (el) {
+        if (el.getAttribute('data-lang-option') === lang) { el.style.color = 'var(--ink)'; el.style.fontWeight = '700'; }
+        el.addEventListener('click', function () {
+          var nextLang = el.getAttribute('data-lang-option');
+          ALLESCHOOLS_LANGUAGE.set(nextLang);
+          location.assign('/' + nextLang + '/methodology.html' + location.hash);
+        });
+      });
       var labels = {
         zh: { home: '主页', methodology: '数据与方法', support: '☕ 打赏' },
         en: { home: 'Home', methodology: 'Data & methodology', support: '☕ Support' },
         nl: { home: 'Home', methodology: 'Data & methode', support: '☕ Steunen' }
       }[lang];
-      var homeUrl = './?lang=' + encodeURIComponent(lang);
+      var homeUrl = '/' + lang + '/';
       document.getElementById('brandHome').href = homeUrl;
       document.getElementById('navHome').href = homeUrl;
       document.getElementById('navHome').textContent = labels.home;
-      document.getElementById('navMethodology').href = 'methodology.html?lang=' + encodeURIComponent(lang);
+      document.getElementById('navMethodology').href = '/' + lang + '/methodology.html';
       document.getElementById('navMethodology').textContent = labels.methodology;
       document.getElementById('navSupport').textContent = labels.support;
       document.title = lang === 'zh' ? 'AlleSchools · 数据与方法' : (lang === 'nl' ? 'AlleSchools · Data & methode' : 'AlleSchools · Data & methodology');

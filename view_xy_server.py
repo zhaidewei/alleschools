@@ -13,6 +13,8 @@ import sys
 import webbrowser
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 
+from alleschools.school_pages import build_ranked_school_pages, school_slug, select_top_schools
+
 BASE = os.path.dirname(os.path.abspath(__file__))
 CSV_PATH = os.path.join(BASE, "schools_xy_coords.csv")
 EXCLUDED_PATH = os.path.join(BASE, "excluded_schools.json")
@@ -467,6 +469,14 @@ def build_html(
     data_vo_profiles_js = _json_for_inline_script(data_vo_profiles)
     meta_vo_profiles_js = _json_for_inline_script(meta_vo_profiles)
     yearly_comparison_js = _json_for_inline_script(yearly_comparison)
+    detail_paths = {}
+    for layer, schools in (
+        ("vo", select_top_schools([{**school, "layer": "vo"} for school in data_vo])),
+        ("po", select_top_schools([{**school, "layer": "po"} for school in data_po])),
+    ):
+        for school in schools:
+            detail_paths[f"{layer}:{school['id']}"] = school_slug(school)
+    detail_paths_js = _json_for_inline_script(detail_paths)
     print(f"[view_xy_server] 使用 HTML 模板: {html_path}", file=sys.stderr)
     with open(html_path, "r", encoding="utf-8") as f:
         html = f.read()
@@ -479,6 +489,7 @@ def build_html(
     html = html.replace("__INJECT_DATA_VO_PROFILES__", data_vo_profiles_js)
     html = html.replace("__INJECT_META_VO_PROFILES__", meta_vo_profiles_js)
     html = html.replace("__INJECT_YEARLY_COMPARISON__", yearly_comparison_js)
+    html = html.replace("__INJECT_SCHOOL_DETAIL_PATHS__", detail_paths_js)
     return html
 
 
@@ -588,6 +599,79 @@ def main():
     assets_source = os.path.join(BASE, "assets")
     if os.path.isdir(assets_source):
         shutil.copytree(assets_source, os.path.join(out_dir, "assets"), dirs_exist_ok=True)
+
+    language_meta = {
+        "en": {
+            "html_lang": "en",
+            "title": "Dutch school comparison | AlleSchools",
+            "description": "Explore and compare Dutch schools through public education and neighbourhood data.",
+            "method_title": "AlleSchools · Data & methodology",
+            "method_description": "How AlleSchools processes and explains Dutch education and neighbourhood data.",
+        },
+        "nl": {
+            "html_lang": "nl",
+            "title": "Nederlandse scholen vergelijken | AlleSchools",
+            "description": "Vergelijk Nederlandse scholen met openbare onderwijs- en buurtgegevens.",
+            "method_title": "AlleSchools · Data & methode",
+            "method_description": "Hoe AlleSchools Nederlandse onderwijs- en buurtgegevens verwerkt en uitlegt.",
+        },
+        "zh": {
+            "html_lang": "zh-CN",
+            "title": "荷兰学校数据比较 | AlleSchools",
+            "description": "通过公开教育与社区数据探索和比较荷兰学校。",
+            "method_title": "AlleSchools · 数据与方法",
+            "method_description": "了解 AlleSchools 如何处理和解释荷兰教育与社区数据。",
+        },
+    }
+    for lang, meta in language_meta.items():
+        lang_dir = os.path.join(out_dir, lang)
+        os.makedirs(lang_dir, exist_ok=True)
+        localized_home = html.replace('<html lang="zh-CN">', f'<html lang="{meta["html_lang"]}">', 1)
+        localized_home = localized_home.replace(
+            "<title>Dutch secondary school map: academic level × science focus</title>",
+            f'<title>{meta["title"]}</title>',
+            1,
+        ).replace(
+            '<meta name="description" content="Explore and compare Dutch schools through public education and neighbourhood data.">',
+            f'<meta name="description" content="{meta["description"]}">',
+            1,
+        ).replace(
+            '<link rel="canonical" href="https://alleschools.nl/en/">',
+            f'<link rel="canonical" href="https://alleschools.nl/{lang}/">',
+            1,
+        )
+        with open(os.path.join(lang_dir, "index.html"), "w", encoding="utf-8") as f:
+            f.write(localized_home)
+
+        if os.path.exists(methodology_source):
+            with open(methodology_source, "r", encoding="utf-8") as f:
+                localized_methodology = f.read()
+            localized_methodology = localized_methodology.replace(
+                '<html lang="zh-CN">', f'<html lang="{meta["html_lang"]}">', 1
+            ).replace(
+                "<title>AlleSchools · 数据与方法</title>", f'<title>{meta["method_title"]}</title>', 1
+            ).replace(
+                '<meta name="description" content="How AlleSchools processes and explains Dutch education and neighbourhood data.">',
+                f'<meta name="description" content="{meta["method_description"]}">',
+                1,
+            ).replace(
+                '<link rel="canonical" href="https://alleschools.nl/en/methodology.html">',
+                f'<link rel="canonical" href="https://alleschools.nl/{lang}/methodology.html">',
+                1,
+            )
+            for article_lang in language_meta:
+                visible_class = "method-copy mx-auto max-w-3xl" if article_lang == lang else "method-copy mx-auto hidden max-w-3xl"
+                localized_methodology = localized_methodology.replace(
+                    f'class="method-copy mx-auto max-w-3xl" data-lang="{article_lang}"',
+                    f'class="{visible_class}" data-lang="{article_lang}"',
+                ).replace(
+                    f'class="method-copy mx-auto hidden max-w-3xl" data-lang="{article_lang}"',
+                    f'class="{visible_class}" data-lang="{article_lang}"',
+                )
+            with open(os.path.join(lang_dir, "methodology.html"), "w", encoding="utf-8") as f:
+                f.write(localized_methodology)
+    school_pages = build_ranked_school_pages(data_vo, data_po, out_dir, yearly_comparison)
+    print(f"已生成学校详情页: VO {len(school_pages['vo'])} + PO {len(school_pages['po'])}")
 
     if args.static:
         print(f"已生成: {PUBLIC_INDEX}")

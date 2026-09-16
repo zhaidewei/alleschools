@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Dutch secondary school map: academic level × science focus</title>
   <meta name="description" content="Explore and compare Dutch schools through public education and neighbourhood data.">
+  <link rel="canonical" href="https://alleschools.nl/en/">
+  <link rel="alternate" hreflang="en" href="https://alleschools.nl/en/">
+  <link rel="alternate" hreflang="nl" href="https://alleschools.nl/nl/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://alleschools.nl/zh/">
+  <link rel="alternate" hreflang="x-default" href="https://alleschools.nl/en/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="AlleSchools">
   <meta property="og:title" content="AlleSchools — Explore schools through data">
@@ -20,10 +25,11 @@
   <meta name="twitter:image" content="https://alleschools.nl/assets/social/alleschools-og.png">
   <link rel="icon" href="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ctext%20y%3D%22.9em%22%20font-size%3D%2290%22%3E%F0%9F%8E%AB%3C%2Ftext%3E%3C%2Fsvg%3E">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
-  <link rel="stylesheet" href="assets/site.css">
-  <script src="assets/chart.umd.min.js"></script>
-  <script src="assets/html2canvas.min.js"></script>
-  <script src="view_xy_logic.js"></script>
+  <link rel="stylesheet" href="/assets/site.css">
+  <script src="/assets/chart.umd.min.js"></script>
+  <script src="/assets/html2canvas.min.js"></script>
+  <script src="/view_xy_logic.js"></script>
+  <script src="/assets/language.js"></script>
   <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
   <script defer src="/_vercel/insights/script.js"></script>
   <script>document.documentElement.classList.toggle('dark', localStorage.getItem('theme')==='dark');</script>
@@ -34,8 +40,8 @@
     <div class="v2-shell flex min-h-[68px] flex-wrap items-center justify-between gap-x-4">
       <a id="brandHome" href="/" class="font-display text-2xl font-bold tracking-tight text-forest no-underline dark:text-[#f4efe4]">Alle<span class="text-terracotta dark:text-[#e08260]">Schools</span></a>
       <nav class="order-3 flex w-full items-center gap-4 overflow-x-auto border-t border-[#ddd5c7] py-2 text-sm dark:border-[#335047] sm:order-none sm:w-auto sm:border-0 sm:py-0" aria-label="Primary navigation">
-        <a id="navHome" href="/?lang=en" class="v2-nav-link">Home</a>
-        <a id="navMethodology" href="methodology.html?lang=en" class="v2-nav-link">Data &amp; methodology</a>
+        <a id="navHome" href="/" class="v2-nav-link">Home</a>
+        <a id="navMethodology" href="methodology.html" class="v2-nav-link">Data &amp; methodology</a>
         <a id="navSupport" href="https://ko-fi.com/deweizhai" target="_blank" rel="noopener noreferrer" class="inline-flex whitespace-nowrap rounded-lg bg-amber-500/90 px-3 py-1.5 font-medium text-white no-underline shadow-sm hover:bg-amber-500">☕ Support</a>
       </nav>
       <div class="flex items-center gap-2">
@@ -187,6 +193,7 @@
     const dataVOProfiles = __INJECT_DATA_VO_PROFILES__;
     const metaVOProfiles = __INJECT_META_VO_PROFILES__;
     const yearlyComparison = __INJECT_YEARLY_COMPARISON__;
+    const schoolDetailPaths = __INJECT_SCHOOL_DETAIL_PATHS__;
     let currentMode = ['vo', 'po'].includes(localStorage.getItem('schools-mode')) ? localStorage.getItem('schools-mode') : 'vo';
     let data = currentMode === 'vo' ? dataVO : dataPO;
     let excluded = currentMode === 'vo' ? excludedVO : excludedPO;
@@ -240,7 +247,13 @@
     }
   </script>
   <script>
-    let currentLang = ['en', 'zh', 'nl'].includes(localStorage.getItem('schools-lang')) ? localStorage.getItem('schools-lang') : 'en';
+    function languageFromPath() {
+      var match = window.location.pathname.match(/^\/(en|nl|zh)(?:\/|$)/);
+      return match ? match[1] : null;
+    }
+    function languageHome(lang) { return '/' + lang + '/'; }
+    function languageMethodology(lang) { return '/' + lang + '/methodology.html'; }
+    let currentLang = languageFromPath() || ALLESCHOOLS_LANGUAGE.get();
     const L = {
       en: {
         navMethodology: 'Data & methodology',
@@ -578,7 +591,7 @@
     var LANG_DISPLAY = { en: { flag: '🇬🇧', abbr: 'EN' }, zh: { flag: '🇨🇳', abbr: 'CHN' }, nl: { flag: '🇳🇱', abbr: 'NL' } };
     function applyLanguage() {
       document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : currentLang;
-      localStorage.setItem('schools-lang', currentLang);
+      ALLESCHOOLS_LANGUAGE.set(currentLang);
       var d = LANG_DISPLAY[currentLang] || LANG_DISPLAY.en;
       var langBtnFlag = document.getElementById('langBtnFlag');
       var langBtnAbbr = document.getElementById('langBtnAbbr');
@@ -594,8 +607,8 @@
       var navPO = document.getElementById('navPO');
       if (navPO) navPO.textContent = t('navPO');
       var methodologyLink = document.getElementById('navMethodology');
-      if (methodologyLink) methodologyLink.href = 'methodology.html?lang=' + encodeURIComponent(currentLang);
-      var homeUrl = './?lang=' + encodeURIComponent(currentLang);
+      if (methodologyLink) methodologyLink.href = languageMethodology(currentLang);
+      var homeUrl = languageHome(currentLang);
       var brandHome = document.getElementById('brandHome');
       if (brandHome) brandHome.href = homeUrl;
       var navHome = document.getElementById('navHome');
@@ -888,7 +901,17 @@
         heading.className = 'flex items-start justify-between gap-3';
         var name = document.createElement('h4');
         name.className = 'font-semibold text-forest dark:text-[#f4efe4]';
-        name.textContent = school.label || school.naam || VIEW_XY.getStableSchoolId(school, currentMode);
+        var schoolId = VIEW_XY.getStableSchoolId(school, currentMode);
+        var detailSlug = schoolDetailPaths[schoolId];
+        if (detailSlug) {
+          var nameLink = document.createElement('a');
+          nameLink.href = '/' + currentLang + '/schools/' + detailSlug + '/';
+          nameLink.className = 'underline decoration-[#b45f3f]/40 underline-offset-4 hover:decoration-[#b45f3f]';
+          nameLink.textContent = school.label || school.naam || schoolId;
+          name.appendChild(nameLink);
+        } else {
+          name.textContent = school.label || school.naam || schoolId;
+        }
         var remove = document.createElement('button');
         remove.type = 'button';
         remove.className = 'shrink-0 text-xs font-semibold text-terracotta dark:text-[#e08260]';
@@ -1059,13 +1082,13 @@
     }
 
     function getShareUrl() {
-      var base = window.location.origin + window.location.pathname;
+      var base = window.location.origin + languageHome(currentLang);
       var q = (document.getElementById('schoolSearch') && document.getElementById('schoolSearch').value || '').trim();
       var cityList = selectedGemeenten ? Array.from(selectedGemeenten) : [];
       var allCities = getAllAvailableGemeenten();
       var gemeenteState = cityList.length === 0 ? [] : (allCities.length > 0 && allCities.every(function(city) { return selectedGemeenten.has(city); }) ? 'all' : cityList);
       var canonical = VIEW_XY.serializeShareState({ lang: currentLang, mode: currentMode, q: q, gemeente: gemeenteState, profile: currentProfile, compare: comparisonSchools.map(function(school) { return VIEW_XY.getStableSchoolId(school, currentMode); }) });
-      var parts = canonical ? canonical.split('&') : [];
+      var parts = canonical ? canonical.split('&').filter(function(part) { return part.indexOf('lang=') !== 0; }) : [];
       if (selectedProvince !== 'all') parts.push('province=' + encodeURIComponent(selectedProvince));
       var schoolUniverse = getAllAvailableSchools().map(function(point) { return VIEW_XY.getStableSchoolId(point, currentMode); }).filter(Boolean);
       var schoolsState = selectedSchoolIds.size === 0 ? '' : (schoolUniverse.length > 0 && schoolUniverse.every(function(id) { return selectedSchoolIds.has(id); }) ? 'all' : Array.from(selectedSchoolIds).join(','));
@@ -1081,7 +1104,7 @@
         if (parsed && typeof parsed === 'object' && !Array.isArray(parsed) && Object.keys(parsed).length > 0) return parsed;
       } catch (error) { /* invalid storage falls back to legacy keys */ }
       return {
-        lang: localStorage.getItem('schools-lang'),
+        lang: ALLESCHOOLS_LANGUAGE.get(),
         mode: localStorage.getItem('schools-mode'),
         profile: localStorage.getItem('schools-profile')
       };
@@ -1127,8 +1150,7 @@
       var persistedHasGemeente = Object.prototype.hasOwnProperty.call(persistedState, 'gemeente') || Object.prototype.hasOwnProperty.call(persistedState, 'city');
       var state = VIEW_XY.deserializeShareState(params, persistedState, { lang: 'en', mode: 'vo', q: '', gemeente: DEFAULT_GEMEENTEN, profile: 'nt', compare: [] });
       switchMode(state.mode);
-      currentLang = state.lang;
-      localStorage.setItem('schools-lang', currentLang);
+      currentLang = languageFromPath() || ALLESCHOOLS_LANGUAGE.get();
       applyLanguage();
       var searchEl = document.getElementById('schoolSearch');
       if (searchEl) searchEl.value = state.q;
@@ -1981,15 +2003,11 @@
     document.querySelectorAll('.lang-option').forEach(function(btn) {
       btn.addEventListener('click', function() {
         currentLang = this.getAttribute('data-lang');
-        localStorage.setItem('schools-lang', currentLang);
-        applyLanguage();
-        refreshChart();
-        syncCanonicalUrl();
-        if (langWrap) langWrap.classList.remove('open');
-        if (langBtn) langBtn.setAttribute('aria-expanded', 'false');
+        ALLESCHOOLS_LANGUAGE.set(currentLang);
+        window.location.assign(languageHome(currentLang) + window.location.search + window.location.hash);
       });
     });
-    currentLang = ['en', 'zh', 'nl'].includes(localStorage.getItem('schools-lang')) ? localStorage.getItem('schools-lang') : 'en';
+    currentLang = languageFromPath() || ALLESCHOOLS_LANGUAGE.get();
     applyLanguage();
 
     function isDarkTheme() { return document.documentElement.classList.contains('dark'); }

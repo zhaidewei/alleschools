@@ -34,7 +34,7 @@ def test_visible_copy_avoids_uncontracted_ranking_language() -> None:
 def test_methodology_is_a_dedicated_page() -> None:
     home = (PROJECT_ROOT / "view_xy.html").read_text(encoding="utf-8")
     methodology = (PROJECT_ROOT / "methodology.html").read_text(encoding="utf-8")
-    assert 'href="methodology.html?lang=en"' in home
+    assert 'href="methodology.html"' in home
     assert 'id="algorithmSection"' not in home
     assert 'id="navData"' not in home
     assert 'id="disclaimerSection"' not in home
@@ -56,6 +56,40 @@ def test_public_pages_include_vercel_analytics() -> None:
     home = (PROJECT_ROOT / "view_xy.html").read_text(encoding="utf-8")
     assert "connect-src 'self'" in home
     assert "connect-src 'none'" not in home
+
+
+def test_language_selection_uses_site_cookie_instead_of_language_links() -> None:
+    home = (PROJECT_ROOT / "view_xy.html").read_text(encoding="utf-8")
+    methodology = (PROJECT_ROOT / "methodology.html").read_text(encoding="utf-8")
+    language_script = (PROJECT_ROOT / "assets" / "language.js").read_text(encoding="utf-8")
+
+    assert "alleschools-language" in language_script
+    assert "Max-Age=31536000" in language_script
+    assert "ALLESCHOOLS_LANGUAGE.get()" in home
+    assert "ALLESCHOOLS_LANGUAGE.set(currentLang)" in home
+    assert "data-lang-option" in methodology
+    assert "data-lang-link" not in methodology
+    assert "?lang=" not in methodology
+
+
+def test_language_pages_use_indexable_paths_and_hreflang() -> None:
+    home = (PROJECT_ROOT / "view_xy.html").read_text(encoding="utf-8")
+    methodology = (PROJECT_ROOT / "methodology.html").read_text(encoding="utf-8")
+
+    for lang_path in ("/en/", "/nl/", "/zh/"):
+        assert f"https://alleschools.nl{lang_path}" in home
+    for lang in ("en", "nl", "zh"):
+        assert f"https://alleschools.nl/{lang}/methodology.html" in methodology
+    assert "languageFromPath()" in home
+    assert "window.location.assign(languageHome(currentLang)" in home
+
+
+def test_pinned_school_names_link_only_when_a_detail_page_exists() -> None:
+    home = (PROJECT_ROOT / "view_xy.html").read_text(encoding="utf-8")
+
+    assert "const schoolDetailPaths = __INJECT_SCHOOL_DETAIL_PATHS__;" in home
+    assert "var detailSlug = schoolDetailPaths[schoolId];" in home
+    assert "nameLink.href = '/' + currentLang + '/schools/' + detailSlug + '/';" in home
 
 
 def test_explorer_flow_is_visually_ordered() -> None:
