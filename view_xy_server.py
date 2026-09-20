@@ -636,8 +636,13 @@ def main():
             f'<meta name="description" content="{meta["description"]}">',
             1,
         ).replace(
-            '<link rel="canonical" href="https://alleschools.nl/en/">',
-            f'<link rel="canonical" href="https://alleschools.nl/{lang}/">',
+            '<link rel="canonical" href="https://www.alleschools.nl/en/">',
+            f'<link rel="canonical" href="https://www.alleschools.nl/{lang}/">',
+            1,
+        )
+        localized_home = localized_home.replace(
+            '<meta property="og:url" content="https://www.alleschools.nl/en/">',
+            f'<meta property="og:url" content="https://www.alleschools.nl/{lang}/">',
             1,
         )
         with open(os.path.join(lang_dir, "index.html"), "w", encoding="utf-8") as f:
@@ -655,8 +660,13 @@ def main():
                 f'<meta name="description" content="{meta["method_description"]}">',
                 1,
             ).replace(
-                '<link rel="canonical" href="https://alleschools.nl/en/methodology.html">',
-                f'<link rel="canonical" href="https://alleschools.nl/{lang}/methodology.html">',
+                '<link rel="canonical" href="https://www.alleschools.nl/en/methodology.html">',
+                f'<link rel="canonical" href="https://www.alleschools.nl/{lang}/methodology.html">',
+                1,
+            )
+            localized_methodology = localized_methodology.replace(
+                '<meta property="og:url" content="https://www.alleschools.nl/en/methodology.html">',
+                f'<meta property="og:url" content="https://www.alleschools.nl/{lang}/methodology.html">',
                 1,
             )
             for article_lang in language_meta:

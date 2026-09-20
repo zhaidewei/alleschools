@@ -77,9 +77,9 @@ def test_language_pages_use_indexable_paths_and_hreflang() -> None:
     methodology = (PROJECT_ROOT / "methodology.html").read_text(encoding="utf-8")
 
     for lang_path in ("/en/", "/nl/", "/zh/"):
-        assert f"https://alleschools.nl{lang_path}" in home
+        assert f"https://www.alleschools.nl{lang_path}" in home
     for lang in ("en", "nl", "zh"):
-        assert f"https://alleschools.nl/{lang}/methodology.html" in methodology
+        assert f"https://www.alleschools.nl/{lang}/methodology.html" in methodology
     assert "languageFromPath()" in home
     assert "window.location.assign(languageHome(currentLang)" in home
 
