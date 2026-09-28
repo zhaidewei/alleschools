@@ -124,6 +124,7 @@
         <h3 id="accessibleResultsTitle" class="font-display text-lg font-bold text-forest dark:text-[#f4efe4]">Matching schools</h3>
         <p id="chartTextSummary" class="mt-1 text-xs text-[#65716b] dark:text-[#afbbb4]"></p>
         <ul id="accessibleResultsList" class="mt-3 grid max-h-[32rem] gap-2 overflow-y-auto overscroll-contain pr-1 sm:grid-cols-2" tabindex="0"></ul>
+        <button id="showMoreSchools" type="button" aria-controls="accessibleResultsList" class="mt-3 hidden rounded-lg border border-[#ddd5c7] px-4 py-2 text-sm font-semibold text-terracotta dark:border-[#335047] dark:text-[#e08260]"></button>
       </section>
       <p id="comparisonStatus" class="sr-only" aria-live="polite"></p>
     </div>
@@ -135,6 +136,11 @@
         <div id="schoolSearchHint" class="input-hint" role="tooltip" aria-live="polite"></div>
       </div>
     </div>
+    <details id="filterDisclosure" class="filter-disclosure" open>
+    <summary class="mobile-filters-toggle">
+      <span id="mobileFiltersText">Filters</span>
+      <span class="mobile-filters-chevron" aria-hidden="true">⌄</span>
+    </summary>
     <div class="controls grid grid-cols-1 gap-4 px-5 py-6 md:px-6">
       <h2 id="filterStepTitle" class="flow-step-title">Refine results</h2>
       <div class="min-w-0">
@@ -174,6 +180,7 @@
         </label>
       </div>
     </div>
+    </details>
     </section>
     <div id="excludedSection" class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-600 text-sm text-slate-500 dark:text-slate-400"></div>
     <footer id="copyrightSection" class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-600 text-xs text-slate-400 dark:text-slate-500 pb-8">
@@ -198,6 +205,12 @@
     let data = currentMode === 'vo' ? dataVO : dataPO;
     let excluded = currentMode === 'vo' ? excludedVO : excludedPO;
     let meta = currentMode === 'vo' ? metaVO : metaPO;
+    const filterDisclosure = document.getElementById('filterDisclosure');
+    const mobileFilterQuery = window.matchMedia('(max-width: 767px)');
+    if (filterDisclosure && mobileFilterQuery.matches) filterDisclosure.open = false;
+    mobileFilterQuery.addEventListener('change', function(event) {
+      if (filterDisclosure && !event.matches) filterDisclosure.open = true;
+    });
 
     function resolveMetricFromMeta(metricId) {
       return VIEW_XY.getMetricFromMeta(meta, metricId, currentLang);
@@ -283,7 +296,9 @@
         mobileClose: 'Close',
         noResults: 'No schools match the current display filters or search. Your selections are preserved.',
         accessibleResultsTitle: 'Matching schools',
-        resultsSummary: '{count} schools shown. Use the buttons below to pin or unpin a school.',
+        resultsSummary: '{visible} of {count} matching schools shown. Use the buttons below to pin or unpin a school.',
+        showMoreSchools: 'Show 20 more schools',
+        showRemainingSchools: 'Show the remaining {count} schools',
         addToComparison: 'Pin school',
         removeFromComparison: 'Unpin school',
         legendBase: 'All schools',
@@ -386,7 +401,9 @@
         mobileClose: '关闭',
         noResults: '当前展示筛选或搜索没有匹配学校。所有选择均已保留。',
         accessibleResultsTitle: '匹配学校',
-        resultsSummary: '当前显示 {count} 所学校。使用下方按钮钉住或取消钉住学校。',
+        resultsSummary: '匹配 {count} 所学校，名单当前显示 {visible} 所。可以用下方按钮钉住或取消钉住学校。',
+        showMoreSchools: '再显示 20 所学校',
+        showRemainingSchools: '显示剩余 {count} 所学校',
         addToComparison: '钉住学校',
         removeFromComparison: '取消钉住',
         legendBase: '全部学校',
@@ -489,7 +506,9 @@
         mobileClose: 'Sluiten',
         noResults: 'Geen scholen passen bij de huidige weergavefilters of zoekopdracht. Uw keuzes blijven behouden.',
         accessibleResultsTitle: 'Overeenkomende scholen',
-        resultsSummary: '{count} scholen getoond. Gebruik de knoppen hieronder om een school vast te zetten of los te maken.',
+        resultsSummary: '{visible} van de {count} gevonden scholen getoond. Gebruik de knoppen hieronder om een school vast te zetten of los te maken.',
+        showMoreSchools: 'Toon 20 extra scholen',
+        showRemainingSchools: 'Toon de resterende {count} scholen',
         addToComparison: 'School vastzetten',
         removeFromComparison: 'School losmaken',
         legendBase: 'Alle scholen',
@@ -992,11 +1011,7 @@
     }
     function updateMobileFiltersSummary() {
       var n = getSelectedCitiesCount();
-      var label = document.getElementById('mobileFiltersBtnLabel');
-      var header = document.getElementById('mobileFiltersHeader');
       var text = t('mobileCities') + ' (' + n + ')';
-      if (label) label.textContent = text;
-      if (header) header.textContent = text;
       var triggerValue = document.getElementById('cityFilterTriggerValue');
       if (triggerValue) triggerValue.textContent = text;
     }
@@ -1051,19 +1066,39 @@
       updateSchoolFilterSummary();
     }
 
+    var accessibleResultsLimit = 10;
+    var accessibleResultsBatchSize = 20;
+    var accessibleResultsSignature = null;
+    var focusAfterResultsLoadMore = false;
+    var latestAccessibleResults = { filtered: [], matched: [] };
+    var accessibleResultsMobileQuery = window.matchMedia('(max-width: 767px)');
+    accessibleResultsMobileQuery.addEventListener('change', function() {
+      accessibleResultsLimit = 10;
+      renderAccessibleResults(latestAccessibleResults.filtered, latestAccessibleResults.matched);
+    });
+
     function renderAccessibleResults(filtered, matched) {
       var list = document.getElementById('accessibleResultsList');
       var summary = document.getElementById('chartTextSummary');
       var empty = document.getElementById('noResults');
+      var moreButton = document.getElementById('showMoreSchools');
       var shown = getSchoolSearchTerms().length ? matched : filtered;
+      var signature = shown.map(function(school) { return VIEW_XY.getStableSchoolId(school, currentMode); }).join('|');
+      if (signature !== accessibleResultsSignature) accessibleResultsLimit = 10;
+      accessibleResultsSignature = signature;
+      latestAccessibleResults = { filtered: filtered, matched: matched };
+      var visibleCount = accessibleResultsMobileQuery.matches ? Math.min(shown.length, accessibleResultsLimit) : shown.length;
       if (empty) {
         empty.textContent = t('noResults');
         empty.classList.toggle('hidden', shown.length !== 0);
       }
-      if (summary) summary.textContent = t('resultsSummary').replace('{count}', String(shown.length));
+      if (summary) summary.textContent = t('resultsSummary')
+        .replace('{count}', String(shown.length))
+        .replace('{visible}', String(visibleCount));
       if (!list) return;
       list.innerHTML = '';
-      shown.forEach(function(school) {
+      var visibleSchools = shown.slice(0, visibleCount);
+      visibleSchools.forEach(function(school) {
         var item = document.createElement('li');
         var button = document.createElement('button');
         var selected = getComparisonIndex(school) >= 0;
@@ -1079,6 +1114,28 @@
         item.appendChild(button);
         list.appendChild(item);
       });
+      if (moreButton) {
+        var remaining = shown.length - visibleSchools.length;
+        moreButton.classList.toggle('hidden', !accessibleResultsMobileQuery.matches || remaining <= 0);
+        moreButton.textContent = remaining <= accessibleResultsBatchSize
+          ? t('showRemainingSchools').replace('{count}', String(remaining))
+          : t('showMoreSchools');
+        if (focusAfterResultsLoadMore) {
+          if (remaining <= 0) {
+            var lastSchoolButton = list.lastElementChild && list.lastElementChild.querySelector('button');
+            if (lastSchoolButton) lastSchoolButton.focus();
+          }
+          focusAfterResultsLoadMore = false;
+        }
+        if (!moreButton.dataset.bound) {
+          moreButton.dataset.bound = 'true';
+          moreButton.addEventListener('click', function() {
+            accessibleResultsLimit += accessibleResultsBatchSize;
+            focusAfterResultsLoadMore = true;
+            renderAccessibleResults(latestAccessibleResults.filtered, latestAccessibleResults.matched);
+          });
+        }
+      }
     }
 
     function getShareUrl() {
